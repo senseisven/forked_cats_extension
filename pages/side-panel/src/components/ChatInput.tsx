@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { FaMicrophone } from 'react-icons/fa';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { t } from '@extension/i18n';
 
 interface ChatInputProps {
   onSendMessage: (text: string) => void;
@@ -102,7 +103,7 @@ export default function ChatInput({
                 ? 'bg-slate-800 text-gray-200'
                 : 'bg-white'
           }`}
-          placeholder="What can I help you with?"
+          placeholder={t('chatInputPlaceholder')}
           aria-label="Message input"
         />
 
@@ -117,7 +118,7 @@ export default function ChatInput({
                 onClick={onMicClick}
                 disabled={disabled || isProcessingSpeech}
                 aria-label={
-                  isProcessingSpeech ? 'Processing speech...' : isRecording ? 'Stop recording' : 'Start voice input'
+                  isProcessingSpeech ? t('processingSpeech') : isRecording ? t('stopRecording') : t('startVoiceInput')
                 }
                 className={`rounded-md p-1.5 transition-colors ${
                   disabled || isProcessingSpeech
@@ -142,7 +143,7 @@ export default function ChatInput({
               type="button"
               onClick={onStopTask}
               className="rounded-md bg-red-500 px-3 py-1 text-white transition-colors hover:bg-red-600">
-              Stop
+              {t('stopButton')}
             </button>
           ) : (
             <button
@@ -150,7 +151,7 @@ export default function ChatInput({
               disabled={isSendButtonDisabled}
               aria-disabled={isSendButtonDisabled}
               className={`rounded-md bg-[#19C2FF] px-3 py-1 text-white transition-colors hover:enabled:bg-[#0073DC] ${isSendButtonDisabled ? 'cursor-not-allowed opacity-50' : ''}`}>
-              Send
+              {t('sendButton')}
             </button>
           )}
         </div>

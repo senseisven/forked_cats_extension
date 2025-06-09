@@ -1,30 +1,306 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "Automate web tasks with AI! NanoBrowser is an open-source Chrome extension that lets you extract data, fill forms, and more."
+    "message": "AIでWebタスクを自動化！エイナーの手は、データ抽出、フォーム入力などを行うオープンソースのChrome拡張機能です。"
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "Nanobrowser: AI Web Agent & Automation"
+    "message": "エイナーの手"
   },
   "toggleTheme": {
-    "message": "Toggle theme"
+    "message": "テーマを切り替え"
   },
   "loading": {
-    "message": "Loading..."
+    "message": "読み込み中..."
   },
   "greeting": {
     "description": "Greeting message",
-    "message": "Hello, My name is $NAME$",
+    "message": "こんにちは、私の名前は$NAME$です",
     "placeholders": {
       "name": {
         "content": "$1",
-        "example": "John Doe"
+        "example": "田中太郎"
       }
     }
   },
   "hello": {
     "description": "Placeholder example",
-    "message": "Hello $1"
+    "message": "こんにちは $1"
+  },
+  "chatInputPlaceholder": {
+    "message": "何をお手伝いしましょうか？"
+  },
+  "sendButton": {
+    "message": "送信"
+  },
+  "stopButton": {
+    "message": "停止"
+  },
+  "newChatButton": {
+    "message": "新しいチャット"
+  },
+  "historyButton": {
+    "message": "履歴を読み込み"
+  },
+  "settingsButton": {
+    "message": "設定"
+  },
+  "backToChatButton": {
+    "message": "チャットに戻る"
+  },
+  "quickStart": {
+    "message": "クイックスタート"
+  },
+  "editBookmark": {
+    "message": "ブックマークを編集"
+  },
+  "deleteBookmark": {
+    "message": "ブックマークを削除"
+  },
+  "saveEdit": {
+    "message": "編集を保存"
+  },
+  "cancelEdit": {
+    "message": "編集をキャンセル"
+  },
+  "startVoiceInput": {
+    "message": "音声入力を開始"
+  },
+  "stopRecording": {
+    "message": "録音を停止"
+  },
+  "processingSpeech": {
+    "message": "音声を処理中..."
+  },
+  "settingsTitle": {
+    "message": "設定"
+  },
+  "generalTab": {
+    "message": "一般"
+  },
+  "modelsTab": {
+    "message": "モデル"
+  },
+  "firewallTab": {
+    "message": "ファイアウォール"
+  },
+  "helpTab": {
+    "message": "ヘルプ"
+  },
+  "loadingText": {
+    "message": "読み込み中..."
+  },
+  "errorOccurred": {
+    "message": "エラーが発生しました"
+  },
+  "firewallTitle": {
+    "message": "ファイアウォール"
+  },
+  "enableFirewall": {
+    "message": "ファイアウォールを有効化"
+  },
+  "allowList": {
+    "message": "許可リスト"
+  },
+  "denyList": {
+    "message": "拒否リスト"
+  },
+  "addButton": {
+    "message": "追加"
+  },
+  "enterDomainPlaceholder": {
+    "message": "ドメインまたはURL を入力 (例: example.com, localhost, 127.0.0.1)"
+  },
+  "noDomains": {
+    "message": "許可リストにドメインがありません。空の許可リストは、拒否されていないすべてのドメインが許可されることを意味します。"
+  },
+  "howFirewallWorks": {
+    "message": "ファイアウォールの仕組み"
+  },
+  "firewallContainsList": {
+    "message": "ファイアウォールには拒否リストと許可リストが含まれています。"
+  },
+  "bothListsEmpty": {
+    "message": "両方のリストが空の場合、すべてのURLが許可されます"
+  },
+  "denyListPriority": {
+    "message": "拒否リストが優先されます - URLが拒否リストのエントリに一致する場合、ブロックされます"
+  },
+  "allowListEmpty": {
+    "message": "許可リストが空の場合、拒否されていないすべてのURLが許可されます"
+  },
+  "allowListNotEmpty": {
+    "message": "許可リストが空でない場合、一致するURLのみが許可されます"
+  },
+  "wildcardsNotSupported": {
+    "message": "ワイルドカードはまだサポートされていません"
+  },
+  "removeButton": {
+    "message": "削除"
+  },
+  "noDomainsDenyList": {
+    "message": "拒否リストにドメインがありません"
+  },
+  "maxStepsPerTask": {
+    "message": "タスクあたりの最大ステップ数"
+  },
+  "stepLimitPerTask": {
+    "message": "タスクあたりのステップ制限"
+  },
+  "maxActionsPerStep": {
+    "message": "ステップあたりの最大アクション数"
+  },
+  "actionLimitPerStep": {
+    "message": "ステップあたりのアクション制限"
+  },
+  "failureTolerance": {
+    "message": "失敗許容度"
+  },
+  "consecutiveFailuresBeforeStopping": {
+    "message": "停止するまでの連続失敗回数"
+  },
+  "enableVisionWithHighlighting": {
+    "message": "ハイライト付きビジョンを有効化"
+  },
+  "useVisionCapability": {
+    "message": "LLMのビジョン機能を使用（より良い結果のためにトークンを多く消費）"
+  },
+  "enableVision": {
+    "message": "ビジョンを有効化"
+  },
+  "replanningFrequency": {
+    "message": "再計画頻度"
+  },
+  "reconsiderAndUpdatePlan": {
+    "message": "[数値] ステップごとに計画を再検討・更新"
+  },
+  "llmProviders": {
+    "message": "LLMプロバイダー"
+  },
+  "noProvidersConfigured": {
+    "message": "プロバイダーが設定されていません。開始するにはプロバイダーを追加してください。"
+  },
+  "addNewProvider": {
+    "message": "新しいプロバイダーを追加"
+  },
+  "modelSelection": {
+    "message": "モデル選択"
+  },
+  "planner": {
+    "message": "プランナー"
+  },
+  "developsAndRefinesStrategies": {
+    "message": "タスクを完了するための戦略を開発・改良します"
+  },
+  "navigator": {
+    "message": "ナビゲーター"
+  },
+  "navigatesWebsitesAndPerformsActions": {
+    "message": "Webサイトをナビゲートし、アクションを実行します"
+  },
+  "validator": {
+    "message": "バリデーター"
+  },
+  "checksIfTasksAreCompleted": {
+    "message": "タスクが正常に完了したかチェックします"
+  },
+  "speechToTextModel": {
+    "message": "音声テキスト変換モデル"
+  },
+  "configureGeminiModel": {
+    "message": "マイク機能使用時に音声をテキストに変換するGeminiモデルを設定します。"
+  },
+  "model": {
+    "message": "モデル"
+  },
+  "chooseModel": {
+    "message": "モデルを選択"
+  },
+  "temperature": {
+    "message": "温度"
+  },
+  "topP": {
+    "message": "Top P"
+  },
+  "reasoning": {
+    "message": "推論"
+  },
+  "lowFaster": {
+    "message": "低（高速）"
+  },
+  "mediumBalanced": {
+    "message": "中（バランス）"
+  },
+  "highMoreThorough": {
+    "message": "高（より詳細）"
+  },
+  "general": {
+    "message": "一般"
+  },
+  "cancel": {
+    "message": "キャンセル"
+  },
+  "save": {
+    "message": "保存"
+  },
+  "delete": {
+    "message": "削除"
+  },
+  "name": {
+    "message": "名前"
+  },
+  "apiKey": {
+    "message": "APIキー"
+  },
+  "baseUrl": {
+    "message": "ベースURL"
+  },
+  "endpoint": {
+    "message": "エンドポイント"
+  },
+  "models": {
+    "message": "モデル"
+  },
+  "providerName": {
+    "message": "プロバイダー名（保存時にスペースは使用不可）"
+  },
+  "apiKeyRequired": {
+    "message": "APIキー（必須）"
+  },
+  "apiKeyOptional": {
+    "message": "APIキー（任意）"
+  },
+  "apiKeyLeaveEmpty": {
+    "message": "APIキー（Ollamaの場合は空のままにしてください）"
+  },
+  "hideApiKey": {
+    "message": "APIキーを非表示"
+  },
+  "showApiKey": {
+    "message": "APIキーを表示"
+  },
+  "typeAndPressEnter": {
+    "message": "入力してEnterまたはSpaceを押して追加"
+  },
+  "noModelsSelected": {
+    "message": "モデルが選択されていません。必要に応じて手動でモデル名を追加してください。"
+  },
+  "ollamaReminder": {
+    "message": "Ollamaサーバーに環境変数を追加してください："
+  },
+  "learnMore": {
+    "message": "詳細はこちら"
+  },
+  "newlyAddedProvider": {
+    "message": "このプロバイダーは新しく追加されました。APIキーを入力して保存をクリックして設定してください。"
+  },
+  "removeModel": {
+    "message": "削除"
+  },
+  "apiVersion": {
+    "message": "APIバージョン"
+  },
+  "remember": {
+    "message": "覚えておいてください："
   }
 }

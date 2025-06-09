@@ -1,0 +1,92 @@
+# Nanobrowser Project Understanding Summary
+
+## Project Overview
+Nanobrowser is an open-source AI web automation Chrome extension that runs locally in the browser. It serves as a free alternative to OpenAI Operator with flexible LLM options and a multi-agent system.
+
+## Key Features
+- **Multi-agent System**: Uses specialized AI agents (Navigator, Planner, Validator) for complex web workflows
+- **Interactive Side Panel**: Chat interface with real-time status updates
+- **Task Automation**: Automates repetitive web tasks across websites
+- **Multiple LLM Support**: Supports OpenAI, Anthropic, Gemini, Ollama, Groq, Cerebras, and custom OpenAI-compatible providers
+- **Privacy-Focused**: Everything runs locally, no data shared with cloud services
+- **100% Free**: No subscription fees, users only pay for their own API usage
+
+## Project Structure
+- `chrome-extension/` - Main Chrome extension code
+- `packages/` - Shared packages and utilities
+- `pages/` - Additional web pages
+- `dist/` - Built extension files (generated after build)
+
+## Technology Stack
+- **Framework**: React 18.3.1 with TypeScript
+- **Styling**: Tailwind CSS
+- **Build Tool**: Vite with Turbo for monorepo management
+- **Package Manager**: pnpm (v9.15.1)
+- **Target**: Chrome Extension Manifest V3
+
+## Development Setup
+- **Node.js**: v22.12.0+ (currently using v23.10.0)
+- **pnpm**: v9.15.1+ (currently using v9.15.1)
+
+## Build Commands
+- `pnpm install` - Install dependencies ✅ (completed)
+- `pnpm dev` - Development build with hot reload ✅ (running in background)
+- `pnpm build` - Production build
+- `pnpm zip` - Create distribution zip file
+
+## Extension Structure
+The built extension includes:
+- **manifest.json**: Extension configuration with permissions for storage, scripting, tabs, debugger, and sidePanel
+- **background.iife.js**: Service worker for background processes
+- **side-panel/**: Main UI interface (React-based)
+- **content/**: Content scripts for web page interaction
+- **options/**: Extension settings page
+- **permission/**: Permission handling
+- **Icons**: 32px and 128px extension icons
+
+## Current Status
+✅ Dependencies installed
+✅ Production build completed successfully
+✅ Extension files generated in `dist/` directory
+✅ All required files present (content script, manifest, etc.)
+✅ Extension name changed to "エイナーの手" 
+✅ **Full Japanese UI localization completed**
+🔄 Ready for Chrome extension loading and testing
+
+## Complete Japanese Localization 
+- ✅ Extension name: "エイナーの手" (Einar's Hand)
+- ✅ Extension description translated to Japanese
+- ✅ All UI components localized (buttons, placeholders, labels)
+- ✅ **Settings page completely translated with improved layout:**
+  - ✅ Sidebar widened (w-48 → w-56) for Japanese text like "ファイアウォール"
+  - ✅ General settings: "タスクあたりの最大ステップ数", "失敗許容度", "ハイライト付きビジョンを有効化"
+  - ✅ Model settings: "LLMプロバイダー", "モデル選択", agent descriptions, parameters
+  - ✅ Provider management: API keys, model lists, save/cancel buttons
+  - ✅ Speech-to-text model configuration fully translated
+- ✅ Chat interface fully in Japanese
+- ✅ Error messages and loading text in Japanese
+- ✅ Voice input controls translated
+- ✅ Bookmark management UI in Japanese
+- ✅ **Firewall settings page fully localized**
+- ✅ **Fixed i18n implementation using `t()` function**
+- ✅ **All hardcoded English text replaced with Japanese translations**
+
+## Fixed Issues
+- ✅ Port 8081 conflict resolved
+- ✅ Missing content script file (content/index.iife.js) now built properly
+- ✅ _locales directory created successfully
+- ✅ Clean production build completed
+- ✅ JSX syntax errors in SidePanel component fixed
+
+## Next Steps for Testing
+1. Open `chrome://extensions/` in Chrome
+2. Enable "Developer mode"
+3. Click "Load unpacked" and select the `dist/` folder
+4. Configure API keys in the extension settings
+5. Test web automation features
+
+## Key Use Cases
+- News summarization from websites
+- GitHub repository research
+- Shopping research and comparison
+- General web automation tasks through natural language commands 

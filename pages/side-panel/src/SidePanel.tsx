@@ -11,6 +11,7 @@ import ChatInput from './components/ChatInput';
 import ChatHistoryList from './components/ChatHistoryList';
 import BookmarkList from './components/BookmarkList';
 import { EventType, type AgentEvent, ExecutionState } from './types/event';
+import { t } from '@extension/i18n';
 import './SidePanel.css';
 
 // Declare chrome API types
@@ -830,7 +831,7 @@ const SidePanel = () => {
                 type="button"
                 onClick={() => handleBackToChat(false)}
                 className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
-                aria-label="Back to chat">
+                aria-label={t('backToChatButton')}>
                 ← Back
               </button>
             ) : (
@@ -845,7 +846,7 @@ const SidePanel = () => {
                   onClick={handleNewChat}
                   onKeyDown={e => e.key === 'Enter' && handleNewChat()}
                   className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
-                  aria-label="New Chat"
+                  aria-label={t('newChatButton')}
                   tabIndex={0}>
                   <PiPlusBold size={20} />
                 </button>
@@ -854,7 +855,7 @@ const SidePanel = () => {
                   onClick={handleLoadHistory}
                   onKeyDown={e => e.key === 'Enter' && handleLoadHistory()}
                   className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
-                  aria-label="Load History"
+                  aria-label={t('historyButton')}
                   tabIndex={0}>
                   <GrHistory size={20} />
                 </button>
@@ -872,7 +873,7 @@ const SidePanel = () => {
               onClick={() => chrome.runtime.openOptionsPage()}
               onKeyDown={e => e.key === 'Enter' && chrome.runtime.openOptionsPage()}
               className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
-              aria-label="Settings"
+              aria-label={t('settingsButton')}
               tabIndex={0}>
               <FiSettings size={20} />
             </button>

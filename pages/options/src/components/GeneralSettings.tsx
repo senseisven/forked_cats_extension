@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { type GeneralSettingsConfig, generalSettingsStore, DEFAULT_GENERAL_SETTINGS } from '@extension/storage';
+import { t } from '@extension/i18n';
 
 interface GeneralSettingsProps {
   isDarkMode?: boolean;
@@ -24,21 +25,21 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
       <div
         className={`rounded-lg border ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-blue-100 bg-white'} p-6 text-left shadow-sm`}>
         <h2 className={`mb-4 text-left text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-          General
+          {t('general')}
         </h2>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Max Steps per Task
+                {t('maxStepsPerTask')}
               </h3>
               <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Step limit per task
+                {t('stepLimitPerTask')}
               </p>
             </div>
             <label htmlFor="maxSteps" className="sr-only">
-              Max Steps per Task
+              {t('maxStepsPerTask')}
             </label>
             <input
               id="maxSteps"
@@ -54,14 +55,14 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
           <div className="flex items-center justify-between">
             <div>
               <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Max Actions per Step
+                {t('maxActionsPerStep')}
               </h3>
               <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Action limit per step
+                {t('actionLimitPerStep')}
               </p>
             </div>
             <label htmlFor="maxActionsPerStep" className="sr-only">
-              Max Actions per Step
+              {t('maxActionsPerStep')}
             </label>
             <input
               id="maxActionsPerStep"
@@ -77,14 +78,14 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
           <div className="flex items-center justify-between">
             <div>
               <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Failure Tolerance
+                {t('failureTolerance')}
               </h3>
               <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                How many consecutive failures before stopping
+                {t('consecutiveFailuresBeforeStopping')}
               </p>
             </div>
             <label htmlFor="maxFailures" className="sr-only">
-              Failure Tolerance
+              {t('failureTolerance')}
             </label>
             <input
               id="maxFailures"
@@ -100,10 +101,10 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
           <div className="flex items-center justify-between">
             <div>
               <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Enable Vision with Highlighting
+                {t('enableVisionWithHighlighting')}
               </h3>
               <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Use vision capability of LLMs (consumes more tokens for better results)
+                {t('useVisionCapability')}
               </p>
             </div>
             <div className="relative inline-flex cursor-pointer items-center">
@@ -117,7 +118,7 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
               <label
                 htmlFor="useVision"
                 className={`peer h-6 w-11 rounded-full ${isDarkMode ? 'bg-slate-600' : 'bg-gray-200'} after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300`}>
-                <span className="sr-only">Enable Vision</span>
+                <span className="sr-only">{t('enableVision')}</span>
               </label>
             </div>
           </div>
@@ -125,14 +126,14 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
           <div className="flex items-center justify-between">
             <div>
               <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Replanning Frequency
+                {t('replanningFrequency')}
               </h3>
               <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Reconsider and update the plan every [Number] steps
+                {t('reconsiderAndUpdatePlan')}
               </p>
             </div>
             <label htmlFor="planningInterval" className="sr-only">
-              Replanning Frequency
+              {t('replanningFrequency')}
             </label>
             <input
               id="planningInterval"

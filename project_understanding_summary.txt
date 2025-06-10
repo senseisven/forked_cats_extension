@@ -120,6 +120,52 @@ The built extension includes:
 
 **Technical Details**: Used Chrome extension i18n system with comprehensive Japanese translations in `packages/i18n/locales/en/messages.json`.
 
+### Upstream Merge & Fork Management (Latest)
+
+**Problem Solved**: Successfully merged backend updates from original nanobrowser repository while preserving custom UI/design changes.
+
+**What Was Done**:
+
+1. **Set Up Fork Management** (`FORK_DOCUMENTATION.md`):
+   - Created comprehensive documentation explaining this is a fork
+   - Added detailed update process for keeping backend in sync with upstream
+   - Documented which files to protect (UI customizations) vs. accept (backend changes)
+   - Established regular update schedule and emergency recovery procedures
+
+2. **Successful Upstream Merge**:
+   - Added original repository as upstream remote
+   - Fetched and merged latest commits from nanobrowser/nanobrowser
+   - Successfully merged significant backend improvements including:
+     - Enhanced first-time user experience with model configuration detection
+     - New "Display Highlights" setting for visual feedback
+     - Improved navigator agent functionality
+     - Better browser page handling and utilities
+     - Settings improvements and bug fixes
+
+3. **Conflict Resolution**:
+   - **SidePanel.tsx**: Merged new welcome screen for unconfigured models with existing enhanced template system
+   - **GeneralSettings.tsx**: Combined new Display Highlights setting with Japanese translations
+   - **messages.json**: Added Japanese translations for new Display Highlights feature
+   - Preserved all custom UI enhancements while accepting backend improvements
+
+4. **Features Preserved**:
+   - ✅ Complete Japanese localization (extended to cover new features)
+   - ✅ Enhanced template system with user-customizable templates
+   - ✅ Improved layout and UX enhancements
+   - ✅ Custom default templates focused on user workflows
+
+5. **New Features Added from Upstream**:
+   - ✅ Smart welcome screen for first-time users without configured models
+   - ✅ Display Highlights toggle for visual feedback on interactive elements
+   - ✅ Enhanced backend stability and performance improvements
+   - ✅ Better error handling and user guidance
+
+**Git Setup**:
+- `origin`: https://github.com/senseisven/nanobrowser.git (your fork)
+- `upstream`: https://github.com/nanobrowser/nanobrowser.git (original repo)
+
+**Future Maintenance**: Regular upstream merges recommended monthly or when critical updates are available, following the process documented in `FORK_DOCUMENTATION.md`.
+
 ## Fixed Issues
 - ✅ Port 8081 conflict resolved
 - ✅ Missing content script file (content/index.iife.js) now built properly
@@ -139,3 +185,72 @@ The built extension includes:
 - GitHub repository research
 - Shopping research and comparison
 - General web automation tasks through natural language commands 
+
+### Centralized API Service Implementation (Latest)
+
+**Problem Solved**: Eliminated the need for users to configure API keys by creating a centralized backend service that handles all OpenRouter API calls.
+
+**What Was Done**:
+
+1. **Backend Service Creation** (`backend-service/`):
+   - Created Express.js server that proxies OpenRouter API requests
+   - Added rate limiting, CORS handling, security headers with Helmet
+   - Implemented health checks (`/health`) and usage stats (`/stats`)
+   - Added comprehensive error handling and request/response logging
+   - Configured for easy deployment on Railway, Render, Vercel, or VPS
+
+2. **New Provider Type** (`packages/storage/lib/settings/types.ts`):
+   - Added `ProviderTypeEnum.CentralizedAPI` as new provider type
+   - Configured default models (OpenAI GPT-4.1, Claude, Gemini, etc.)
+   - Set up default parameters for all three agents (Planner, Navigator, Validator)
+
+3. **Extension Backend Integration**:
+   - Updated `chrome-extension/src/background/agent/helper.ts` to handle centralized API
+   - Modified LLM provider configuration to skip API key validation for centralized provider
+   - Added automatic initialization of centralized provider on extension startup
+
+4. **User Interface Updates**:
+   - Added Japanese translations for centralized API ("エイナーのAI (APIキー不要)")
+   - Modified ModelSettings component to disable API key input for centralized provider
+   - Added visual indicators showing API key is not required
+
+5. **Configuration Management** (`packages/storage/lib/settings/centralizedApi.ts`):
+   - Created dedicated configuration module for centralized API settings
+   - Added health check functionality to verify service availability
+   - Implemented URL management functions for easy service endpoint updates
+
+6. **Default Provider Setup** (`packages/storage/lib/settings/defaultProviders.ts`):
+   - Created functions to automatically configure centralized API provider
+   - Added health checking and URL updating capabilities
+   - Implemented initialization on extension startup
+
+**Key Benefits**:
+- **Zero Configuration**: Users can use the extension immediately without API keys
+- **Cost Control**: Centralized billing and usage monitoring
+- **Security**: API keys stored securely on server, never exposed to clients
+- **Rate Limiting**: Built-in abuse protection and usage management
+- **Monitoring**: Comprehensive logging and health checks
+
+**Deployment Options**:
+- Railway (recommended for simplicity)
+- Render (good for production)
+- Vercel (serverless option)
+- Custom VPS with PM2
+
+**Files Modified/Added**:
+- `backend-service/` - Complete backend service
+- `packages/storage/lib/settings/types.ts` - New provider type
+- `packages/storage/lib/settings/llmProviders.ts` - Provider configuration
+- `packages/storage/lib/settings/centralizedApi.ts` - API configuration
+- `packages/storage/lib/settings/defaultProviders.ts` - Setup functions
+- `chrome-extension/src/background/agent/helper.ts` - Chat model creation
+- `chrome-extension/src/background/index.ts` - Initialization
+- `pages/options/src/components/ModelSettings.tsx` - UI updates
+- `packages/i18n/locales/en/messages.json` - Japanese translations
+- `CENTRALIZED_API_SETUP.md` - Comprehensive deployment guide
+
+**Next Steps for Deployment**:
+1. Deploy backend service to hosting platform
+2. Update API URLs in configuration files
+3. Build and test extension
+4. Monitor usage and costs 

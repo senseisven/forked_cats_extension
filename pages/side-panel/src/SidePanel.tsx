@@ -968,18 +968,17 @@ const SidePanel = () => {
                 <div className="text-center max-w-md">
                   <FiSettings size={48} className={`mx-auto mb-4 ${isDarkMode ? 'text-sky-400' : 'text-sky-500'}`} />
                   <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-sky-200' : 'text-sky-700'}`}>
-                    Welcome to Nanobrowser!
+                    エイナーの手へようこそ
                   </h3>
                   <p className="mb-4">
-                    To get started, you need to configure your AI models. The settings page should have opened
-                    automatically.
+                    エイナーの手へを使うにはAIモデルを指定してもらう必要があります。設定パネルを開いてモデルを指定してください。。
                   </p>
                   <button
                     onClick={() => chrome.runtime.openOptionsPage()}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                       isDarkMode ? 'bg-sky-600 hover:bg-sky-700 text-white' : 'bg-sky-500 hover:bg-sky-600 text-white'
                     }`}>
-                    Open Settings
+                    設定パネルを開く
                   </button>
                   <div className="mt-4 text-sm opacity-75">
                     <p>Need help? Check our:</p>

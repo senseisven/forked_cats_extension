@@ -323,5 +323,20 @@
   },
   "remember": {
     "message": "覚えておいてください："
+  },
+  "centralizedApi": {
+    "message": "エイナーのAI (APIキー不要)"
+  },
+  "centralizedApiDescription": {
+    "message": "APIキーの設定は不要です。すぐに使用できます。"
+  },
+  "centralizedApiUrl": {
+    "message": "APIサービスURL"
+  },
+  "centralizedApiUrlPlaceholder": {
+    "message": "https://your-api-service.com/api/chat/completions"
+  },
+  "apiKeyNotRequired": {
+    "message": "APIキー不要"
   }
 }

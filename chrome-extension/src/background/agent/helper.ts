@@ -276,6 +276,16 @@ export function createChatModel(providerConfig: ProviderConfig, modelConfig: Mod
         },
       });
     }
+    case ProviderTypeEnum.CentralizedAPI: {
+      // Call the helper function for centralized API service
+      console.log('[createChatModel] Calling createOpenAIChatModel for CentralizedAPI');
+      return createOpenAIChatModel(providerConfig, modelConfig, {
+        headers: {
+          'User-Agent': 'Nanobrowser-Extension/1.0',
+          'X-Extension-ID': chrome?.runtime?.id || 'unknown',
+        },
+      });
+    }
     default: {
       // by default, we think it's a openai-compatible provider
       // Pass undefined for extraFetchOptions for default/custom cases

@@ -17,6 +17,7 @@ export enum ProviderTypeEnum {
   Ollama = 'ollama',
   AzureOpenAI = 'azure_openai',
   OpenRouter = 'openrouter',
+  CentralizedAPI = 'centralized_api', // New centralized API service
   Groq = 'groq',
   Cerebras = 'cerebras',
   CustomOpenAI = 'custom_openai',
@@ -47,6 +48,15 @@ export const llmProviderModelNames = {
     'openai/o4-mini',
     'openai/gpt-4o-2024-11-20',
     'google/gemini-2.5-flash-preview',
+  ],
+  [ProviderTypeEnum.CentralizedAPI]: [
+    'openai/gpt-4.1',
+    'openai/gpt-4.1-mini',
+    'openai/o4-mini',
+    'openai/gpt-4o-2024-11-20',
+    'google/gemini-2.5-flash-preview',
+    'anthropic/claude-3-5-sonnet-20241022',
+    'anthropic/claude-3-5-haiku-20241022',
   ],
   [ProviderTypeEnum.Groq]: ['llama-3.3-70b-versatile'],
   [ProviderTypeEnum.Cerebras]: ['llama-3.3-70b'],
@@ -140,6 +150,20 @@ export const llmProviderParameters = {
     },
   },
   [ProviderTypeEnum.OpenRouter]: {
+    [AgentNameEnum.Planner]: {
+      temperature: 0.7,
+      topP: 0.9,
+    },
+    [AgentNameEnum.Navigator]: {
+      temperature: 0.3,
+      topP: 0.85,
+    },
+    [AgentNameEnum.Validator]: {
+      temperature: 0.1,
+      topP: 0.8,
+    },
+  },
+  [ProviderTypeEnum.CentralizedAPI]: {
     [AgentNameEnum.Planner]: {
       temperature: 0.7,
       topP: 0.9,

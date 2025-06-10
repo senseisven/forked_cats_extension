@@ -15,6 +15,7 @@ import type { BaseChatModel } from '@langchain/core/language_models/chat_models'
 import { DEFAULT_AGENT_OPTIONS } from './agent/types';
 import { SpeechToTextService } from './services/speechToText';
 import { ProviderTypeEnum } from '@extension/storage';
+import { setupDefaultCentralizedProvider } from '@extension/storage/lib/settings/defaultProviders';
 
 const logger = createLogger('background');
 
@@ -24,6 +25,9 @@ let currentPort: chrome.runtime.Port | null = null;
 
 // Setup side panel behavior
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(error => console.error(error));
+
+// Initialize default centralized API provider
+setupDefaultCentralizedProvider().catch(error => console.error('Failed to setup default centralized provider:', error));
 
 // Function to check if script is already injected
 async function isScriptInjected(tabId: number): Promise<boolean> {

@@ -63,6 +63,7 @@ export function getProviderTypeByProviderId(providerId: string): ProviderTypeEnu
     case ProviderTypeEnum.Grok:
     case ProviderTypeEnum.Ollama:
     case ProviderTypeEnum.OpenRouter:
+    case ProviderTypeEnum.CentralizedAPI:
     case ProviderTypeEnum.Groq:
     case ProviderTypeEnum.Cerebras:
       return providerId;
@@ -91,6 +92,8 @@ export function getDefaultDisplayNameFromProviderId(providerId: string): string 
       return 'Azure OpenAI';
     case ProviderTypeEnum.OpenRouter:
       return 'OpenRouter';
+    case ProviderTypeEnum.CentralizedAPI:
+      return 'エイナーの手 (No API Key Required)';
     case ProviderTypeEnum.Groq:
       return 'Groq';
     case ProviderTypeEnum.Cerebras:
@@ -117,6 +120,16 @@ export function getDefaultProviderConfig(providerId: string): ProviderConfig {
         type: providerId,
         baseUrl: providerId === ProviderTypeEnum.OpenRouter ? 'https://openrouter.ai/api/v1' : undefined,
         modelNames: [...(llmProviderModelNames[providerId] || [])],
+        createdAt: Date.now(),
+      };
+
+    case ProviderTypeEnum.CentralizedAPI:
+      return {
+        apiKey: 'not-required', // No API key needed for centralized service
+        name: getDefaultDisplayNameFromProviderId(ProviderTypeEnum.CentralizedAPI),
+        type: ProviderTypeEnum.CentralizedAPI,
+        baseUrl: 'https://your-api-service.com/api/chat/completions', // Users will need to update this
+        modelNames: [...(llmProviderModelNames[ProviderTypeEnum.CentralizedAPI] || [])],
         createdAt: Date.now(),
       };
 
@@ -238,7 +251,11 @@ export const llmProviderStore: LLMProviderStorage = {
       if (!config.apiKey?.trim()) {
         throw new Error('API Key is required for Azure OpenAI');
       }
-    } else if (providerType !== ProviderTypeEnum.CustomOpenAI && providerType !== ProviderTypeEnum.Ollama) {
+    } else if (
+      providerType !== ProviderTypeEnum.CustomOpenAI &&
+      providerType !== ProviderTypeEnum.Ollama &&
+      providerType !== ProviderTypeEnum.CentralizedAPI
+    ) {
       if (!config.apiKey?.trim()) {
         throw new Error(`API Key is required for ${getDefaultDisplayNameFromProviderId(providerId)}`);
       }

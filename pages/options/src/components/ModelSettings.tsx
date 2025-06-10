@@ -1236,15 +1236,22 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
                           id={`${providerId}-api-key`}
                           type="password"
                           placeholder={
-                            providerConfig.type === ProviderTypeEnum.CustomOpenAI
-                              ? `${providerConfig.name || providerId} ${t('apiKeyOptional')}`
-                              : providerConfig.type === ProviderTypeEnum.Ollama
-                                ? t('apiKeyLeaveEmpty')
-                                : `${providerConfig.name || providerId} ${t('apiKeyRequired')}`
+                            providerConfig.type === ProviderTypeEnum.CentralizedAPI
+                              ? t('apiKeyNotRequired')
+                              : providerConfig.type === ProviderTypeEnum.CustomOpenAI
+                                ? `${providerConfig.name || providerId} ${t('apiKeyOptional')}`
+                                : providerConfig.type === ProviderTypeEnum.Ollama
+                                  ? t('apiKeyLeaveEmpty')
+                                  : `${providerConfig.name || providerId} ${t('apiKeyRequired')}`
                           }
                           value={providerConfig.apiKey || ''}
                           onChange={e => handleApiKeyChange(providerId, e.target.value, providerConfig.baseUrl)}
-                          className={`w-full rounded-md border text-sm ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-800' : 'border-gray-300 bg-white text-gray-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-200'} p-2 outline-none`}
+                          disabled={providerConfig.type === ProviderTypeEnum.CentralizedAPI}
+                          className={`w-full rounded-md border text-sm ${
+                            providerConfig.type === ProviderTypeEnum.CentralizedAPI
+                              ? 'cursor-not-allowed opacity-60'
+                              : ''
+                          } ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-800' : 'border-gray-300 bg-white text-gray-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-200'} p-2 outline-none`}
                         />
                         {/* Show eye button only for newly added providers */}
                         {modifiedProviders.has(providerId) && !providersFromStorage.has(providerId) && (

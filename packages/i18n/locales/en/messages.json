@@ -183,6 +183,12 @@
   "enableVision": {
     "message": "ビジョンを有効化"
   },
+  "displayHighlights": {
+    "message": "ハイライト表示"
+  },
+  "showVisualHighlights": {
+    "message": "インタラクティブ要素（ボタン、リンクなど）の視覚的ハイライトを表示"
+  },
   "replanningFrequency": {
     "message": "再計画頻度"
   },

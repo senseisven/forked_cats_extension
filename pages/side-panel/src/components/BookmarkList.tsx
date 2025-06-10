@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, useRef, useEffect } from 'react';
-import { FaTrash, FaPen, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaTrash, FaPen, FaCheck, FaTimes, FaPlus } from 'react-icons/fa';
 import { t } from '@extension/i18n';
 
 interface Bookmark {
@@ -15,6 +15,7 @@ interface BookmarkListProps {
   onBookmarkUpdateTitle?: (id: number, title: string) => void;
   onBookmarkDelete?: (id: number) => void;
   onBookmarkReorder?: (draggedId: number, targetId: number) => void;
+  onBookmarkAdd?: (title: string, content: string) => void;
   isDarkMode?: boolean;
 }
 
@@ -24,12 +25,18 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
   onBookmarkUpdateTitle,
   onBookmarkDelete,
   onBookmarkReorder,
+  onBookmarkAdd,
   isDarkMode = false,
 }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState<string>('');
   const [draggedId, setDraggedId] = useState<number | null>(null);
+  const [showAddForm, setShowAddForm] = useState<boolean>(false);
+  const [newTitle, setNewTitle] = useState<string>('');
+  const [newContent, setNewContent] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleEditClick = (bookmark: Bookmark) => {
     setEditingId(bookmark.id);
@@ -45,6 +52,27 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
 
   const handleCancelEdit = () => {
     setEditingId(null);
+  };
+
+  const handleAddClick = () => {
+    setShowAddForm(true);
+    setNewTitle('');
+    setNewContent('');
+  };
+
+  const handleAddSave = () => {
+    if (onBookmarkAdd && newTitle.trim() && newContent.trim()) {
+      onBookmarkAdd(newTitle.trim(), newContent.trim());
+      setShowAddForm(false);
+      setNewTitle('');
+      setNewContent('');
+    }
+  };
+
+  const handleAddCancel = () => {
+    setShowAddForm(false);
+    setNewTitle('');
+    setNewContent('');
   };
 
   // Drag handlers
@@ -73,18 +101,96 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
     }
   };
 
-  // Focus the input field when entering edit mode
+  // Focus the input field when entering edit mode or add mode
   useEffect(() => {
     if (editingId !== null && inputRef.current) {
       inputRef.current.focus();
     }
   }, [editingId]);
 
+  useEffect(() => {
+    if (showAddForm && titleInputRef.current) {
+      titleInputRef.current.focus();
+    }
+  }, [showAddForm]);
+
   return (
     <div className="p-2">
-      <h3 className={`mb-3 text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-        {t('quickStart')}
-      </h3>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{t('quickStart')}</h3>
+        <button
+          onClick={handleAddClick}
+          className={`rounded-md p-1.5 text-xs ${
+            isDarkMode ? 'bg-slate-700 text-sky-400 hover:bg-slate-600' : 'bg-sky-100 text-sky-600 hover:bg-sky-200'
+          } transition-colors`}
+          aria-label={t('addTemplate')}
+          type="button">
+          <FaPlus size={12} />
+        </button>
+      </div>
+
+      {/* Add new template form */}
+      {showAddForm && (
+        <div
+          className={`mb-4 rounded-lg border p-4 ${
+            isDarkMode ? 'border-slate-600 bg-slate-800' : 'border-sky-200 bg-sky-50'
+          }`}>
+          <div className="mb-3">
+            <label className={`mb-1 block text-xs font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              {t('templateTitle')}
+            </label>
+            <input
+              ref={titleInputRef}
+              type="text"
+              value={newTitle}
+              onChange={e => setNewTitle(e.target.value)}
+              placeholder={t('templateTitlePlaceholder')}
+              className={`w-full rounded border px-3 py-2 text-sm ${
+                isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-sky-200 bg-white text-gray-700'
+              }`}
+            />
+          </div>
+          <div className="mb-3">
+            <label className={`mb-1 block text-xs font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              {t('templateContent')}
+            </label>
+            <textarea
+              ref={contentTextareaRef}
+              value={newContent}
+              onChange={e => setNewContent(e.target.value)}
+              placeholder={t('templateContentPlaceholder')}
+              rows={3}
+              className={`w-full rounded border px-3 py-2 text-sm ${
+                isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-sky-200 bg-white text-gray-700'
+              }`}
+            />
+          </div>
+          <div className="flex justify-end space-x-2">
+            <button
+              onClick={handleAddCancel}
+              className={`rounded px-3 py-1.5 text-xs ${
+                isDarkMode
+                  ? 'bg-slate-700 text-gray-400 hover:bg-slate-600'
+                  : 'bg-white text-gray-500 hover:bg-gray-100'
+              } border ${isDarkMode ? 'border-slate-600' : 'border-gray-200'}`}
+              type="button">
+              {t('cancel')}
+            </button>
+            <button
+              onClick={handleAddSave}
+              disabled={!newTitle.trim() || !newContent.trim()}
+              className={`rounded px-3 py-1.5 text-xs ${
+                isDarkMode
+                  ? 'bg-sky-600 text-white hover:bg-sky-700 disabled:bg-slate-600'
+                  : 'bg-sky-500 text-white hover:bg-sky-600 disabled:bg-gray-300'
+              } disabled:cursor-not-allowed`}
+              type="button">
+              {t('save')}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {bookmarks.map(bookmark => (
           <div

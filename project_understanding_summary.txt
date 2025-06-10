@@ -53,23 +53,72 @@ The built extension includes:
 ✅ **Full Japanese UI localization completed**
 🔄 Ready for Chrome extension loading and testing
 
-## Complete Japanese Localization 
-- ✅ Extension name: "エイナーの手" (Einar's Hand)
-- ✅ Extension description translated to Japanese
-- ✅ All UI components localized (buttons, placeholders, labels)
-- ✅ **Settings page completely translated with improved layout:**
-  - ✅ Sidebar widened (w-48 → w-56) for Japanese text like "ファイアウォール"
-  - ✅ General settings: "タスクあたりの最大ステップ数", "失敗許容度", "ハイライト付きビジョンを有効化"
-  - ✅ Model settings: "LLMプロバイダー", "モデル選択", agent descriptions, parameters
-  - ✅ Provider management: API keys, model lists, save/cancel buttons
-  - ✅ Speech-to-text model configuration fully translated
-- ✅ Chat interface fully in Japanese
-- ✅ Error messages and loading text in Japanese
-- ✅ Voice input controls translated
-- ✅ Bookmark management UI in Japanese
-- ✅ **Firewall settings page fully localized**
-- ✅ **Fixed i18n implementation using `t()` function**
-- ✅ **All hardcoded English text replaced with Japanese translations**
+## Recent Major Updates
+
+### Custom Template System (Latest)
+
+**Problem Solved**: Replaced the fixed QuickStart items (GitHub star, X follow, AI papers) with a user-friendly custom template system.
+
+**What Changed**:
+
+1. **Updated Default Templates** (`packages/storage/lib/prompt/favorites.ts`):
+   - Replaced marketing-focused templates with practical user-focused ones:
+     - "📧 Check Daily Emails" - Summarizes important daily emails
+     - "📰 Daily News Summary" - Creates news summaries from preferred sites  
+     - "📋 Create Meeting Notes" - Organizes meeting notes with action items
+
+2. **Enhanced BookmarkList Component** (`pages/side-panel/src/components/BookmarkList.tsx`):
+   - Added "+" button in the QuickStart header to create new templates
+   - Implemented template creation form with:
+     - Title input field
+     - Content textarea for task description
+     - Save/Cancel buttons with proper validation
+   - Added proper focus management for accessibility
+   - Added new props: `onBookmarkAdd` callback
+
+3. **Updated SidePanel Integration** (`pages/side-panel/src/SidePanel.tsx`):
+   - Added `handleBookmarkAdd` function to save new templates to storage
+   - Connected the new template creation flow to the favorites storage system
+   - Maintained existing edit, delete, and reorder functionality
+
+4. **Japanese Translations** (`packages/i18n/locales/en/messages.json`):
+   - Added complete Japanese translations for template management:
+     - `addTemplate`: "テンプレートを追加"
+     - `templateTitle`: "テンプレートタイトル"
+     - `templateTitlePlaceholder`: "例: 毎日のメールチェック"
+     - `templateContent`: "テンプレート内容"
+     - `templateContentPlaceholder`: "AIエージェントに実行してもらいたいタスクを入力してください..."
+
+**User Experience**: Users can now create personalized task templates for their daily workflows instead of being limited to fixed promotional content. Templates are saved persistently and can be edited, deleted, or reordered as needed.
+
+**Technical Implementation**: Leveraged the existing favorites storage system but enhanced the UI to make template creation more accessible and user-friendly.
+
+### Complete Japanese Localization (Previous)
+
+**Problem Solved**: Users in Japan couldn't use the extension effectively due to English-only interface.
+
+**What Changed**:
+
+1. **Settings Panel Translation**:
+   - All settings categories and options now display in Japanese
+   - Model selection interfaces, parameter controls, and provider management
+   - Enhanced layout to accommodate longer Japanese text (widened sidebar from w-48 to w-56)
+
+2. **Comprehensive Translation Coverage**:
+   - General settings terms (maxStepsPerTask, failureTolerance, enableVisionWithHighlighting, etc.)
+   - Model interface terms (modelSelection, llmProviders, speechToTextModel, etc.)
+   - Agent descriptions (planner, navigator, validator with full descriptions)
+   - UI elements (buttons, labels, placeholders, error messages)
+   - Provider management terms (apiKey, baseUrl, models, save, cancel, delete, etc.)
+
+3. **Component Updates**:
+   - Added `import { t } from '@extension/i18n'` to all relevant components
+   - Replaced hardcoded English strings with `t('translationKey')` function calls in:
+     - Options.tsx (main settings layout)
+     - GeneralSettings.tsx (task and behavior settings)  
+     - ModelSettings.tsx (provider and model configuration)
+
+**Technical Details**: Used Chrome extension i18n system with comprehensive Japanese translations in `packages/i18n/locales/en/messages.json`.
 
 ## Fixed Issues
 - ✅ Port 8081 conflict resolved

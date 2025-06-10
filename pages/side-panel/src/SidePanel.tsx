@@ -620,6 +620,18 @@ const SidePanel = () => {
     }
   };
 
+  const handleBookmarkAdd = async (title: string, content: string) => {
+    try {
+      await favoritesStorage.addPrompt(title, content);
+
+      // Update favorites in the UI
+      const prompts = await favoritesStorage.getAllPrompts();
+      setFavoritePrompts(prompts);
+    } catch (error) {
+      console.error('Failed to add favorite prompt:', error);
+    }
+  };
+
   // Load favorite prompts from storage
   useEffect(() => {
     const loadFavorites = async () => {
@@ -917,6 +929,7 @@ const SidePanel = () => {
                     onBookmarkUpdateTitle={handleBookmarkUpdateTitle}
                     onBookmarkDelete={handleBookmarkDelete}
                     onBookmarkReorder={handleBookmarkReorder}
+                    onBookmarkAdd={handleBookmarkAdd}
                     isDarkMode={isDarkMode}
                   />
                 </div>

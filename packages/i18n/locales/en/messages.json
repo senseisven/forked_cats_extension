@@ -51,6 +51,21 @@
   "quickStart": {
     "message": "クイックスタート"
   },
+  "addTemplate": {
+    "message": "テンプレートを追加"
+  },
+  "templateTitle": {
+    "message": "テンプレートタイトル"
+  },
+  "templateTitlePlaceholder": {
+    "message": "例: 毎日のメールチェック"
+  },
+  "templateContent": {
+    "message": "テンプレート内容"
+  },
+  "templateContentPlaceholder": {
+    "message": "AIエージェントに実行してもらいたいタスクを入力してください..."
+  },
   "editBookmark": {
     "message": "ブックマークを編集"
   },

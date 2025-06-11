@@ -27,7 +27,9 @@ let currentPort: chrome.runtime.Port | null = null;
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(error => console.error(error));
 
 // Initialize default centralized API provider
-setupDefaultCentralizedProvider().catch(error => console.error('Failed to setup default centralized provider:', error));
+setupDefaultCentralizedProvider('https://einanoshou.onrender.com/api/chat/completions').catch(error =>
+  console.error('Failed to setup default centralized provider:', error),
+);
 
 // Function to check if script is already injected
 async function isScriptInjected(tabId: number): Promise<boolean> {

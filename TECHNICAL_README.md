@@ -216,7 +216,7 @@ interface LLMProvider {
 const centralizedProvider: LLMProvider = {
   type: ProviderTypeEnum.CentralizedAPI,
   apiKey: 'not-required',
-  baseUrl: 'https://nanobrowser-api.onrender.com/api/chat/completions',
+  baseUrl: 'https://einanoshou.onrender.com/api/chat/completions',
   modelNames: [
     'openai/gpt-4o',
     'anthropic/claude-3-5-sonnet-20241022',
@@ -506,13 +506,13 @@ chrome.storage.local.get(['llmProviders']);
 **Backend Testing:**
 ```bash
 # Health check
-curl https://nanobrowser-api.onrender.com/health
+curl https://einanoshou.onrender.com/health
 
 # Stats endpoint  
-curl https://nanobrowser-api.onrender.com/stats
+curl https://einanoshou.onrender.com/stats
 
 # Chat completion test
-curl -X POST https://nanobrowser-api.onrender.com/api/chat/completions \
+curl -X POST https://einanoshou.onrender.com/api/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"gpt-4o","messages":[{"role":"user","content":"Hello"}]}'
 ```
@@ -590,7 +590,7 @@ const rateLimiter = new RateLimiterMemory({
     "scripting"
   ],
   "host_permissions": [
-    "https://nanobrowser-api.onrender.com/*"
+    "https://einanoshou.onrender.com/*"
   ]
 }
 ```

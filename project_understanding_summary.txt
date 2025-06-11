@@ -1,15 +1,104 @@
-# Nanobrowser Project Understanding Summary
+# Nanobrowser Chrome Extension - Project Understanding Summary
 
 ## Project Overview
-Nanobrowser is an open-source AI web automation Chrome extension that runs locally in the browser. It serves as a free alternative to OpenAI Operator with flexible LLM options and a multi-agent system.
+This is a fork of the Nanobrowser Chrome extension with significant customizations for Japanese users and centralized API service. The extension provides AI-powered browsing assistance with a focus on Japanese localization and user-friendly API access.
 
-## Key Features
-- **Multi-agent System**: Uses specialized AI agents (Navigator, Planner, Validator) for complex web workflows
-- **Interactive Side Panel**: Chat interface with real-time status updates
-- **Task Automation**: Automates repetitive web tasks across websites
-- **Multiple LLM Support**: Supports OpenAI, Anthropic, Gemini, Ollama, Groq, Cerebras, and custom OpenAI-compatible providers
-- **Privacy-Focused**: Everything runs locally, no data shared with cloud services
-- **100% Free**: No subscription fees, users only pay for their own API usage
+## Key Custom Features Implemented
+
+### 1. Japanese Localization (Complete)
+- Full translation of all UI elements and settings
+- Proper Japanese text handling in sidebar layout
+- Wider sidebar (320px → 380px) to accommodate Japanese text
+- Japanese error messages and user feedback
+
+### 2. Custom Template System (Complete)
+- Replaced fixed QuickStart items with user-customizable templates
+- Default templates focused on practical daily tasks:
+  - 重要なメールのまとめ (Important email summaries)
+  - 今日のニュース要約 (Today's news summary) 
+  - 会議の議事録作成 (Meeting minutes creation)
+- Template creation UI with title and content fields
+- Full Japanese translation for template management
+
+### 3. Centralized API Service (Complete & Ready for Deployment)
+- Complete backend service in `backend-service/` directory
+- Express.js server with OpenRouter API proxy
+- Rate limiting (100 requests/minute), CORS, security headers
+- Health checks (`/health`) and usage statistics (`/stats`)
+- No API key required for end users
+- Ready for Render deployment with fixed dependencies
+- **BUILD ISSUE RESOLVED**: Updated `rate-limiter-flexible` from `^3.0.8` to `^5.0.3`
+
+### 4. Fork Management (Complete)
+- Proper upstream remote configuration
+- Successfully merged latest changes from nanobrowser/nanobrowser
+- Preserved all custom features during merge
+- Documented in `FORK_DOCUMENTATION.md`
+
+## Technical Architecture
+
+### Extension Structure
+- `/chrome-extension/` - Main extension code
+- `/packages/storage/` - Settings and data management
+- `/packages/ui/` - React components and UI
+- `/packages/sidepanel/` - Main sidebar interface
+- `/backend-service/` - Centralized API service
+
+### Key Files Modified
+- `packages/storage/lib/prompt/favorites.ts` - Custom template system
+- `packages/sidepanel/lib/components/BookmarkList.tsx` - Template UI
+- `packages/storage/lib/settings/types.ts` - New provider type
+- `packages/storage/lib/settings/centralizedApi.ts` - API configuration
+- `packages/storage/lib/settings/defaultProviders.ts` - Provider initialization
+- `backend-service/package.json` - Fixed dependency versions for deployment
+- Multiple translation files for Japanese support
+
+### Deployment Configuration
+- **Service**: Render.com web service
+- **URL**: https://nanobrowser-api.onrender.com
+- **Runtime**: Node.js
+- **Environment**: Production with rate limiting and security
+- **Root Directory**: `backend-service`
+- **Auto-deployment**: Connected to GitHub repository
+- **Status**: Ready for deployment (build issues resolved)
+
+### Build Status
+- ✅ Extension builds successfully
+- ✅ All TypeScript compilation passes
+- ✅ Japanese translations complete
+- ✅ Backend service tested locally and working
+- ✅ Render URLs configured in extension
+- ✅ Default provider automatically initialized
+- ✅ Dependencies fixed and pushed to GitHub
+- ✅ Ready for Render deployment
+
+## User Experience
+1. Install extension → Centralized API provider auto-configured
+2. No API key setup required
+3. Access "エイナーのAI (APIキー不要)" provider
+4. Create custom templates for daily tasks
+5. Use AI features with Japanese interface
+6. Backend handles all API key management and rate limiting
+
+## Documentation
+- `RENDER_DEPLOYMENT.md` - Complete Render deployment guide
+- `CENTRALIZED_API_SETUP.md` - API service setup documentation  
+- `FORK_DOCUMENTATION.md` - Fork management procedures
+- Japanese translations in `/packages/i18n/`
+
+## Current Status: Ready for Production Deployment
+The extension is fully functional with:
+- Custom template management system
+- Japanese localization
+- Centralized API service ready for Render (build issues resolved)
+- Latest upstream features integrated
+- Zero-configuration user experience
+- Cost-controlled backend service
+- All dependencies tested and working locally
+
+**Latest Fix Applied**: Resolved Render build error by updating `rate-limiter-flexible` from non-existent version `^3.0.8` to working version `^5.0.3`. Changes committed and pushed to GitHub repository, triggering automatic redeployment on Render.
+
+This represents a complete, production-ready fork with significant value-added features for Japanese users and simplified API access management.
 
 ## Project Structure
 - `chrome-extension/` - Main Chrome extension code

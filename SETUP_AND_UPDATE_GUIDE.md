@@ -56,7 +56,7 @@ npm run build
 4. Check browser console for any errors (F12 → Console)
 
 ### **Test 3: Verify Backend Health**
-Open in browser: `https://nanobrowser-api.onrender.com/health`
+Open in browser: `https://einanoshou.onrender.com/health`
 
 Should show:
 ```json
@@ -68,7 +68,7 @@ Should show:
 ```
 
 ### **Test 4: Check Usage Stats**
-Visit: `https://nanobrowser-api.onrender.com/stats`
+Visit: `https://einanoshou.onrender.com/stats`
 
 Shows backend uptime and memory usage.
 
@@ -112,8 +112,8 @@ npm run build
 3. **Metrics**: Monitor CPU, memory, and request patterns
 
 ### **Health Monitoring**
-- **Health Check**: `https://nanobrowser-api.onrender.com/health`
-- **Stats**: `https://nanobrowser-api.onrender.com/stats`
+- **Health Check**: `https://einanoshou.onrender.com/health`
+- **Stats**: `https://einanoshou.onrender.com/stats`
 - **Automatic Restart**: Render restarts if service crashes
 
 ### **Updating Backend**
@@ -152,7 +152,7 @@ Update in Render dashboard → Your Service → Environment:
 ### **API Connection Issues**
 
 **Problem**: No response from AI
-- ✅ Check `https://nanobrowser-api.onrender.com/health`
+- ✅ Check `https://einanoshou.onrender.com/health`
 - ✅ Service might be sleeping (first request takes 30+ seconds)
 - ✅ Check Render logs for errors
 
@@ -209,7 +209,7 @@ Users can add their own templates through the extension UI:
 ### **Monitor API Usage**
 Check your backend stats:
 ```bash
-curl https://nanobrowser-api.onrender.com/stats
+curl https://einanoshou.onrender.com/stats
 ```
 
 ### **OpenRouter Usage**

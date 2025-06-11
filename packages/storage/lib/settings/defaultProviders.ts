@@ -15,7 +15,7 @@ export async function setupDefaultCentralizedProvider(apiBaseUrl?: string): Prom
       console.log('Setting up default centralized API provider...');
 
       // Use provided URL or default
-      const baseUrl = apiBaseUrl || 'https://your-api-service.com/api/chat/completions';
+      const baseUrl = apiBaseUrl || 'https://einanoshou.onrender.com/api/chat/completions';
 
       // Update centralized API config
       await centralizedApiStore.setBaseUrl(baseUrl);

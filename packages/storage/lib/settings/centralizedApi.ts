@@ -11,7 +11,7 @@ export interface CentralizedApiConfig {
 
 // Default configuration for centralized API
 const defaultConfig: CentralizedApiConfig = {
-  baseUrl: 'https://your-api-service.com/api/chat/completions',
+  baseUrl: 'https://einanoshou.onrender.com/api/chat/completions', // Your actual Render URL
   enabled: true,
   lastChecked: Date.now(),
   version: '1.0.0',

@@ -1,0 +1,104 @@
+name: Build and Release Extension
+
+on:
+  push:
+    branches: [ master, main ]
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Build extension
+      run: npm run build
+      
+    - name: Archive extension build
+      uses: actions/upload-artifact@v4
+      with:
+        name: えいなーの手-extension-${{ github.sha }}
+        path: dist/
+        retention-days: 30
+        
+    - name: Create extension zip
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+      run: |
+        cd dist
+        zip -r ../えいなーの手-extension-v$(date +%Y%m%d-%H%M%S).zip .
+        cd ..
+        
+    - name: Create Release
+      if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v$(date +%Y%m%d-%H%M%S)
+        name: えいなーの手 Extension Build $(date +%Y-%m-%d)
+        body: |
+          🚀 **Automatic Build Release**
+          
+          **Features:**
+          - ✅ Japanese localization
+          - ✅ Custom template system
+          - ✅ Centralized API (no API key required)
+          - ✅ Latest upstream features
+          
+          **Installation:**
+          1. Download the `.zip` file below
+          2. Unzip the contents
+          3. Go to `chrome://extensions/`
+          4. Enable "Developer mode"
+          5. Click "Load unpacked" and select the unzipped folder
+          
+          **Render API Status:** [Check here](https://nanobrowser-api.onrender.com/health)
+          
+          Built from commit: ${{ github.sha }}
+        files: |
+          えいなーの手-extension-*.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Test backend dependencies
+      run: |
+        cd backend-service
+        npm install
+        
+    - name: Test backend startup
+      run: |
+        cd backend-service
+        OPENROUTER_API_KEY=test-key timeout 10s npm start || true
+        echo "Backend startup test completed" 

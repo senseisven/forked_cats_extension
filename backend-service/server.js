@@ -251,12 +251,82 @@ app.post('/api/openrouter/*', async (req, res) => {
 
 // Generic chat completion endpoint (for easier integration)
 app.post('/api/chat/completions', async (req, res) => {
-  // Redirect to OpenRouter chat completions
-  req.url = '/api/openrouter/chat/completions';
-  req.path = '/api/openrouter/chat/completions';
+  const startTime = Date.now();
 
-  // Continue with the same handler
-  return app._router.handle(req, res);
+  try {
+    console.log(`📤 [${new Date().toISOString()}] Chat completion request from ${req.ip}`);
+    console.log(`📝 Request body: ${JSON.stringify(req.body)}`);
+
+    // Check if API key is configured
+    if (!process.env.OPENROUTER_API_KEY) {
+      console.error('❌ OPENROUTER_API_KEY is not configured');
+      return res.status(500).json({
+        error: 'Configuration Error',
+        message: 'OPENROUTER_API_KEY is not configured in environment variables',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Forward request directly to OpenRouter chat completions
+    const openrouterUrl = 'https://openrouter.ai/api/v1/chat/completions';
+    const response = await fetch(openrouterUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://nanobrowser.ai',
+        'X-Title': 'Nanobrowser (Centralized API)',
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    // Log response status
+    console.log(`📊 OpenRouter response status: ${response.status}`);
+
+    // Get response data
+    let responseData;
+    const responseText = await response.text();
+
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error(`❌ Failed to parse OpenRouter response: ${responseText}`);
+      return res.status(502).json({
+        error: 'Bad Gateway',
+        message: 'Invalid response from OpenRouter API',
+        details: responseText.substring(0, 500),
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Log response stats
+    const duration = Date.now() - startTime;
+    console.log(`📥 [${new Date().toISOString()}] Chat completion response ${response.status} in ${duration}ms`);
+
+    // If OpenRouter returned an error, log it
+    if (!response.ok) {
+      console.error(`❌ OpenRouter API error:`, responseData);
+    }
+
+    // Optional: Log usage for cost tracking
+    if (process.env.ENABLE_USAGE_LOGGING === 'true' && responseData.usage) {
+      console.log(`💰 Usage: ${JSON.stringify(responseData.usage)}`);
+    }
+
+    // Forward response
+    res.status(response.status).json(responseData);
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    console.error(`❌ [${new Date().toISOString()}] Chat completion error after ${duration}ms:`, error.message);
+    console.error(`❌ Full error:`, error);
+
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: 'Failed to process chat completion request',
+      details: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 // Catch-all for unsupported endpoints

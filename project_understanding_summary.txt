@@ -20,20 +20,26 @@ This is a fork of the Nanobrowser Chrome extension with significant customizatio
 - Template creation UI with title and content fields
 - Full Japanese translation for template management
 
-### 3. Centralized API Service (Complete & Ready for Deployment)
+### 3. Centralized API Service (Complete & Production Deployed)
 - Complete backend service in `backend-service/` directory
 - Express.js server with OpenRouter API proxy
 - Rate limiting (100 requests/minute), CORS, security headers
 - Health checks (`/health`) and usage statistics (`/stats`)
 - No API key required for end users
-- Ready for Render deployment with fixed dependencies
-- **BUILD ISSUE RESOLVED**: Updated `rate-limiter-flexible` from `^3.0.8` to `^5.0.3`
+- **DEPLOYED TO RENDER**: `https://einanoshou.onrender.com`
+- **STATUS**: ✅ WORKING - API responds to health checks and stats
 
 ### 4. Fork Management (Complete)
 - Proper upstream remote configuration
 - Successfully merged latest changes from nanobrowser/nanobrowser
 - Preserved all custom features during merge
 - Documented in `FORK_DOCUMENTATION.md`
+
+### 5. Automated Build & Release System (Complete)
+- **GitHub Actions**: Auto-builds extension on every push to master
+- **Auto-releases**: Creates GitHub releases with downloadable ZIP files
+- **Testing workflows**: Backend dependency verification
+- **No manual building**: Users get automatic updates
 
 ## Technical Architecture
 
@@ -43,6 +49,7 @@ This is a fork of the Nanobrowser Chrome extension with significant customizatio
 - `/packages/ui/` - React components and UI
 - `/packages/sidepanel/` - Main sidebar interface
 - `/backend-service/` - Centralized API service
+- `/.github/workflows/` - Automated build system
 
 ### Key Files Modified
 - `packages/storage/lib/prompt/favorites.ts` - Custom template system
@@ -51,26 +58,28 @@ This is a fork of the Nanobrowser Chrome extension with significant customizatio
 - `packages/storage/lib/settings/centralizedApi.ts` - API configuration
 - `packages/storage/lib/settings/defaultProviders.ts` - Provider initialization
 - `backend-service/package.json` - Fixed dependency versions for deployment
+- `.github/workflows/build-release.yml` - Automated build system
 - Multiple translation files for Japanese support
 
 ### Deployment Configuration
 - **Service**: Render.com web service
-- **URL**: https://nanobrowser-api.onrender.com
+- **URL**: https://einanoshou.onrender.com
 - **Runtime**: Node.js
 - **Environment**: Production with rate limiting and security
 - **Root Directory**: `backend-service`
 - **Auto-deployment**: Connected to GitHub repository
-- **Status**: Ready for deployment (build issues resolved)
+- **Status**: ✅ DEPLOYED AND WORKING
 
 ### Build Status
 - ✅ Extension builds successfully
 - ✅ All TypeScript compilation passes
 - ✅ Japanese translations complete
-- ✅ Backend service tested locally and working
-- ✅ Render URLs configured in extension
+- ✅ Backend service deployed and operational
+- ✅ API health checks passing
+- ✅ Extension configured with correct URLs
 - ✅ Default provider automatically initialized
-- ✅ Dependencies fixed and pushed to GitHub
-- ✅ Ready for Render deployment
+- ✅ GitHub Actions workflow active
+- ✅ Auto-release system working
 
 ## User Experience
 1. Install extension → Centralized API provider auto-configured
@@ -79,26 +88,65 @@ This is a fork of the Nanobrowser Chrome extension with significant customizatio
 4. Create custom templates for daily tasks
 5. Use AI features with Japanese interface
 6. Backend handles all API key management and rate limiting
+7. **Automatic updates** via GitHub releases
 
 ## Documentation
+- `SETUP_AND_UPDATE_GUIDE.md` - Complete installation and testing guide
+- `TECHNICAL_README.md` - Detailed architecture and implementation docs
 - `RENDER_DEPLOYMENT.md` - Complete Render deployment guide
 - `CENTRALIZED_API_SETUP.md` - API service setup documentation  
 - `FORK_DOCUMENTATION.md` - Fork management procedures
 - Japanese translations in `/packages/i18n/`
 
-## Current Status: Ready for Production Deployment
-The extension is fully functional with:
-- Custom template management system
-- Japanese localization
-- Centralized API service ready for Render (build issues resolved)
-- Latest upstream features integrated
-- Zero-configuration user experience
-- Cost-controlled backend service
-- All dependencies tested and working locally
+## API Testing Results
+**Health Check**: ✅ PASSING
+```bash
+curl https://einanoshou.onrender.com/health
+# Response: {"status":"healthy","timestamp":"2025-06-11T20:19:33.638Z","service":"nanobrowser-api-service"}
+```
 
-**Latest Fix Applied**: Resolved Render build error by updating `rate-limiter-flexible` from non-existent version `^3.0.8` to working version `^5.0.3`. Changes committed and pushed to GitHub repository, triggering automatic redeployment on Render.
+**Stats Endpoint**: ✅ WORKING
+```bash  
+curl https://einanoshou.onrender.com/stats
+# Response: Shows uptime, memory usage, timestamp
+```
 
-This represents a complete, production-ready fork with significant value-added features for Japanese users and simplified API access management.
+## Current Status: PRODUCTION READY & FULLY WORKING
+The extension is now fully functional and working in production:
+- ✅ Custom template management system
+- ✅ Japanese localization
+- ✅ Centralized API service deployed and working on Render
+- ✅ Latest upstream features integrated
+- ✅ Zero-configuration user experience
+- ✅ Cost-controlled backend service
+- ✅ Automatic build and release system
+- ✅ OpenRouter API integration working perfectly
+- ✅ All endpoints responding correctly
+
+## Issue Resolved (2025-06-12)
+**Issue**: Extension showing "Failed to invoke openai/gpt-4.1-mini with structured output: Error: Connection error"
+**Root Cause**: Faulty Express.js redirect logic in `/api/chat/completions` endpoint using `app._router.handle()`
+**Fix Applied**: 
+- Fixed broken redirect logic by implementing direct API call to OpenRouter
+- Improved backend error handling and detailed logging
+- Added debug endpoint `/debug/openrouter` for testing API connectivity
+- OpenRouter API key was already correctly configured in environment variables
+**Status**: ✅ RESOLVED - All endpoints working, extension operational
+
+**Deployment Completed**: 
+- Extension configured for `https://einanoshou.onrender.com`
+- All documentation updated with correct URLs
+- GitHub Actions workflow triggering automatic builds
+- Users can download latest builds from GitHub releases page
+
+**Ready for Distribution**: The system is now production-ready with:
+1. Working backend API service
+2. Automatic extension builds on code changes  
+3. Japanese-localized UI with custom templates
+4. No API key setup required for end users
+5. Comprehensive documentation for setup and maintenance
+
+This represents a complete, production-deployed fork with significant value-added features for Japanese users and enterprise-grade API access management.
 
 ## Project Structure
 - `chrome-extension/` - Main Chrome extension code

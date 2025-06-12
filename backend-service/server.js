@@ -267,8 +267,12 @@ app.post('/api/chat/completions', async (req, res) => {
       });
     }
 
-    // Forward request directly to OpenRouter chat completions
+    const controller = new AbortController();
     const openrouterUrl = 'https://openrouter.ai/api/v1/chat/completions';
+
+    // 30-second safety timeout so one slow request can't freeze the whole app
+    const timeout = setTimeout(() => controller.abort(), 30_000);
+
     const response = await fetch(openrouterUrl, {
       method: 'POST',
       headers: {
@@ -277,48 +281,19 @@ app.post('/api/chat/completions', async (req, res) => {
         'HTTP-Referer': 'https://nanobrowser.ai',
         'X-Title': 'Nanobrowser (Centralized API)',
       },
-      body: JSON.stringify(req.body),
-    });
+      body: JSON.stringify({ ...req.body, stream: false }), // ensure non-streaming
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeout));
 
-    // Log response status
     console.log(`📊 OpenRouter response status: ${response.status}`);
 
-    // Get response data
-    let responseData;
-    const responseText = await response.text();
-
-    try {
-      responseData = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error(`❌ Failed to parse OpenRouter response: ${responseText}`);
-      return res.status(502).json({
-        error: 'Bad Gateway',
-        message: 'Invalid response from OpenRouter API',
-        details: responseText.substring(0, 500),
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    // Log response stats
-    const duration = Date.now() - startTime;
-    console.log(`📥 [${new Date().toISOString()}] Chat completion response ${response.status} in ${duration}ms`);
-
-    // If OpenRouter returned an error, log it
-    if (!response.ok) {
-      console.error(`❌ OpenRouter API error:`, responseData);
-    }
-
-    // Optional: Log usage for cost tracking
-    if (process.env.ENABLE_USAGE_LOGGING === 'true' && responseData.usage) {
-      console.log(`💰 Usage: ${JSON.stringify(responseData.usage)}`);
-    }
-
-    // Forward response
-    res.status(response.status).json(responseData);
+    // Pipe the raw body straight back to the client – no buffering
+    res.status(response.status);
+    response.body.pipe(res);
   } catch (error) {
     const duration = Date.now() - startTime;
     console.error(`❌ [${new Date().toISOString()}] Chat completion error after ${duration}ms:`, error.message);
-    console.error(`❌ Full error:`, error);
+    console.error('❌ Full error:', error);
 
     res.status(500).json({
       error: 'Internal Server Error',
@@ -334,7 +309,13 @@ app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Not Found',
     message: `Endpoint ${req.method} ${req.originalUrl} not found`,
-    availableEndpoints: ['GET /health', 'GET /stats', 'POST /api/openrouter/*', 'POST /api/chat/completions'],
+    availableEndpoints: [
+      'GET /health',
+      'GET /stats',
+      'GET /debug/openrouter',
+      'POST /api/openrouter/*',
+      'POST /api/chat/completions',
+    ],
   });
 });
 

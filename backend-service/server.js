@@ -14,7 +14,18 @@ const PORT = process.env.PORT || 3001;
 // Validate required environment variables
 if (!process.env.OPENROUTER_API_KEY) {
   console.error('❌ OPENROUTER_API_KEY is required in environment variables');
+  console.error('❌ Please set OPENROUTER_API_KEY in your Render environment variables');
+  console.error(
+    '❌ Available environment variables:',
+    Object.keys(process.env).filter(key => !key.includes('SECRET') && !key.includes('KEY')),
+  );
   process.exit(1);
+}
+
+// Validate API key format
+if (!process.env.OPENROUTER_API_KEY.startsWith('sk-or-v1-')) {
+  console.warn('⚠️  OPENROUTER_API_KEY does not start with expected prefix "sk-or-v1-"');
+  console.warn('⚠️  This may indicate an invalid API key format');
 }
 
 // Rate limiting configuration
@@ -86,7 +97,59 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'nanobrowser-api-service',
+    openrouter_key_configured: !!process.env.OPENROUTER_API_KEY,
+    node_version: process.version,
   });
+});
+
+// Debug endpoint to test OpenRouter connection
+app.get('/debug/openrouter', async (req, res) => {
+  try {
+    console.log('🔍 Testing OpenRouter connection...');
+
+    if (!process.env.OPENROUTER_API_KEY) {
+      return res.status(500).json({
+        error: 'OPENROUTER_API_KEY not configured',
+        configured_vars: Object.keys(process.env).filter(key => !key.includes('SECRET') && !key.includes('KEY')),
+      });
+    }
+
+    // Test with a simple request to OpenRouter
+    const response = await fetch('https://openrouter.ai/api/v1/models', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const responseText = await response.text();
+    console.log(`🔍 OpenRouter models endpoint response: ${response.status}`);
+
+    if (response.ok) {
+      res.json({
+        status: 'OpenRouter connection successful',
+        response_status: response.status,
+        api_key_valid: true,
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      res.status(502).json({
+        status: 'OpenRouter connection failed',
+        response_status: response.status,
+        error_details: responseText,
+        api_key_valid: false,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  } catch (error) {
+    console.error('❌ Debug OpenRouter test failed:', error);
+    res.status(500).json({
+      error: 'Failed to test OpenRouter connection',
+      details: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 // Usage stats endpoint (optional)
@@ -110,6 +173,19 @@ app.post('/api/openrouter/*', async (req, res) => {
 
     // Log request (without sensitive data)
     console.log(`📤 [${new Date().toISOString()}] ${req.method} ${openrouterPath} from ${req.ip}`);
+    console.log(`🔗 OpenRouter URL: ${openrouterUrl}`);
+    console.log(`🔑 API Key configured: ${process.env.OPENROUTER_API_KEY ? 'Yes' : 'No'}`);
+    console.log(`📝 Request body: ${JSON.stringify(req.body)}`);
+
+    // Check if API key is configured
+    if (!process.env.OPENROUTER_API_KEY) {
+      console.error('❌ OPENROUTER_API_KEY is not configured');
+      return res.status(500).json({
+        error: 'Configuration Error',
+        message: 'OPENROUTER_API_KEY is not configured in environment variables',
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     // Forward request to OpenRouter
     const response = await fetch(openrouterUrl, {
@@ -119,17 +195,38 @@ app.post('/api/openrouter/*', async (req, res) => {
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://nanobrowser.ai',
         'X-Title': 'Nanobrowser (Centralized API)',
-        ...req.headers, // Forward other headers except authorization
+        // Don't forward all headers to avoid conflicts
       },
       body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined,
     });
 
+    // Log response status
+    console.log(`📊 OpenRouter response status: ${response.status}`);
+
     // Get response data
-    const responseData = await response.json();
+    let responseData;
+    const responseText = await response.text();
+
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error(`❌ Failed to parse OpenRouter response: ${responseText}`);
+      return res.status(502).json({
+        error: 'Bad Gateway',
+        message: 'Invalid response from OpenRouter API',
+        details: responseText.substring(0, 500), // Include first 500 chars for debugging
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     // Log response stats
     const duration = Date.now() - startTime;
     console.log(`📥 [${new Date().toISOString()}] Response ${response.status} in ${duration}ms`);
+
+    // If OpenRouter returned an error, log it
+    if (!response.ok) {
+      console.error(`❌ OpenRouter API error:`, responseData);
+    }
 
     // Optional: Log usage for cost tracking
     if (process.env.ENABLE_USAGE_LOGGING === 'true' && responseData.usage) {
@@ -141,10 +238,12 @@ app.post('/api/openrouter/*', async (req, res) => {
   } catch (error) {
     const duration = Date.now() - startTime;
     console.error(`❌ [${new Date().toISOString()}] Error after ${duration}ms:`, error.message);
+    console.error(`❌ Full error:`, error);
 
     res.status(500).json({
       error: 'Internal Server Error',
       message: 'Failed to process OpenRouter request',
+      details: error.message,
       timestamp: new Date().toISOString(),
     });
   }

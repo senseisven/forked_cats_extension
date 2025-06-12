@@ -128,7 +128,7 @@ export function getDefaultProviderConfig(providerId: string): ProviderConfig {
         apiKey: 'not-required', // No API key needed for centralized service
         name: getDefaultDisplayNameFromProviderId(ProviderTypeEnum.CentralizedAPI),
         type: ProviderTypeEnum.CentralizedAPI,
-        baseUrl: 'https://einanoshou.onrender.com/api/chat/completions', // Your actual Render URL
+        baseUrl: 'https://einanoshou.onrender.com/api/openrouter', // Your actual Render URL
         modelNames: [...(llmProviderModelNames[ProviderTypeEnum.CentralizedAPI] || [])],
         createdAt: Date.now(),
       };

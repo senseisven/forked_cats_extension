@@ -119,34 +119,48 @@ async function _buildDomTree(
     return [elementTree, new Map<number, DOMElementNode>()];
   }
 
-  const results = await chrome.scripting.executeScript({
-    target: { tabId },
-    func: args => {
-      // Access buildDomTree from the window context of the target page
-      return window.buildDomTree(args);
-    },
-    args: [
-      {
-        showHighlightElements,
-        focusHighlightIndex: focusElement,
-        viewportExpansion,
-        debugMode,
-      },
-    ],
-  });
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = 100;
 
-  // First cast to unknown, then to BuildDomTreeResult
-  const evalPage = results[0]?.result as unknown as BuildDomTreeResult;
-  if (!evalPage || !evalPage.map || !evalPage.rootId) {
-    throw new Error('Failed to build DOM tree: No result returned or invalid structure');
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const results = await chrome.scripting.executeScript({
+        target: { tabId },
+        func: args => {
+          // Access buildDomTree from the window context of the target page
+          return window.buildDomTree(args);
+        },
+        args: [
+          {
+            showHighlightElements,
+            focusHighlightIndex: focusElement,
+            viewportExpansion,
+            debugMode,
+          },
+        ],
+      });
+
+      // First cast to unknown, then to BuildDomTreeResult
+      const evalPage = results[0]?.result as unknown as BuildDomTreeResult;
+      if (!evalPage || !evalPage.map || !evalPage.rootId) {
+        throw new Error('Failed to build DOM tree: No result returned or invalid structure');
+      }
+
+      // Log performance metrics in debug mode
+      if (debugMode && evalPage.perfMetrics) {
+        logger.debug('DOM Tree Building Performance Metrics:', evalPage.perfMetrics);
+      }
+      return await _constructDomTree(evalPage);
+    } catch (error) {
+      logger.error(`Attempt ${attempt} to build DOM tree failed:`, error);
+      if (attempt === MAX_RETRIES) {
+        throw error; // Re-throw the last error
+      }
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+    }
   }
-
-  // Log performance metrics in debug mode
-  if (debugMode && evalPage.perfMetrics) {
-    logger.debug('DOM Tree Building Performance Metrics:', evalPage.perfMetrics);
-  }
-
-  return _constructDomTree(evalPage);
+  // This part should be unreachable, but it's here for type safety
+  throw new Error('Exhausted retries for building DOM tree');
 }
 
 /**

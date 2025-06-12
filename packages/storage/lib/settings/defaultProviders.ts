@@ -42,6 +42,20 @@ export async function setupDefaultCentralizedProvider(apiBaseUrl?: string): Prom
     } else {
       console.log('Centralized API provider already exists');
     }
+
+    // Temporary debug call to check OpenRouter key
+    try {
+      const response = await fetch('https://einanoshou.onrender.com/debug/openrouter');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OpenRouter debug check failed:', { status: response.status, body: errorText });
+      } else {
+        const data = await response.json();
+        console.log('OpenRouter debug check:', data);
+      }
+    } catch (error) {
+      console.error('OpenRouter debug check failed:', error);
+    }
   } catch (error) {
     console.error('Failed to setup default centralized provider:', error);
   }

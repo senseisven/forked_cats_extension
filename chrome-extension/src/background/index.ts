@@ -27,9 +27,23 @@ let currentPort: chrome.runtime.Port | null = null;
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(error => console.error(error));
 
 // Initialize default centralized API provider
-setupDefaultCentralizedProvider('https://einanoshou.onrender.com/api/chat/completions').catch(error =>
-  console.error('Failed to setup default centralized provider:', error),
-);
+setupDefaultCentralizedProvider().catch(error => console.error('Failed to setup default centralized provider:', error));
+
+// Temporary debug call to check OpenRouter key
+(async () => {
+  try {
+    const response = await fetch('https://einanoshou.onrender.com/debug/openrouter');
+    if (!response.ok) {
+      const errorText = await response.text();
+      logger.error('OpenRouter debug check failed:', { status: response.status, body: errorText });
+    } else {
+      const data = await response.json();
+      logger.info('OpenRouter debug check:', data);
+    }
+  } catch (error) {
+    logger.error('OpenRouter debug check failed:', error);
+  }
+})();
 
 // Function to check if script is already injected
 async function isScriptInjected(tabId: number): Promise<boolean> {
@@ -350,3 +364,24 @@ async function subscribeToExecutorEvents(executor: Executor) {
     }
   });
 }
+
+async function initialize() {
+  logger.info('background loaded');
+
+  // Check if the centralized API provider is properly configured
+  await setupDefaultCentralizedProvider();
+  await checkAndMigrateStorage();
+  await initializeContextMenu();
+  await setupOmnibox();
+
+  // Temporary debug call to check OpenRouter key
+  try {
+    const response = await fetch('https://einanoshou.onrender.com/debug/openrouter');
+    const data = await response.json();
+    logger.info('OpenRouter debug check:', data);
+  } catch (error) {
+    logger.error('OpenRouter debug check failed:', error);
+  }
+}
+
+initialize();

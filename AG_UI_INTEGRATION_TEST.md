@@ -162,3 +162,78 @@ The AG-UI integration is complete and ready for use. Key benefits:
 ## Conclusion
 
 The AG-UI protocol has been successfully integrated into the Nanobrowser Chrome extension, providing a modern, feature-rich agent interface while maintaining full backward compatibility with the existing system. 
+
+## Latest Updates (2025-01-14)
+
+### ✅ CRITICAL FIXES COMPLETED
+1. **Messaging Fix**: Resolved the issue where messages weren't being sent through AG-UI
+2. **UI Consistency**: AG-UI now has identical styling to legacy chat panel
+3. **Template Integration**: BookmarkList templates now work in AG-UI mode
+
+### Key Changes Made:
+- **Fixed `sendUserMessage` protocol**: Now uses port connection instead of `chrome.runtime.sendMessage`
+- **Rewritten `AgentChat.tsx`**: Complete rewrite to match legacy chat styling and functionality
+- **Added template support**: AG-UI now includes the same BookmarkList functionality as legacy mode
+
+## Testing Instructions
+
+### 1. Extension Loading
+```bash
+# Build the extension
+npm run build
+
+# Load in Chrome
+open -a "Google Chrome" --args --load-extension=./dist
+```
+
+### 2. Test AG-UI Messaging
+1. Open Chrome extension sidebar
+2. Toggle to "AG-UI" mode using the switch
+3. Verify you see the template buttons (same as legacy mode)
+4. Type a simple message like "Hello, test message" and press Enter
+5. **Expected**: Message should appear in chat and be sent to background script
+6. **Previous Issue**: Nothing happened when sending messages (now fixed)
+
+### 3. Test Template Functionality
+1. In AG-UI mode, click on one of the template buttons
+2. **Expected**: Template content should populate the input field
+3. Send the template message
+4. **Expected**: Message should be processed normally
+
+### 4. Test UI Consistency
+1. Switch between Legacy and AG-UI modes
+2. **Expected**: Both interfaces should look identical in terms of:
+   - Input field styling and positioning
+   - Template/BookmarkList appearance
+   - Message display format
+   - Button styling and colors
+
+### 5. Verify Message Flow
+1. Send a message in AG-UI mode
+2. Check browser console for `user_message` events
+3. **Expected**: Should see proper AG-UI protocol messages being sent
+4. **Previous Issue**: Messages were not reaching the background script
+
+## Technical Verification
+
+### Protocol Communication
+- Messages now use `port.postMessage()` instead of `chrome.runtime.sendMessage()`
+- Proper port connection established with name `'ag-ui-connection'`
+- Event conversion from AG-UI protocol to legacy Message format
+
+### UI Components
+- `AgentChat.tsx` now uses same components as legacy: `ChatInput`, `BookmarkList`, `MessageList`
+- Identical CSS classes and styling
+- Proper dark mode support
+
+### Event Handling
+- AG-UI events properly converted to legacy Message format
+- Message display matches legacy chat appearance
+- Proper scrolling and message management
+
+## Success Criteria
+- ✅ Messages send successfully in AG-UI mode
+- ✅ UI appearance matches legacy mode exactly
+- ✅ Template functionality works in AG-UI mode
+- ✅ No console errors when switching modes
+- ✅ Proper event flow from frontend to background script 

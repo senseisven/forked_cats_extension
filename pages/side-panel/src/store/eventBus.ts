@@ -65,7 +65,7 @@ class EventBus {
 
   sendUserMessage(text: string) {
     if (this.port) {
-      sendUserMessage(text);
+      sendUserMessage(text, undefined, this.port);
     } else {
       console.error('No connection to background script');
     }

@@ -130,9 +130,20 @@ export function createStepFinished(stepName: string): StepFinishedEvent {
 }
 
 // Message protocol functions
-export function sendUserMessage(text: string, threadId?: string) {
+export function sendUserMessage(text: string, threadId?: string, port?: chrome.runtime.Port) {
   const message = createUserMessage(text, threadId);
-  chrome.runtime.sendMessage(message);
+
+  // Try to use the provided port first, then fall back to sendMessage
+  if (port && port.postMessage) {
+    try {
+      port.postMessage(message);
+    } catch (error) {
+      console.error('Failed to send message via port:', error);
+      chrome.runtime.sendMessage(message);
+    }
+  } else {
+    chrome.runtime.sendMessage(message);
+  }
 }
 
 // Export the isAGUIEvent function for use in message routing

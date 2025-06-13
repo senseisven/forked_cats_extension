@@ -10,7 +10,6 @@ import MessageList from './components/MessageList';
 import ChatInput from './components/ChatInput';
 import ChatHistoryList from './components/ChatHistoryList';
 import BookmarkList from './components/BookmarkList';
-import AgentChat from './components/AgentChat';
 import { EventType, type AgentEvent, ExecutionState } from './types/event';
 import { t } from '@extension/i18n';
 import './SidePanel.css';
@@ -36,7 +35,6 @@ const SidePanel = () => {
   const [hasConfiguredModels, setHasConfiguredModels] = useState<boolean | null>(null); // null = loading, false = no models, true = has models
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingSpeech, setIsProcessingSpeech] = useState(false);
-  const [useAGUI, setUseAGUI] = useState(false); // New state for AG-UI mode
   const sessionIdRef = useRef<string | null>(null);
   const portRef = useRef<chrome.runtime.Port | null>(null);
   const heartbeatIntervalRef = useRef<number | null>(null);
@@ -903,15 +901,6 @@ const SidePanel = () => {
               <>
                 <button
                   type="button"
-                  onClick={() => setUseAGUI(!useAGUI)}
-                  className={`header-icon ${useAGUI ? 'text-green-400' : isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer text-xs px-2 py-1 rounded border`}
-                  aria-label="Toggle AG-UI mode"
-                  title={useAGUI ? 'Switch to Legacy Mode' : 'Switch to AG-UI Mode'}
-                  tabIndex={0}>
-                  {useAGUI ? 'AG-UI' : 'Legacy'}
-                </button>
-                <button
-                  type="button"
                   onClick={handleNewChat}
                   onKeyDown={e => e.key === 'Enter' && handleNewChat()}
                   className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
@@ -1013,7 +1002,7 @@ const SidePanel = () => {
             )}
 
             {/* Show normal chat interface when models are configured */}
-            {hasConfiguredModels === true && !useAGUI && (
+            {hasConfiguredModels === true && (
               <>
                 {messages.length === 0 && (
                   <>
@@ -1072,13 +1061,6 @@ const SidePanel = () => {
                   </div>
                 )}
               </>
-            )}
-
-            {/* Show AG-UI interface when AG-UI mode is enabled and models are configured */}
-            {hasConfiguredModels === true && useAGUI && (
-              <div className="flex-1 min-h-0">
-                <AgentChat />
-              </div>
             )}
           </>
         )}

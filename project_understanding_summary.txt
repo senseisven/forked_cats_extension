@@ -1,17 +1,27 @@
 # Nanobrowser Chrome Extension - Project Understanding Summary
 
 ## Project Overview
-This is a fork of the Nanobrowser Chrome extension with significant customizations for Japanese users and centralized API service. The extension provides AI-powered browsing assistance with a focus on Japanese localization and user-friendly API access.
+This is a fork of the Nanobrowser Chrome extension with significant customizations for Japanese users, centralized API service, and AG-UI protocol integration. The extension provides AI-powered browsing assistance with a focus on Japanese localization, user-friendly API access, and modern agent interface protocols.
 
 ## Key Custom Features Implemented
 
-### 1. Japanese Localization (Complete)
+### 1. AG-UI Protocol Integration (NEW - Latest)
+- **Dual-mode interface**: Toggle between Legacy and AG-UI modes in the sidebar
+- **16-event schema**: Complete AG-UI protocol implementation with event types for messaging, tool calls, and run management
+- **Token streaming**: Real-time text streaming with character-by-character display
+- **Tool cards**: Visual representation of tool calls with status badges (pending, success, error)
+- **Error handling**: Dedicated error badges and descriptive error messages
+- **Event bridge**: Automatic translation from legacy executor events to AG-UI protocol
+- **Tool actions**: DOM manipulation support (click, fill, scroll, screenshot) via AG-UI
+- **React components**: Modern chat interface with streaming support and tool visualization
+
+### 2. Japanese Localization (Complete)
 - Full translation of all UI elements and settings
 - Proper Japanese text handling in sidebar layout
 - Wider sidebar (320px → 380px) to accommodate Japanese text
 - Japanese error messages and user feedback
 
-### 2. Custom Template System (Complete)
+### 3. Custom Template System (Complete)
 - Replaced fixed QuickStart items with user-customizable templates
 - Default templates focused on practical daily tasks:
   - 重要なメールのまとめ (Important email summaries)
@@ -20,7 +30,7 @@ This is a fork of the Nanobrowser Chrome extension with significant customizatio
 - Template creation UI with title and content fields
 - Full Japanese translation for template management
 
-### 3. Centralized API Service (Complete & Production Deployed)
+### 4. Centralized API Service (Complete & Production Deployed)
 - Complete backend service in `backend-service/` directory
 - Express.js server with OpenRouter API proxy
 - Rate limiting (100 requests/minute), CORS, security headers
@@ -29,13 +39,13 @@ This is a fork of the Nanobrowser Chrome extension with significant customizatio
 - **DEPLOYED TO RENDER**: `https://einanoshou.onrender.com`
 - **STATUS**: ✅ WORKING - API responds to health checks and stats
 
-### 4. Fork Management (Complete)
+### 5. Fork Management (Complete)
 - Proper upstream remote configuration
 - Successfully merged latest changes from nanobrowser/nanobrowser
 - Preserved all custom features during merge
 - Documented in `FORK_DOCUMENTATION.md`
 
-### 5. Automated Build & Release System (Complete)
+### 6. Automated Build & Release System (Complete)
 - **GitHub Actions**: Auto-builds extension on every push to master
 - **Auto-releases**: Creates GitHub releases with downloadable ZIP files
 - **Testing workflows**: Backend dependency verification
@@ -44,14 +54,61 @@ This is a fork of the Nanobrowser Chrome extension with significant customizatio
 ## Technical Architecture
 
 ### Extension Structure
-- `/chrome-extension/` - Main extension code
+- `/chrome-extension/` - Main extension code with AG-UI support
 - `/packages/storage/` - Settings and data management
 - `/packages/ui/` - React components and UI
-- `/packages/sidepanel/` - Main sidebar interface
+- `/packages/sidepanel/` - Main sidebar interface with dual-mode support
 - `/backend-service/` - Centralized API service
 - `/.github/workflows/` - Automated build system
 
-### Key Files Modified
+### AG-UI Integration Architecture
+
+#### Core AG-UI Components
+- **Event System** (`pages/side-panel/src/lib/ag-ui/events.ts`): 
+  - 16-event schema with types for text messages, tool calls, runs, and steps
+  - Zod validation for type safety
+  - Event type enums and interfaces
+
+- **Protocol Functions** (`pages/side-panel/src/lib/ag-ui/protocol.ts`):
+  - Event factory functions for creating AG-UI events
+  - Message sending utilities
+  - Tool action result helpers
+
+- **Chat Interface** (`pages/side-panel/src/components/ChatPanel.tsx`):
+  - Real-time message streaming with character-by-character display
+  - Tool call visualization with expandable cards
+  - Status badges for pending/success/error states
+  - Automatic scrolling and message management
+
+- **Event Bus** (`pages/side-panel/src/store/eventBus.ts`):
+  - Reactive event management with React hooks
+  - Chrome runtime connection management
+  - Event subscription and broadcasting system
+
+#### Backend AG-UI Support
+
+- **Event Bridge** (`chrome-extension/src/background/ag-ui-bridge.ts`):
+  - Converts legacy executor events to AG-UI protocol
+  - Manages message streaming and tool call lifecycle
+  - Handles run states and error conversion
+
+- **Tool Action Handler** (`chrome-extension/src/background/ag-ui-tools.ts`):
+  - DOM manipulation via AG-UI protocol
+  - Supported actions: click, fill, scroll, screenshot
+  - Integrates with existing Page interface
+
+- **Background Service** (`chrome-extension/src/background/index.ts`):
+  - Dual connection support (legacy + AG-UI)
+  - Event routing and protocol conversion
+  - Tool action execution and result reporting
+
+### Key Files Modified for AG-UI
+- `pages/side-panel/src/SidePanel.tsx` - Added AG-UI mode toggle and routing
+- `chrome-extension/src/background/index.ts` - AG-UI connection support and user_message handling
+- `pages/side-panel/package.json` - Added nanoid and zod dependencies
+- Multiple new AG-UI specific files for complete protocol implementation
+
+### Key Files Modified (Legacy Features)
 - `packages/storage/lib/prompt/favorites.ts` - Custom template system
 - `packages/sidepanel/lib/components/BookmarkList.tsx` - Template UI
 - `packages/storage/lib/settings/types.ts` - New provider type

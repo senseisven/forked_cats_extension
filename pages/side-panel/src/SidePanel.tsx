@@ -975,7 +975,20 @@ const SidePanel = () => {
               <div
                 className={`flex flex-1 items-center justify-center p-8 ${isDarkMode ? 'text-sky-300' : 'text-[#8b7355]'}`}>
                 <div className="text-center">
-                  <div className="mx-auto mb-4 size-8 animate-spin rounded-full border-2 border-sky-400 border-t-transparent"></div>
+                  <div className="mx-auto mb-4 flex items-center justify-center space-x-1">
+                    <div
+                      className={`h-3 w-3 rounded-full ${isDarkMode ? 'bg-sky-400' : 'bg-[#8b7355]'} animate-breathe`}
+                      style={{ animationDelay: '0ms' }}
+                    />
+                    <div
+                      className={`h-3 w-3 rounded-full ${isDarkMode ? 'bg-sky-400' : 'bg-[#8b7355]'} animate-breathe`}
+                      style={{ animationDelay: '200ms' }}
+                    />
+                    <div
+                      className={`h-3 w-3 rounded-full ${isDarkMode ? 'bg-sky-400' : 'bg-[#8b7355]'} animate-breathe`}
+                      style={{ animationDelay: '400ms' }}
+                    />
+                  </div>
                   <p>Checking configuration...</p>
                 </div>
               </div>

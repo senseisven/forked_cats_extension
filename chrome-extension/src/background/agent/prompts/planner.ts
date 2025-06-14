@@ -13,6 +13,15 @@ export class PlannerPrompt extends BasePrompt {
     this.language = language;
   }
 
+  /**
+   * Update the language of the prompt at runtime. This is useful when users
+   * switch languages between follow-up tasks so that the planner continues
+   * to respond in the same language as the latest user input.
+   */
+  public setLanguage(language: DetectedLanguage): void {
+    this.language = language;
+  }
+
   getSystemMessage(): SystemMessage {
     const promptTemplate = getDynamicPlannerPrompt(this.language);
     return new SystemMessage(promptTemplate);

@@ -57,6 +57,13 @@
 - **Dark Mode Toggle**: User-configurable light/dark/system theme options
 - **Japanese UI**: Theme settings with Japanese labels and descriptions
 
+### Dynamic Language Update for Follow-Up Tasks
+- **Added `setLanguage` Method**: Implemented `setLanguage` method in all prompt classes (`PlannerPrompt`, `NavigatorPrompt`, `ValidatorPrompt`)
+- **Enhanced `Executor.addFollowUpTask`**: Updated `Executor.addFollowUpTask` to detect the language of each new task and propagate it to the prompts and context at runtime
+- **Fix for Language Persistence**: Ensures the Planner/Navigator/Validator always respond in the same language as the latest user input, fixing the issue where later tasks kept the initial language
+- **UI Improvements**: Updated agent icons to use new PNG files from dist directory (navigator.png, planner.png, validator.png), improved timestamp readability by making the text darker (from text-gray-300 to text-gray-600 in light mode), and cleaned up the provider name from "ネコノテAI (No API Key Required)" to just "ネコノテAI" for better display in model selection dropdowns.
+- **Modern Loader Animations**: Completely redesigned the loading animations throughout the chat panel with modern, stylish loaders. Each agent now has a unique animation style: Planner uses pulsing dots (thinking/planning), Navigator uses wave animation (navigating/moving), Validator uses breathing circles (checking/validating), and general loading states use breathing dots. Added new Tailwind keyframes for pulse-dot, wave, rotate-gradient, breathe, and shimmer animations.
+
 ## File Structure
 ```
 nanobrowser/

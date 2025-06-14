@@ -107,6 +107,17 @@ export class Executor {
     // update validator prompt
     this.validatorPrompt.addFollowUpTask(task);
 
+    // Detect the language of the new task and update context & prompts so that
+    // subsequent planner/navigator/validator steps use the correct language.
+    const detectedLanguage = detectLanguage(task);
+    this.context.language = detectedLanguage;
+
+    // Update the language inside each prompt instance. NavigatorPrompt also
+    // needs to regenerate its cached system message.
+    this.navigatorPrompt.setLanguage(detectedLanguage);
+    this.plannerPrompt.setLanguage(detectedLanguage);
+    this.validatorPrompt.setLanguage(detectedLanguage);
+
     // need to reset previous action results that are not included in memory
     this.context.actionResults = this.context.actionResults.filter(result => result.includeInMemory);
   }

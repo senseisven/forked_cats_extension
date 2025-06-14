@@ -14,6 +14,15 @@ export class ValidatorPrompt extends BasePrompt {
     this.language = language;
   }
 
+  /**
+   * Update the language of the prompt at runtime. This ensures the validator
+   * messages are regenerated in the correct language when users switch
+   * languages between follow-up tasks.
+   */
+  public setLanguage(language: DetectedLanguage): void {
+    this.language = language;
+  }
+
   private tasksToValidate(): string {
     if (this.tasks.length === 1) {
       return this.tasks[0];

@@ -28,6 +28,97 @@ interface MessageBlockProps {
   isDarkMode?: boolean;
 }
 
+// Modern loader component with different styles for each agent
+function ModernLoader({ actor, isDarkMode = false }: { actor: string; isDarkMode?: boolean }) {
+  const getLoaderStyle = () => {
+    switch (actor) {
+      case 'planner':
+        // Pulsing dots for planner (thinking/planning)
+        return (
+          <div className="flex items-center space-x-1">
+            <div
+              className={`h-2 w-2 rounded-full ${isDarkMode ? 'bg-orange-400' : 'bg-orange-500'} animate-pulse-dot`}
+              style={{ animationDelay: '0ms' }}
+            />
+            <div
+              className={`h-2 w-2 rounded-full ${isDarkMode ? 'bg-orange-400' : 'bg-orange-500'} animate-pulse-dot`}
+              style={{ animationDelay: '160ms' }}
+            />
+            <div
+              className={`h-2 w-2 rounded-full ${isDarkMode ? 'bg-orange-400' : 'bg-orange-500'} animate-pulse-dot`}
+              style={{ animationDelay: '320ms' }}
+            />
+            <span className={`ml-2 text-xs ${isDarkMode ? 'text-orange-300' : 'text-orange-600'} font-medium`}>
+              Planning...
+            </span>
+          </div>
+        );
+
+      case 'navigator':
+        // Wave animation for navigator (navigating/moving)
+        return (
+          <div className="flex items-center space-x-1">
+            <div
+              className={`h-3 w-1 rounded-full ${isDarkMode ? 'bg-blue-400' : 'bg-blue-500'} animate-wave`}
+              style={{ animationDelay: '0ms' }}
+            />
+            <div
+              className={`h-3 w-1 rounded-full ${isDarkMode ? 'bg-blue-400' : 'bg-blue-500'} animate-wave`}
+              style={{ animationDelay: '100ms' }}
+            />
+            <div
+              className={`h-3 w-1 rounded-full ${isDarkMode ? 'bg-blue-400' : 'bg-blue-500'} animate-wave`}
+              style={{ animationDelay: '200ms' }}
+            />
+            <div
+              className={`h-3 w-1 rounded-full ${isDarkMode ? 'bg-blue-400' : 'bg-blue-500'} animate-wave`}
+              style={{ animationDelay: '300ms' }}
+            />
+            <div
+              className={`h-3 w-1 rounded-full ${isDarkMode ? 'bg-blue-400' : 'bg-blue-500'} animate-wave`}
+              style={{ animationDelay: '400ms' }}
+            />
+            <span className={`ml-2 text-xs ${isDarkMode ? 'text-blue-300' : 'text-blue-600'} font-medium`}>
+              Navigating...
+            </span>
+          </div>
+        );
+
+      case 'validator':
+        // Breathing circle for validator (checking/validating)
+        return (
+          <div className="flex items-center space-x-2">
+            <div className={`h-3 w-3 rounded-full ${isDarkMode ? 'bg-pink-400' : 'bg-pink-500'} animate-breathe`} />
+            <span className={`text-xs ${isDarkMode ? 'text-pink-300' : 'text-pink-600'} font-medium`}>
+              Validating...
+            </span>
+          </div>
+        );
+
+      default:
+        // Shimmer effect for other agents
+        return (
+          <div className="flex items-center space-x-2">
+            <div
+              className={`h-2 w-16 rounded-full ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'} animate-shimmer`}
+              style={{
+                background: isDarkMode
+                  ? 'linear-gradient(90deg, #374151 25%, #6b7280 50%, #374151 75%)'
+                  : 'linear-gradient(90deg, #d1d5db 25%, #9ca3af 50%, #d1d5db 75%)',
+                backgroundSize: '200% 100%',
+              }}
+            />
+            <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} font-medium`}>
+              Processing...
+            </span>
+          </div>
+        );
+    }
+  };
+
+  return <div className="flex items-center py-1">{getLoaderStyle()}</div>;
+}
+
 function MessageBlock({ message, isSameActor, isDarkMode = false }: MessageBlockProps) {
   if (!message.actor) {
     console.error('No actor found');
@@ -61,16 +152,10 @@ function MessageBlock({ message, isSameActor, isDarkMode = false }: MessageBlock
 
         <div className="space-y-0.5">
           <div className={`whitespace-pre-wrap break-words text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-            {isProgress ? (
-              <div className={`h-1 overflow-hidden rounded ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                <div className="animate-progress h-full bg-blue-500" />
-              </div>
-            ) : (
-              message.content
-            )}
+            {isProgress ? <ModernLoader actor={message.actor} isDarkMode={isDarkMode} /> : message.content}
           </div>
           {!isProgress && (
-            <div className={`text-right text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-300'}`}>
+            <div className={`text-right text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               {formatTimestamp(message.timestamp)}
             </div>
           )}

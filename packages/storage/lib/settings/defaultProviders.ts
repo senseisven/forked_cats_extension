@@ -73,7 +73,7 @@ export async function setupDefaultCentralizedProvider(apiBaseUrl?: string): Prom
       // Create the provider configuration
       await llmProviderStore.setProvider(providerId, {
         apiKey: 'not-required',
-        name: 'ネコノテAI (No API Key Required)',
+        name: 'ネコノテAI',
         type: ProviderTypeEnum.CentralizedAPI,
         baseUrl: baseUrl,
         modelNames: latestModelNames,

@@ -25,6 +25,18 @@ export class NavigatorPrompt extends BasePrompt {
     this.systemMessage = new SystemMessage(formattedPrompt);
   }
 
+  /**
+   * Update the language of the prompt at runtime and regenerate the cached
+   * system message so that subsequent navigator calls use the correct
+   * language.
+   */
+  public setLanguage(language: DetectedLanguage): void {
+    this.language = language;
+    const promptTemplate = getDynamicNavigatorPrompt(language);
+    const formattedPrompt = promptTemplate.replace('{{max_actions}}', this.maxActionsPerStep.toString()).trim();
+    this.systemMessage = new SystemMessage(formattedPrompt);
+  }
+
   getSystemMessage(): SystemMessage {
     /**
      * Get the system prompt for the agent.

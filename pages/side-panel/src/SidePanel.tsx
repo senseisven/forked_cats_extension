@@ -1,16 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { RxDiscordLogo } from 'react-icons/rx';
 import { FiSettings } from 'react-icons/fi';
 import { PiPlusBold } from 'react-icons/pi';
 import { GrHistory } from 'react-icons/gr';
-import { type Message, Actors, chatHistoryStore, agentModelStore } from '@extension/storage';
+import {
+  type Message,
+  Actors,
+  chatHistoryStore,
+  agentModelStore,
+  generalSettingsStore,
+  type ThemeMode,
+} from '@extension/storage';
 import favoritesStorage, { type FavoritePrompt } from '@extension/storage/lib/prompt/favorites';
 import MessageList from './components/MessageList';
 import ChatInput from './components/ChatInput';
 import ChatHistoryList from './components/ChatHistoryList';
 import BookmarkList from './components/BookmarkList';
-import AgentChat from './components/AgentChat';
 import { EventType, type AgentEvent, ExecutionState } from './types/event';
 import { t } from '@extension/i18n';
 import './SidePanel.css';
@@ -32,11 +37,11 @@ const SidePanel = () => {
   const [isFollowUpMode, setIsFollowUpMode] = useState(false);
   const [isHistoricalSession, setIsHistoricalSession] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [themeMode, setThemeMode] = useState<ThemeMode>('light');
   const [favoritePrompts, setFavoritePrompts] = useState<FavoritePrompt[]>([]);
   const [hasConfiguredModels, setHasConfiguredModels] = useState<boolean | null>(null); // null = loading, false = no models, true = has models
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingSpeech, setIsProcessingSpeech] = useState(false);
-  const [useAGUI, setUseAGUI] = useState(false); // New state for AG-UI mode
   const sessionIdRef = useRef<string | null>(null);
   const portRef = useRef<chrome.runtime.Port | null>(null);
   const heartbeatIntervalRef = useRef<number | null>(null);
@@ -46,18 +51,37 @@ const SidePanel = () => {
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<number | null>(null);
 
-  // Check for dark mode preference
+  // Load theme settings and determine dark mode
   useEffect(() => {
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkMode(darkModeMediaQuery.matches);
+    const loadThemeSettings = async () => {
+      try {
+        const settings = await generalSettingsStore.getSettings();
+        setThemeMode(settings.themeMode);
 
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsDarkMode(e.matches);
+        // Determine if dark mode should be active
+        if (settings.themeMode === 'system') {
+          const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+          setIsDarkMode(darkModeMediaQuery.matches);
+
+          const handleChange = (e: MediaQueryListEvent) => {
+            setIsDarkMode(e.matches);
+          };
+
+          darkModeMediaQuery.addEventListener('change', handleChange);
+          return () => darkModeMediaQuery.removeEventListener('change', handleChange);
+        } else {
+          setIsDarkMode(settings.themeMode === 'dark');
+        }
+      } catch (error) {
+        console.error('Failed to load theme settings:', error);
+        // Fallback to light mode (warm cream theme)
+        setThemeMode('light');
+        setIsDarkMode(false);
+      }
     };
 
-    darkModeMediaQuery.addEventListener('change', handleChange);
-    return () => darkModeMediaQuery.removeEventListener('change', handleChange);
-  }, []);
+    loadThemeSettings();
+  }, [themeMode]); // Re-run when themeMode changes
 
   // Check if models are configured
   const checkModelConfiguration = useCallback(async () => {
@@ -883,19 +907,19 @@ const SidePanel = () => {
   return (
     <div>
       <div
-        className={`flex h-screen flex-col ${isDarkMode ? 'bg-slate-900' : "bg-[url('/bg.jpg')] bg-cover bg-no-repeat"} overflow-hidden border ${isDarkMode ? 'border-sky-800' : 'border-[rgb(186,230,253)]'} rounded-2xl`}>
+        className={`flex h-screen flex-col ${isDarkMode ? 'bg-slate-900' : 'bg-[#ede2c7]'} overflow-hidden border ${isDarkMode ? 'border-sky-800' : 'border-[#d4c4a8]'} rounded-2xl`}>
         <header className="header relative">
           <div className="header-logo">
             {showHistory ? (
               <button
                 type="button"
                 onClick={() => handleBackToChat(false)}
-                className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
+                className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-[#8b7355] hover:text-[#6d5a44]'} cursor-pointer`}
                 aria-label={t('backToChatButton')}>
                 ← Back
               </button>
             ) : (
-              <img src="/icon-128.png" alt="Extension Logo" className="size-6" />
+              <img src="/icon-128.png" alt="ネコノテ" className="size-6" />
             )}
           </div>
           <div className="header-icons">
@@ -903,18 +927,9 @@ const SidePanel = () => {
               <>
                 <button
                   type="button"
-                  onClick={() => setUseAGUI(!useAGUI)}
-                  className={`header-icon ${useAGUI ? 'text-green-400' : isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer text-xs px-2 py-1 rounded border`}
-                  aria-label="Toggle AG-UI mode"
-                  title={useAGUI ? 'Switch to Legacy Mode' : 'Switch to AG-UI Mode'}
-                  tabIndex={0}>
-                  {useAGUI ? 'AG-UI' : 'Legacy'}
-                </button>
-                <button
-                  type="button"
                   onClick={handleNewChat}
                   onKeyDown={e => e.key === 'Enter' && handleNewChat()}
-                  className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
+                  className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-[#8b7355] hover:text-[#6d5a44]'} cursor-pointer`}
                   aria-label={t('newChatButton')}
                   tabIndex={0}>
                   <PiPlusBold size={20} />
@@ -923,25 +938,19 @@ const SidePanel = () => {
                   type="button"
                   onClick={handleLoadHistory}
                   onKeyDown={e => e.key === 'Enter' && handleLoadHistory()}
-                  className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
+                  className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-[#8b7355] hover:text-[#6d5a44]'} cursor-pointer`}
                   aria-label={t('historyButton')}
                   tabIndex={0}>
                   <GrHistory size={20} />
                 </button>
               </>
             )}
-            <a
-              href="https://discord.gg/NN3ABHggMK"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'}`}>
-              <RxDiscordLogo size={20} />
-            </a>
+
             <button
               type="button"
               onClick={() => chrome.runtime.openOptionsPage()}
               onKeyDown={e => e.key === 'Enter' && chrome.runtime.openOptionsPage()}
-              className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'} cursor-pointer`}
+              className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-[#8b7355] hover:text-[#6d5a44]'} cursor-pointer`}
               aria-label={t('settingsButton')}
               tabIndex={0}>
               <FiSettings size={20} />
@@ -964,7 +973,7 @@ const SidePanel = () => {
             {/* Show loading state while checking model configuration */}
             {hasConfiguredModels === null && (
               <div
-                className={`flex flex-1 items-center justify-center p-8 ${isDarkMode ? 'text-sky-300' : 'text-sky-600'}`}>
+                className={`flex flex-1 items-center justify-center p-8 ${isDarkMode ? 'text-sky-300' : 'text-[#8b7355]'}`}>
                 <div className="text-center">
                   <div className="mx-auto mb-4 size-8 animate-spin rounded-full border-2 border-sky-400 border-t-transparent"></div>
                   <p>Checking configuration...</p>
@@ -975,19 +984,21 @@ const SidePanel = () => {
             {/* Show setup message when no models are configured */}
             {hasConfiguredModels === false && (
               <div
-                className={`flex flex-1 items-center justify-center p-8 ${isDarkMode ? 'text-sky-300' : 'text-sky-600'}`}>
+                className={`flex flex-1 items-center justify-center p-8 ${isDarkMode ? 'text-sky-300' : 'text-[#8b7355]'}`}>
                 <div className="max-w-md text-center">
-                  <img src="/icon-128.png" alt="エイナーの手ロゴ" className="mx-auto mb-4 size-12" />
-                  <h3 className={`mb-2 text-lg font-semibold ${isDarkMode ? 'text-sky-200' : 'text-sky-700'}`}>
-                    エイナーの手へようこそ！
+                  <img src="/icon-128.png" alt="ネコノテロゴ" className="mx-auto mb-4 size-12" />
+                  <h3 className={`mb-2 text-lg font-semibold ${isDarkMode ? 'text-sky-200' : 'text-[#6d5a44]'}`}>
+                    ネコノテへようこそ！
                   </h3>
                   <p className="mb-4">
-                    使い始めるにはAIモデルを設定してください。設定パネルでAPIキーを構成するか、APIキー不要のエイナーのAIを選択してください。
+                    使い始めるにはAIモデルを設定してください。設定パネルでAPIキーを構成するか、APIキー不要のネコノテAIを選択してください。
                   </p>
                   <button
                     onClick={() => chrome.runtime.openOptionsPage()}
                     className={`my-4 rounded-lg px-4 py-2 font-medium transition-colors ${
-                      isDarkMode ? 'bg-sky-600 text-white hover:bg-sky-700' : 'bg-sky-500 text-white hover:bg-sky-600'
+                      isDarkMode
+                        ? 'bg-sky-600 text-white hover:bg-sky-700'
+                        : 'bg-[#8b7355] text-white hover:bg-[#6d5a44]'
                     }`}>
                     設定パネルを開く
                   </button>
@@ -996,16 +1007,8 @@ const SidePanel = () => {
                       href="https://github.com/nanobrowser/nanobrowser?tab=readme-ov-file#-quick-start"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-600'}`}>
+                      className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-[#8b7355] hover:text-[#6d5a44]'}`}>
                       Quick Start Guide
-                    </a>
-                    <span className="mx-2">•</span>
-                    <a
-                      href="https://discord.gg/NN3ABHggMK"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-600'}`}>
-                      Join Our Community
                     </a>
                   </div>
                 </div>
@@ -1013,12 +1016,12 @@ const SidePanel = () => {
             )}
 
             {/* Show normal chat interface when models are configured */}
-            {hasConfiguredModels === true && !useAGUI && (
+            {hasConfiguredModels === true && (
               <>
                 {messages.length === 0 && (
                   <>
                     <div
-                      className={`border-t ${isDarkMode ? 'border-sky-900' : 'border-sky-100'} mb-2 p-2 shadow-sm backdrop-blur-sm`}>
+                      className={`border-t ${isDarkMode ? 'border-sky-900' : 'border-[#d4c4a8]'} mb-2 p-2 shadow-sm backdrop-blur-sm`}>
                       <ChatInput
                         onSendMessage={handleSendMessage}
                         onStopTask={handleStopTask}
@@ -1055,7 +1058,7 @@ const SidePanel = () => {
                 )}
                 {messages.length > 0 && (
                   <div
-                    className={`border-t ${isDarkMode ? 'border-sky-900' : 'border-sky-100'} p-2 shadow-sm backdrop-blur-sm`}>
+                    className={`border-t ${isDarkMode ? 'border-sky-900' : 'border-[#d4c4a8]'} p-2 shadow-sm backdrop-blur-sm`}>
                     <ChatInput
                       onSendMessage={handleSendMessage}
                       onStopTask={handleStopTask}
@@ -1072,13 +1075,6 @@ const SidePanel = () => {
                   </div>
                 )}
               </>
-            )}
-
-            {/* Show AG-UI interface when AG-UI mode is enabled and models are configured */}
-            {hasConfiguredModels === true && useAGUI && (
-              <div className="flex-1 min-h-0">
-                <AgentChat />
-              </div>
             )}
           </>
         )}

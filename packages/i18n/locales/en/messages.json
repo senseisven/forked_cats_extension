@@ -1,14 +1,29 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "AIでWebタスクを自動化！エイナーの手は、データ抽出、フォーム入力などを行うオープンソースのChrome拡張機能です。"
+    "message": "AIでWebタスクを自動化！ネコノテは、データ抽出、フォーム入力などを行うオープンソースのChrome拡張機能です。"
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "エイナーの手"
+    "message": "ネコノテ"
   },
   "toggleTheme": {
     "message": "テーマを切り替え"
+  },
+  "themeMode": {
+    "message": "テーマモード"
+  },
+  "themeModeDescription": {
+    "message": "ライト、ダーク、またはシステムデフォルトテーマを選択"
+  },
+  "lightTheme": {
+    "message": "ライト（温かみのあるクリーム）"
+  },
+  "darkTheme": {
+    "message": "ダーク"
+  },
+  "systemTheme": {
+    "message": "システムデフォルト"
   },
   "loading": {
     "message": "読み込み中..."
@@ -325,7 +340,7 @@
     "message": "覚えておいてください："
   },
   "centralizedApi": {
-    "message": "エイナーのAI (APIキー不要)"
+    "message": "ネコノテAI (APIキー不要)"
   },
   "centralizedApiDescription": {
     "message": "APIキーの設定は不要です。すぐに使用できます。"
@@ -338,5 +353,29 @@
   },
   "apiKeyNotRequired": {
     "message": "APIキー不要"
+  },
+  "navigationFailed": {
+    "message": "ナビゲーションに失敗しました"
+  },
+  "modelNotValid": {
+    "message": "は有効なモデルIDではありません"
+  },
+  "failedToInvoke": {
+    "message": "の呼び出しに失敗しました"
+  },
+  "structuredOutputError": {
+    "message": "構造化出力エラー"
+  },
+  "apiError": {
+    "message": "APIエラー"
+  },
+  "retryingTask": {
+    "message": "タスクを再試行しています..."
+  },
+  "taskCompleted": {
+    "message": "タスクが完了しました"
+  },
+  "taskFailed": {
+    "message": "タスクが失敗しました"
   }
 }

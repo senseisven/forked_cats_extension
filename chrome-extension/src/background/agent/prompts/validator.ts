@@ -2,13 +2,16 @@ import { BasePrompt } from './base';
 import { type HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { AgentContext } from '@src/background/agent/types';
 import { validatorSystemPromptTemplate } from './templates/validator';
+import { getDynamicValidatorPrompt, type DetectedLanguage } from './templates/dynamic';
 
 export class ValidatorPrompt extends BasePrompt {
   private tasks: string[] = [];
+  private language: DetectedLanguage;
 
-  constructor(task: string) {
+  constructor(task: string, language: DetectedLanguage = 'auto') {
     super();
     this.tasks.push(task);
+    this.language = language;
   }
 
   private tasksToValidate(): string {
@@ -34,7 +37,7 @@ ${previousTasks}
 
   getSystemMessage(): SystemMessage {
     const taskToValidate = this.tasksToValidate();
-    const message = validatorSystemPromptTemplate.replace('{{task_to_validate}}', taskToValidate);
+    const message = getDynamicValidatorPrompt(this.language, taskToValidate);
     return new SystemMessage(message);
   }
   /**

@@ -1,450 +1,123 @@
-# Nanobrowser Chrome Extension - Project Understanding Summary
+# ネコノテ (nanobrowser) - Project Understanding Summary
 
 ## Project Overview
-This is a fork of the Nanobrowser Chrome extension with significant customizations for Japanese users, centralized API service, and AG-UI protocol integration. The extension provides AI-powered browsing assistance with a focus on Japanese localization, user-friendly API access, and modern agent interface protocols.
+**ネコノテ** (Cat's Paw) is a sophisticated AI-powered Chrome extension for browser automation with multi-agent architecture. The extension uses three specialized AI agents (Planner, Navigator, Validator) working together to intelligently navigate websites, perform complex tasks, and interact with web content.
 
-## Key Custom Features Implemented
-
-### 1. AG-UI Protocol Integration (NEW - Latest)
-- **Dual-mode interface**: Toggle between Legacy and AG-UI modes in the sidebar
-- **16-event schema**: Complete AG-UI protocol implementation with event types for messaging, tool calls, and run management
-- **Token streaming**: Real-time text streaming with character-by-character display
-- **Tool cards**: Visual representation of tool calls with status badges (pending, success, error)
-- **Error handling**: Dedicated error badges and descriptive error messages
-- **Event bridge**: Automatic translation from legacy executor events to AG-UI protocol
-- **Tool actions**: DOM manipulation support (click, fill, scroll, screenshot) via AG-UI
-- **React components**: Modern chat interface with streaming support and tool visualization
-
-### 2. Japanese Localization (Complete)
-- Full translation of all UI elements and settings
-- Proper Japanese text handling in sidebar layout
-- Wider sidebar (320px → 380px) to accommodate Japanese text
-- Japanese error messages and user feedback
-
-### 3. Custom Template System (Complete)
-- Replaced fixed QuickStart items with user-customizable templates
-- Default templates focused on practical daily tasks:
-  - 重要なメールのまとめ (Important email summaries)
-  - 今日のニュース要約 (Today's news summary) 
-  - 会議の議事録作成 (Meeting minutes creation)
-- Template creation UI with title and content fields
-- Full Japanese translation for template management
-
-### 4. Centralized API Service (Complete & Production Deployed)
-- Complete backend service in `backend-service/` directory
-- Express.js server with OpenRouter API proxy
-- Rate limiting (100 requests/minute), CORS, security headers
-- Health checks (`/health`) and usage statistics (`/stats`)
-- No API key required for end users
-- **DEPLOYED TO RENDER**: `https://einanoshou.onrender.com`
-- **STATUS**: ✅ WORKING - API responds to health checks and stats
-
-### 5. Fork Management (Complete)
-- Proper upstream remote configuration
-- Successfully merged latest changes from nanobrowser/nanobrowser
-- Preserved all custom features during merge
-- Documented in `FORK_DOCUMENTATION.md`
-
-### 6. Automated Build & Release System (Complete)
-- **GitHub Actions**: Auto-builds extension on every push to master
-- **Auto-releases**: Creates GitHub releases with downloadable ZIP files
-- **Testing workflows**: Backend dependency verification
-- **No manual building**: Users get automatic updates
+## Key Features
+- **Multi-Agent Architecture**: Planner (strategic planning), Navigator (web interaction), Validator (result verification)
+- **Multimodal AI**: Vision system for screenshot analysis, speech-to-text integration
+- **40+ Cutting-Edge AI Models**: Claude Sonnet 4, Gemini 2.5 Pro, DeepSeek R1, OpenAI O3, Qwen Max, Grok 3 Beta, etc.
+- **Japanese Localization**: Complete UI and system messages in Japanese
+- **Theme System**: Warm cream (#ede2c7) default theme with dark mode toggle
+- **Status messages in Japanese**: 計画中..., ナビゲーション中..., 検証中...
 
 ## Technical Architecture
 
-### Extension Structure
-- `/chrome-extension/` - Main extension code with AG-UI support
-- `/packages/storage/` - Settings and data management
-- `/packages/ui/` - React components and UI
-- `/packages/sidepanel/` - Main sidebar interface with dual-mode support
-- `/backend-service/` - Centralized API service
-- `/.github/workflows/` - Automated build system
+### Core Components
+- **Chrome Extension**: Manifest V3, TypeScript, React UI, Vite build system
+- **Backend**: Centralized API service on Render.com proxying OpenRouter
+- **Storage**: Chrome storage API with type-safe abstractions
+- **Build System**: Turbo monorepo with pnpm package management
 
-### AG-UI Integration Architecture
+### Agent System
+1. **Planner Agent**: Breaks down complex tasks into executable steps
+2. **Navigator Agent**: Executes web interactions (clicking, typing, navigation)
+3. **Validator Agent**: Verifies task completion and validates results
 
-#### Core AG-UI Components
-- **Event System** (`pages/side-panel/src/lib/ag-ui/events.ts`): 
-  - 16-event schema with types for text messages, tool calls, runs, and steps
-  - Zod validation for type safety
-  - Event type enums and interfaces
-
-- **Protocol Functions** (`pages/side-panel/src/lib/ag-ui/protocol.ts`):
-  - Event factory functions for creating AG-UI events
-  - Message sending utilities
-  - Tool action result helpers
-
-- **Chat Interface** (`pages/side-panel/src/components/ChatPanel.tsx`):
-  - Real-time message streaming with character-by-character display
-  - Tool call visualization with expandable cards
-  - Status badges for pending/success/error states
-  - Automatic scrolling and message management
-
-- **Event Bus** (`pages/side-panel/src/store/eventBus.ts`):
-  - Reactive event management with React hooks
-  - Chrome runtime connection management
-  - Event subscription and broadcasting system
-
-#### Backend AG-UI Support
-
-- **Event Bridge** (`chrome-extension/src/background/ag-ui-bridge.ts`):
-  - Converts legacy executor events to AG-UI protocol
-  - Manages message streaming and tool call lifecycle
-  - Handles run states and error conversion
-
-- **Tool Action Handler** (`chrome-extension/src/background/ag-ui-tools.ts`):
-  - DOM manipulation via AG-UI protocol
-  - Supported actions: click, fill, scroll, screenshot
-  - Integrates with existing Page interface
-
-- **Background Service** (`chrome-extension/src/background/index.ts`):
-  - Dual connection support (legacy + AG-UI)
-  - Event routing and protocol conversion
-  - Tool action execution and result reporting
-
-### Key Files Modified for AG-UI
-- `pages/side-panel/src/SidePanel.tsx` - Added AG-UI mode toggle and routing
-- `chrome-extension/src/background/index.ts` - AG-UI connection support and user_message handling
-- `pages/side-panel/package.json` - Added nanoid and zod dependencies
-- Multiple new AG-UI specific files for complete protocol implementation
-
-### Key Files Modified (Legacy Features)
-- `packages/storage/lib/prompt/favorites.ts` - Custom template system
-- `packages/sidepanel/lib/components/BookmarkList.tsx` - Template UI
-- `packages/storage/lib/settings/types.ts` - New provider type
-- `packages/storage/lib/settings/centralizedApi.ts` - API configuration
-- `packages/storage/lib/settings/defaultProviders.ts` - Provider initialization
-- `backend-service/package.json` - Fixed dependency versions for deployment
-- `.github/workflows/build-release.yml` - Automated build system
-- Multiple translation files for Japanese support
-
-### Deployment Configuration
-- **Service**: Render.com web service
-- **URL**: https://einanoshou.onrender.com
-- **Runtime**: Node.js
-- **Environment**: Production with rate limiting and security
-- **Root Directory**: `backend-service`
-- **Auto-deployment**: Connected to GitHub repository
-- **Status**: ✅ DEPLOYED AND WORKING
-
-### Build Status
-- ✅ Extension builds successfully
-- ✅ All TypeScript compilation passes
-- ✅ Japanese translations complete
-- ✅ Backend service deployed and operational
-- ✅ API health checks passing
-- ✅ Extension configured with correct URLs
-- ✅ Default provider automatically initialized
-- ✅ GitHub Actions workflow active
-- ✅ Auto-release system working
-
-## User Experience
-1. Install extension → Centralized API provider auto-configured
-2. No API key setup required
-3. Access "エイナーのAI (APIキー不要)" provider
-4. Create custom templates for daily tasks
-5. Use AI features with Japanese interface
-6. Backend handles all API key management and rate limiting
-7. **Automatic updates** via GitHub releases
-
-## Documentation
-- `SETUP_AND_UPDATE_GUIDE.md` - Complete installation and testing guide
-- `TECHNICAL_README.md` - Detailed architecture and implementation docs
-- `RENDER_DEPLOYMENT.md` - Complete Render deployment guide
-- `CENTRALIZED_API_SETUP.md` - API service setup documentation  
-- `FORK_DOCUMENTATION.md` - Fork management procedures
-- Japanese translations in `/packages/i18n/`
-
-## API Testing Results
-**Health Check**: ✅ PASSING
-```bash
-curl https://einanoshou.onrender.com/health
-# Response: {"status":"healthy","timestamp":"2025-06-11T20:19:33.638Z","service":"nanobrowser-api-service"}
-```
-
-**Stats Endpoint**: ✅ WORKING
-```bash  
-curl https://einanoshou.onrender.com/stats
-# Response: Shows uptime, memory usage, timestamp
-```
-
-## Current Status: PRODUCTION READY & AG-UI MESSAGING FIXES COMPLETED (2025-01-14)
-
-**Latest Improvements - AG-UI Messaging & UI Fixes**:
-✅ **AG-UI Messaging Fixed**: Resolved the core issue where messages weren't being sent through the AG-UI interface
-✅ **Protocol Communication Improved**: Fixed `sendUserMessage` to use the established port connection instead of `chrome.runtime.sendMessage`
-✅ **UI Consistency Achieved**: Completely rewrote `AgentChat.tsx` to match the exact styling and functionality of the legacy chat panel
-✅ **Template Integration**: AG-UI now includes the same BookmarkList/template functionality as the legacy interface
-✅ **Message Handling**: Proper conversion from AG-UI events to legacy Message format for consistency
-
-**Key Technical Fixes Applied**:
-1. **Protocol Fix** (`pages/side-panel/src/lib/ag-ui/protocol.ts`): 
-   - Modified `sendUserMessage` to accept and use the port connection parameter
-   - Added fallback to `chrome.runtime.sendMessage` if port fails
-   
-2. **EventBus Fix** (`pages/side-panel/src/store/eventBus.ts`):
-   - Updated to pass the port connection to `sendUserMessage`
-   - Ensures messages are sent through the established AG-UI connection
-
-3. **AgentChat Complete Rewrite** (`pages/side-panel/src/components/AgentChat.tsx`):
-   - **Identical UI**: Now matches legacy chat panel styling exactly
-   - **Template Support**: Includes BookmarkList with full template functionality
-   - **Message Flow**: Proper user message display and AG-UI event processing
-   - **Input Handling**: Same ChatInput component as legacy with all features
-   - **Dark Mode**: Consistent styling with legacy interface
-
-**Testing Status**: ✅ COMPLETED
-- Build successful: All TypeScript compilation passes
-- Extension loads correctly in Chrome
-- AG-UI messaging functionality restored
-- UI consistency achieved between legacy and AG-UI modes
-
-**Next Steps Recommended**:
-1. Test AG-UI messaging in browser by sending test commands
-2. Verify template functionality works in AG-UI mode
-3. Confirm message flow and event handling works correctly
-4. Test dark mode consistency between interfaces
-
-## Project Structure
-- `chrome-extension/` - Main Chrome extension code
-- `packages/` - Shared packages and utilities
-- `pages/` - Additional web pages
-- `dist/` - Built extension files (generated after build)
-
-## Technology Stack
-- **Framework**: React 18.3.1 with TypeScript
-- **Styling**: Tailwind CSS
-- **Build Tool**: Vite with Turbo for monorepo management
-- **Package Manager**: pnpm (v9.15.1)
-- **Target**: Chrome Extension Manifest V3
-
-## Development Setup
-- **Node.js**: v22.12.0+ (currently using v23.10.0)
-- **pnpm**: v9.15.1+ (currently using v9.15.1)
-
-## Build Commands
-- `pnpm install` - Install dependencies ✅ (completed)
-- `pnpm dev` - Development build with hot reload ✅ (running in background)
-- `pnpm build` - Production build
-- `pnpm zip` - Create distribution zip file
-
-## Extension Structure
-The built extension includes:
-- **manifest.json**: Extension configuration with permissions for storage, scripting, tabs, debugger, and sidePanel
-- **background.iife.js**: Service worker for background processes
-- **side-panel/**: Main UI interface (React-based)
-- **content/**: Content scripts for web page interaction
-- **options/**: Extension settings page
-- **permission/**: Permission handling
-- **Icons**: 32px and 128px extension icons
-
-## Current Status
-✅ Dependencies installed
-✅ Production build completed successfully
-✅ Extension files generated in `dist/` directory
-✅ All required files present (content script, manifest, etc.)
-✅ Extension name changed to "エイナーの手" 
-✅ **Full Japanese UI localization completed**
-🔄 Ready for Chrome extension loading and testing
+### Model Integration
+- **OpenRouter Integration**: 40+ models from multiple providers
+- **Centralized Provider**: Default API service requiring no user API keys
+- **Model Selection**: Intelligent routing based on task complexity
+- **Fallback System**: Automatic model switching on failures
 
 ## Recent Major Updates
 
-### Custom Template System (Latest)
+### Dynamic Language Detection System (Latest)
+- **Language Detection**: Implemented `languageDetection.ts` with proper regex patterns
+- **Fixed Critical Bug**: Language detection regex was missing global flags, causing incorrect detection
+- **Dynamic Prompts**: Created `templates/dynamic.ts` with language-specific prompt templates
+- **Agent Context**: Updated all agents to use detected language from user input
+- **Status Messages**: Language-appropriate status messages (計画中... vs Planning...)
+- **Test Results**: Successfully detects Japanese text like "twitter(x)に行ってAIに関するツイートをして" as 'ja'
 
-**Problem Solved**: Replaced the fixed QuickStart items (GitHub star, X follow, AI papers) with a user-friendly custom template system.
+### Japanese Language Implementation (Previous)
+- **System Prompts**: All agent prompts now in Japanese with explicit language instructions
+- **Agent Messages**: All status messages, error messages, and responses in Japanese
+- **Planner Fixes**: Removed refusal behavior for web tasks (Twitter posting, etc.)
+- **Error Messages**: Translated all error messages to Japanese
 
-**What Changed**:
+### Model Updates & Fixes
+- **Expanded Model Library**: From 7 obsolete models to 40+ cutting-edge models
+- **Fixed Model IDs**: Corrected OpenRouter format (removed problematic date suffixes)
+- **Syntax Error Fix**: Fixed `setupDefaultCentralizedProvider` function
+- **Aggressive Detection**: Updated model detection logic (≤25 models instead of ≤7)
 
-1. **Updated Default Templates** (`packages/storage/lib/prompt/favorites.ts`):
-   - Replaced marketing-focused templates with practical user-focused ones:
-     - "📧 Check Daily Emails" - Summarizes important daily emails
-     - "📰 Daily News Summary" - Creates news summaries from preferred sites  
-     - "📋 Create Meeting Notes" - Organizes meeting notes with action items
+### Theme System
+- **Default Theme**: Warm cream background (#ede2c7) for new users
+- **Dark Mode Toggle**: User-configurable light/dark/system theme options
+- **Japanese UI**: Theme settings with Japanese labels and descriptions
 
-2. **Enhanced BookmarkList Component** (`pages/side-panel/src/components/BookmarkList.tsx`):
-   - Added "+" button in the QuickStart header to create new templates
-   - Implemented template creation form with:
-     - Title input field
-     - Content textarea for task description
-     - Save/Cancel buttons with proper validation
-   - Added proper focus management for accessibility
-   - Added new props: `onBookmarkAdd` callback
+## File Structure
+```
+nanobrowser/
+├── chrome-extension/          # Main extension code
+│   ├── src/background/        # Background script and agents
+│   │   ├── agent/            # Multi-agent system
+│   │   │   ├── agents/       # Individual agent implementations
+│   │   │   ├── prompts/      # System prompts (now in Japanese)
+│   │   │   └── actions/      # Web automation actions
+│   │   └── browser/          # Browser context management
+│   └── public/               # Static assets
+├── pages/                    # Extension UI pages
+│   ├── side-panel/          # Main chat interface
+│   ├── options/             # Settings page
+│   └── content/             # Content script
+├── packages/                # Shared packages
+│   ├── storage/             # Settings and data management
+│   ├── i18n/               # Internationalization
+│   └── ui/                 # Shared UI components
+└── dist-zip/               # Built extension packages
+```
 
-3. **Updated SidePanel Integration** (`pages/side-panel/src/SidePanel.tsx`):
-   - Added `handleBookmarkAdd` function to save new templates to storage
-   - Connected the new template creation flow to the favorites storage system
-   - Maintained existing edit, delete, and reorder functionality
+## Build & Deployment
+- **Build Command**: `npm run build` (uses Turbo for parallel builds)
+- **Package Command**: `npm run zip` (creates installable .zip)
+- **Latest Package**: `extension-20250614-180104.zip` (2.12 MB)
+- **Installation**: Chrome → Extensions → Developer mode → Load unpacked
 
-4. **Japanese Translations** (`packages/i18n/locales/en/messages.json`):
-   - Added complete Japanese translations for template management:
-     - `addTemplate`: "テンプレートを追加"
-     - `templateTitle`: "テンプレートタイトル"
-     - `templateTitlePlaceholder`: "例: 毎日のメールチェック"
-     - `templateContent`: "テンプレート内容"
-     - `templateContentPlaceholder`: "AIエージェントに実行してもらいたいタスクを入力してください..."
+## Configuration
+- **Default Provider**: ネコノテAI (no API key required)
+- **Model Selection**: Automatic based on task type
+- **Theme**: Warm cream default, user-configurable
+- **Language**: Japanese throughout system
+- **Limits**: 10 steps per task, 5 actions per step, 3 failure tolerance
 
-**User Experience**: Users can now create personalized task templates for their daily workflows instead of being limited to fixed promotional content. Templates are saved persistently and can be edited, deleted, or reordered as needed.
+## Key Technical Decisions
+1. **Japanese-First Design**: All system interactions in Japanese
+2. **Multi-Agent Architecture**: Specialized agents for different task phases
+3. **Centralized API**: Eliminates need for user API key management
+4. **Warm Theme Default**: More welcoming than stark white
+5. **Aggressive Model Updates**: Ensures users get latest AI capabilities
+6. **Error Recovery**: Robust fallback mechanisms for reliability
 
-**Technical Implementation**: Leveraged the existing favorites storage system but enhanced the UI to make template creation more accessible and user-friendly.
+## Development Workflow
+1. Make changes to source code
+2. Run `npm run build` to compile
+3. Run `npm run zip` to package
+4. Install in Chrome for testing
+5. Update project understanding summary
 
-### Complete Japanese Localization (Previous)
+## Current Status
+- **Production Ready**: Fully functional with Japanese localization
+- **Model Integration**: 40+ cutting-edge AI models working
+- **Theme System**: Complete with user preferences
+- **Agent Communication**: All in Japanese as requested
+- **Error Handling**: Comprehensive Japanese error messages
+- **Build System**: Stable and reliable
 
-**Problem Solved**: Users in Japan couldn't use the extension effectively due to English-only interface.
-
-**What Changed**:
-
-1. **Settings Panel Translation**:
-   - All settings categories and options now display in Japanese
-   - Model selection interfaces, parameter controls, and provider management
-   - Enhanced layout to accommodate longer Japanese text (widened sidebar from w-48 to w-56)
-
-2. **Comprehensive Translation Coverage**:
-   - General settings terms (maxStepsPerTask, failureTolerance, enableVisionWithHighlighting, etc.)
-   - Model interface terms (modelSelection, llmProviders, speechToTextModel, etc.)
-   - Agent descriptions (planner, navigator, validator with full descriptions)
-   - UI elements (buttons, labels, placeholders, error messages)
-   - Provider management terms (apiKey, baseUrl, models, save, cancel, delete, etc.)
-
-3. **Component Updates**:
-   - Added `import { t } from '@extension/i18n'` to all relevant components
-   - Replaced hardcoded English strings with `t('translationKey')` function calls in:
-     - Options.tsx (main settings layout)
-     - GeneralSettings.tsx (task and behavior settings)  
-     - ModelSettings.tsx (provider and model configuration)
-
-**Technical Details**: Used Chrome extension i18n system with comprehensive Japanese translations in `packages/i18n/locales/en/messages.json`.
-
-### Upstream Merge & Fork Management (Latest)
-
-**Problem Solved**: Successfully merged backend updates from original nanobrowser repository while preserving custom UI/design changes.
-
-**What Was Done**:
-
-1. **Set Up Fork Management** (`FORK_DOCUMENTATION.md`):
-   - Created comprehensive documentation explaining this is a fork
-   - Added detailed update process for keeping backend in sync with upstream
-   - Documented which files to protect (UI customizations) vs. accept (backend changes)
-   - Established regular update schedule and emergency recovery procedures
-
-2. **Successful Upstream Merge**:
-   - Added original repository as upstream remote
-   - Fetched and merged latest commits from nanobrowser/nanobrowser
-   - Successfully merged significant backend improvements including:
-     - Enhanced first-time user experience with model configuration detection
-     - New "Display Highlights" setting for visual feedback
-     - Improved navigator agent functionality
-     - Better browser page handling and utilities
-     - Settings improvements and bug fixes
-
-3. **Conflict Resolution**:
-   - **SidePanel.tsx**: Merged new welcome screen for unconfigured models with existing enhanced template system
-   - **GeneralSettings.tsx**: Combined new Display Highlights setting with Japanese translations
-   - **messages.json**: Added Japanese translations for new Display Highlights feature
-   - Preserved all custom UI enhancements while accepting backend improvements
-
-4. **Features Preserved**:
-   - ✅ Complete Japanese localization (extended to cover new features)
-   - ✅ Enhanced template system with user-customizable templates
-   - ✅ Improved layout and UX enhancements
-   - ✅ Custom default templates focused on user workflows
-
-5. **New Features Added from Upstream**:
-   - ✅ Smart welcome screen for first-time users without configured models
-   - ✅ Display Highlights toggle for visual feedback on interactive elements
-   - ✅ Enhanced backend stability and performance improvements
-   - ✅ Better error handling and user guidance
-
-**Git Setup**:
-- `origin`: https://github.com/senseisven/nanobrowser.git (your fork)
-- `upstream`: https://github.com/nanobrowser/nanobrowser.git (original repo)
-
-**Future Maintenance**: Regular upstream merges recommended monthly or when critical updates are available, following the process documented in `FORK_DOCUMENTATION.md`.
-
-## Fixed Issues
-- ✅ Port 8081 conflict resolved
-- ✅ Missing content script file (content/index.iife.js) now built properly
-- ✅ _locales directory created successfully
-- ✅ Clean production build completed
-- ✅ JSX syntax errors in SidePanel component fixed
-
-## Next Steps for Testing
-1. Open `chrome://extensions/` in Chrome
-2. Enable "Developer mode"
-3. Click "Load unpacked" and select the `dist/` folder
-4. Configure API keys in the extension settings
-5. Test web automation features
-
-## Key Use Cases
-- News summarization from websites
-- GitHub repository research
-- Shopping research and comparison
-- General web automation tasks through natural language commands 
-
-### Centralized API Service Implementation (Latest)
-
-**Problem Solved**: Eliminated the need for users to configure API keys by creating a centralized backend service that handles all OpenRouter API calls.
-
-**What Was Done**:
-
-1. **Backend Service Creation** (`backend-service/`):
-   - Created Express.js server that proxies OpenRouter API requests
-   - Added rate limiting, CORS handling, security headers with Helmet
-   - Implemented health checks (`/health`) and usage stats (`/stats`)
-   - Added comprehensive error handling and request/response logging
-   - Configured for easy deployment on Railway, Render, Vercel, or VPS
-
-2. **New Provider Type** (`packages/storage/lib/settings/types.ts`):
-   - Added `ProviderTypeEnum.CentralizedAPI` as new provider type
-   - Configured default models (OpenAI GPT-4.1, Claude, Gemini, etc.)
-   - Set up default parameters for all three agents (Planner, Navigator, Validator)
-
-3. **Extension Backend Integration**:
-   - Updated `chrome-extension/src/background/agent/helper.ts` to handle centralized API
-   - Modified LLM provider configuration to skip API key validation for centralized provider
-   - Added automatic initialization of centralized provider on extension startup
-
-4. **User Interface Updates**:
-   - Added Japanese translations for centralized API ("エイナーのAI (APIキー不要)")
-   - Modified ModelSettings component to disable API key input for centralized provider
-   - Added visual indicators showing API key is not required
-
-5. **Configuration Management** (`packages/storage/lib/settings/centralizedApi.ts`):
-   - Created dedicated configuration module for centralized API settings
-   - Added health check functionality to verify service availability
-   - Implemented URL management functions for easy service endpoint updates
-
-6. **Default Provider Setup** (`packages/storage/lib/settings/defaultProviders.ts`):
-   - Created functions to automatically configure centralized API provider
-   - Added health checking and URL updating capabilities
-   - Implemented initialization on extension startup
-
-**Key Benefits**:
-- **Zero Configuration**: Users can use the extension immediately without API keys
-- **Cost Control**: Centralized billing and usage monitoring
-- **Security**: API keys stored securely on server, never exposed to clients
-- **Rate Limiting**: Built-in abuse protection and usage management
-- **Monitoring**: Comprehensive logging and health checks
-
-**Deployment Options**:
-- Railway (recommended for simplicity)
-- Render (good for production)
-- Vercel (serverless option)
-- Custom VPS with PM2
-
-**Files Modified/Added**:
-- `backend-service/` - Complete backend service
-- `packages/storage/lib/settings/types.ts` - New provider type
-- `packages/storage/lib/settings/llmProviders.ts` - Provider configuration
-- `packages/storage/lib/settings/centralizedApi.ts` - API configuration
-- `packages/storage/lib/settings/defaultProviders.ts` - Setup functions
-- `chrome-extension/src/background/agent/helper.ts` - Chat model creation
-- `chrome-extension/src/background/index.ts` - Initialization
-- `pages/options/src/components/ModelSettings.tsx` - UI updates
-- `packages/i18n/locales/en/messages.json` - Japanese translations
-- `CENTRALIZED_API_SETUP.md` - Comprehensive deployment guide
-
-**Next Steps for Deployment**:
-1. Deploy backend service to hosting platform
-2. Update API URLs in configuration files
-3. Build and test extension
-4. Monitor usage and costs 
+## Next Potential Improvements
+- Enhanced speech recognition for Japanese
+- More granular model selection options
+- Advanced automation workflows
+- Performance optimizations
+- Additional language support beyond Japanese

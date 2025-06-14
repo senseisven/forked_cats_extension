@@ -16,14 +16,11 @@ import { DEFAULT_AGENT_OPTIONS } from './agent/types';
 import { SpeechToTextService } from './services/speechToText';
 import { ProviderTypeEnum } from '@extension/storage';
 import { setupDefaultCentralizedProvider } from '@extension/storage/lib/settings/defaultProviders';
-import { LegacyToAGUIEventBridge } from './ag-ui-bridge';
-
 const logger = createLogger('background');
 
 const browserContext = new BrowserContext({});
 let currentExecutor: Executor | null = null;
 let currentPort: chrome.runtime.Port | null = null;
-let aguiBridge: LegacyToAGUIEventBridge | null = null;
 
 // Setup side panel behavior
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(error => console.error(error));
@@ -115,15 +112,8 @@ chrome.runtime.onMessage.addListener(() => {
 
 // Setup connection listener for long-lived connections (e.g., side panel)
 chrome.runtime.onConnect.addListener(port => {
-  if (port.name === 'side-panel-connection' || port.name === 'ag-ui-connection') {
+  if (port.name === 'side-panel-connection') {
     currentPort = port;
-
-    // Initialize AG-UI bridge for AG-UI connections
-    if (port.name === 'ag-ui-connection') {
-      aguiBridge = new LegacyToAGUIEventBridge();
-    } else {
-      aguiBridge = null;
-    }
 
     port.onMessage.addListener(async message => {
       try {
@@ -212,26 +202,6 @@ chrome.runtime.onConnect.addListener(port => {
             const page = await browserContext.getCurrentPage();
             await page.removeHighlight();
             return port.postMessage({ type: 'success', msg: 'highlight removed' });
-          }
-
-          case 'user_message': {
-            // Handle AG-UI user message
-            if (!message.text) return port.postMessage({ type: 'error', error: 'No message text provided' });
-
-            // Get current tab ID
-            const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-            const tabId = tabs[0]?.id;
-            if (!tabId) return port.postMessage({ type: 'error', error: 'No active tab found' });
-
-            logger.info('AG-UI user_message', tabId, message.text);
-
-            // Convert AG-UI message to legacy task format
-            currentExecutor = await setupExecutor(message.id || 'ag-ui-task', message.text, browserContext);
-            subscribeToExecutorEvents(currentExecutor);
-
-            const result = await currentExecutor.execute();
-            logger.info('AG-UI task execution result', tabId, result);
-            break;
           }
 
           case 'speech_to_text': {
@@ -369,7 +339,6 @@ async function setupExecutor(taskId: string, task: string, browserContext: Brows
   return executor;
 }
 
-// Update subscribeToExecutorEvents to use port and AG-UI bridge
 async function subscribeToExecutorEvents(executor: Executor) {
   // Clear previous event listeners to prevent multiple subscriptions
   executor.clearExecutionEvents();
@@ -378,16 +347,8 @@ async function subscribeToExecutorEvents(executor: Executor) {
   executor.subscribeExecutionEvents(async event => {
     try {
       if (currentPort) {
-        if (aguiBridge) {
-          // Convert legacy events to AG-UI events
-          const aguiEvents = aguiBridge.convertEvent(event);
-          for (const aguiEvent of aguiEvents) {
-            currentPort.postMessage(aguiEvent);
-          }
-        } else {
-          // Send legacy events as-is
-          currentPort.postMessage(event);
-        }
+        // Send legacy events as-is
+        currentPort.postMessage(event);
       }
     } catch (error) {
       logger.error('Failed to send message to side panel:', error);
@@ -399,9 +360,6 @@ async function subscribeToExecutorEvents(executor: Executor) {
       event.state === ExecutionState.TASK_CANCEL
     ) {
       await currentExecutor?.cleanup();
-      if (aguiBridge) {
-        aguiBridge.reset();
-      }
     }
   });
 }

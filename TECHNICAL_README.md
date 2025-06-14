@@ -1,682 +1,699 @@
-# 🔧 えいなーの手 - Technical Architecture Documentation
+# 🔧 ネコノテ - Technical Architecture Documentation
 
 ## 🎯 System Overview
 
-**えいなーの手** (Einar's Hand) is a sophisticated AI-powered browser automation Chrome extension built on the Nanobrowser foundation, enhanced with Japanese localization, custom templates, and a centralized API service architecture.
+**ネコノテ** (Cat's Paw) is a sophisticated AI-powered browser automation Chrome extension that uses a multi-agent architecture to intelligently navigate websites, perform complex tasks, and interact with web content. The system combines planning, execution, and validation agents with multimodal AI capabilities to create a powerful automation platform.
 
 ---
 
-## 🏗️ High-Level Architecture
+## 🏗️ Multi-Agent Architecture Deep Dive
+
+### **Core Agent System**
+
+The nanobrowser operates using three specialized AI agents that work together in a coordinated workflow:
 
 ```mermaid
 graph TB
-    User[👤 User] --> Extension[🔌 Chrome Extension]
-    Extension --> UI[📱 React UI]
-    Extension --> Background[⚙️ Background Scripts]
-    Extension --> Storage[💾 Chrome Storage API]
+    User[👤 User Input] --> Planner[🧠 Planner Agent]
+    Planner --> Navigator[🚀 Navigator Agent]
+    Navigator --> Validator[✅ Validator Agent]
+    Validator --> |Success| Complete[✅ Task Complete]
+    Validator --> |Failure| Planner
     
-    Background --> CentralizedAPI[🌐 Centralized API Service]
-    CentralizedAPI --> Render[☁️ Render.com]
-    Render --> OpenRouter[🤖 OpenRouter API]
-    OpenRouter --> LLM[🧠 LLM Providers]
-    
-    UI --> Templates[📝 Custom Templates]
-    UI --> I18N[🌏 Japanese Localization]
-    
-    subgraph "Chrome Extension"
-        Extension
-        UI
-        Background
-        Storage
-        Templates
-        I18N
+    subgraph "Agent Capabilities"
+        Planner --> |Creates Strategy| Plan[📋 Step-by-step Plan]
+        Navigator --> |Executes Actions| Actions[🎯 Web Actions]
+        Validator --> |Checks Results| Validation[🔍 Result Validation]
     end
     
-    subgraph "Backend Infrastructure"
-        CentralizedAPI
-        Render
-        OpenRouter
-        LLM
+    subgraph "Multimodal Input"
+        Vision[👁️ Vision/Screenshots]
+        DOM[🌐 DOM Analysis]
+        Speech[🎤 Speech-to-Text]
     end
+    
+    Vision --> Navigator
+    DOM --> Navigator
+    Speech --> Planner
 ```
+
+### **1. Planner Agent (Strategic Intelligence)**
+
+**Role**: High-level task decomposition and strategy formulation
+
+**System Prompt Structure**:
+```typescript
+const plannerPrompt = `
+You are an expert web automation planner. Your role is to:
+
+1. ANALYZE the user's request and break it down into logical steps
+2. CONSIDER the current webpage context and available actions
+3. CREATE a detailed, sequential plan that can be executed by the Navigator
+4. ADAPT the plan based on validation feedback and changing conditions
+
+Current Context:
+- URL: ${currentUrl}
+- Page Title: ${pageTitle}
+- Available Actions: ${availableActions}
+- Previous Attempts: ${previousAttempts}
+
+Guidelines:
+- Be specific about element selectors and expected outcomes
+- Consider error scenarios and provide fallback strategies
+- Optimize for reliability over speed
+- Use Japanese-friendly approaches for Japanese websites
+`;
+```
+
+**Key Capabilities**:
+- **Task Decomposition**: Breaks complex requests into executable steps
+- **Context Awareness**: Analyzes current page state and user intent
+- **Strategy Adaptation**: Modifies plans based on execution feedback
+- **Error Recovery**: Plans alternative approaches when primary strategy fails
+
+**Model Selection**: Uses reasoning-capable models like Claude Sonnet 4, GPT-4o, or DeepSeek R1 for complex planning tasks.
+
+### **2. Navigator Agent (Execution Engine)**
+
+**Role**: Direct web interaction and action execution
+
+**System Prompt Structure**:
+```typescript
+const navigatorPrompt = `
+You are a precise web navigator. Your role is to:
+
+1. EXECUTE the specific step provided by the Planner
+2. INTERACT with web elements using the available action toolkit
+3. HANDLE dynamic content, popups, and unexpected page changes
+4. PROVIDE detailed feedback about action results
+
+Current Step: ${currentStep}
+Available Actions: ${actionToolkit}
+Page Context: ${pageContext}
+Vision Input: ${screenshotAnalysis}
+
+Action Toolkit:
+- click(selector): Click on elements
+- fill(selector, text): Fill input fields
+- select(selector, option): Select dropdown options
+- scroll(direction, amount): Scroll page content
+- wait(condition): Wait for elements or conditions
+- screenshot(): Capture current page state
+
+Guidelines:
+- Use precise CSS selectors for reliability
+- Verify element visibility before interaction
+- Handle Japanese text input correctly
+- Capture screenshots for validation
+- Report any unexpected behaviors or errors
+`;
+```
+
+**Key Capabilities**:
+- **DOM Manipulation**: Direct interaction with web elements
+- **Dynamic Content Handling**: Manages AJAX, SPAs, and dynamic loading
+- **Visual Verification**: Uses screenshots to confirm actions
+- **Error Detection**: Identifies and reports execution failures
+- **Japanese Text Support**: Handles Japanese input and character encoding
+
+**Model Selection**: Uses fast, reliable models like Claude 3.5 Sonnet or Gemini 2.0 Flash for quick execution decisions.
+
+### **3. Validator Agent (Quality Assurance)**
+
+**Role**: Result verification and success validation
+
+**System Prompt Structure**:
+```typescript
+const validatorPrompt = `
+You are a meticulous validation specialist. Your role is to:
+
+1. VERIFY that the executed action achieved the intended result
+2. COMPARE the current state with the expected outcome
+3. IDENTIFY any discrepancies or partial completions
+4. RECOMMEND next steps or corrections needed
+
+Expected Outcome: ${expectedResult}
+Current State: ${currentState}
+Screenshot Evidence: ${screenshot}
+DOM Changes: ${domChanges}
+
+Validation Criteria:
+- Visual confirmation of changes
+- DOM state verification
+- Expected content presence
+- Navigation success
+- Form submission results
+
+Guidelines:
+- Be thorough but efficient in validation
+- Use both visual and DOM evidence
+- Consider Japanese content and layouts
+- Provide specific feedback for improvements
+- Distinguish between complete, partial, and failed outcomes
+`;
+```
+
+**Key Capabilities**:
+- **Multi-Modal Validation**: Uses both visual and DOM analysis
+- **Success Metrics**: Defines and checks completion criteria
+- **Partial Success Detection**: Identifies when tasks are partially complete
+- **Feedback Generation**: Provides actionable feedback for plan refinement
+
+**Model Selection**: Uses balanced models like Claude 3.5 Haiku or Gemini 1.5 Pro for efficient validation.
 
 ---
 
-## 📦 Core Components
+## 🖼️ Multimodal Capabilities
 
-### **1. Chrome Extension Architecture**
+### **Vision System Integration**
 
-**Manifest V3 Structure:**
-```
-chrome-extension/
-├── manifest.json          # Extension configuration
-├── src/
-│   ├── background/         # Service worker & API handling
-│   ├── content-script/     # DOM manipulation
-│   └── sidepanel/         # Main UI components
-└── dist/                  # Built extension files
-```
+The system uses advanced computer vision to understand and interact with web content:
 
-**Key Technologies:**
-- **Manifest V3**: Latest Chrome extension standard
-- **TypeScript**: Type-safe development
-- **Vite**: Modern build tooling
-- **Chrome APIs**: Storage, SidePanel, Tabs, Scripting
-
-### **2. Frontend UI System**
-
-**Tech Stack:**
+**Screenshot Analysis Pipeline**:
 ```typescript
-// Core UI Framework
-React 18 + TypeScript + Tailwind CSS
-
-// State Management
-Chrome Storage API + Custom Hooks
-
-// Build System
-Vite + Turbo (Monorepo)
-
-// Styling
-Tailwind CSS + Custom Japanese-optimized styles
-```
-
-**UI Components Structure:**
-```
-packages/ui/
-├── components/
-│   ├── BookmarkList.tsx    # Template management
-│   ├── SettingsPanel.tsx   # Configuration
-│   └── ChatInterface.tsx   # AI interaction
-├── hooks/
-│   ├── useStorage.ts       # Chrome storage abstraction
-│   └── useI18n.ts         # Internationalization
-└── styles/
-    └── tailwind.config.js  # Japanese text optimization
-```
-
-### **3. Storage & State Management**
-
-**Chrome Storage Architecture:**
-```typescript
-// Storage abstraction layer
-packages/storage/
-├── lib/
-│   ├── settings/
-│   │   ├── llmProviders.ts      # LLM provider management
-│   │   ├── centralizedApi.ts    # API configuration
-│   │   └── types.ts            # TypeScript definitions
-│   ├── prompt/
-│   │   └── favorites.ts        # Custom templates
-│   └── i18n/
-│       └── translations.ts     # Japanese localization
-```
-
-**Storage Pattern:**
-```typescript
-// Type-safe storage with validation
-interface StorageSchema {
-  llmProviders: Record<string, LLMProvider>;
-  centralizedApi: CentralizedApiConfig;
-  customTemplates: Template[];
-  userPreferences: UserSettings;
+interface VisionCapabilities {
+  // Automatic screenshot capture
+  captureScreenshot(): Promise<string>; // Base64 image
+  
+  // Visual element detection
+  detectElements(image: string): Promise<ElementDetection[]>;
+  
+  // Text extraction from images
+  extractText(image: string, language: 'ja' | 'en'): Promise<string>;
+  
+  // Visual change detection
+  compareScreenshots(before: string, after: string): Promise<ChangeAnalysis>;
+  
+  // Japanese content recognition
+  recognizeJapaneseContent(image: string): Promise<JapaneseContentAnalysis>;
 }
+```
 
-// Reactive storage hooks
-const { data, loading, error, update } = useStorage<T>(key);
+**Vision-Enabled Actions**:
+- **Smart Element Selection**: Identifies clickable elements visually when DOM selectors fail
+- **Content Verification**: Confirms text changes and visual updates
+- **Layout Understanding**: Adapts to different website layouts and designs
+- **Japanese Text Recognition**: Handles complex Japanese layouts and fonts
+- **Error Detection**: Visually identifies error messages and unexpected states
+
+### **Speech-to-Text Integration**
+
+**Voice Input Pipeline**:
+```typescript
+interface SpeechCapabilities {
+  // Multi-provider STT support
+  transcribeAudio(audioBlob: Blob, provider: 'gemini' | 'openai' | 'deepgram'): Promise<string>;
+  
+  // Japanese speech recognition
+  transcribeJapanese(audioBlob: Blob): Promise<string>;
+  
+  // Command interpretation
+  parseVoiceCommand(transcript: string): Promise<TaskIntent>;
+  
+  // Continuous listening
+  startListening(): Promise<void>;
+  stopListening(): Promise<string>;
+}
+```
+
+**Voice Command Examples**:
+- "Amazonで新しいヘッドフォンを検索して" (Search for new headphones on Amazon)
+- "このフォームに私の情報を入力して" (Fill this form with my information)
+- "次のページに進んで結果を確認して" (Go to next page and check results)
+
+---
+
+## 🔄 Execution Flow & State Management
+
+### **Task Execution Lifecycle**
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant P as Planner
+    participant N as Navigator
+    participant V as Validator
+    participant S as Storage
+    
+    U->>P: Task Request + Context
+    P->>S: Load Previous State
+    P->>P: Generate Plan
+    P->>N: Execute Step 1
+    N->>N: Perform Actions
+    N->>N: Capture Screenshot
+    N->>V: Validate Results
+    V->>V: Analyze Outcome
+    
+    alt Success
+        V->>P: Step Complete
+        P->>N: Execute Next Step
+    else Failure
+        V->>P: Step Failed + Feedback
+        P->>P: Revise Plan
+        P->>N: Retry/Alternative
+    end
+    
+    P->>S: Save Progress
+    P->>U: Task Complete/Status
+```
+
+### **State Persistence**
+
+**Storage Architecture**:
+```typescript
+interface TaskState {
+  // Execution context
+  taskId: string;
+  currentStep: number;
+  totalSteps: number;
+  
+  // Agent states
+  plannerState: {
+    originalIntent: string;
+    currentPlan: Step[];
+    adaptations: Adaptation[];
+  };
+  
+  navigatorState: {
+    currentUrl: string;
+    lastAction: Action;
+    pageContext: PageContext;
+    screenshots: Screenshot[];
+  };
+  
+  validatorState: {
+    validationHistory: ValidationResult[];
+    successCriteria: Criteria[];
+    currentStatus: 'pending' | 'success' | 'failure';
+  };
+  
+  // Recovery information
+  checkpoints: Checkpoint[];
+  errorHistory: Error[];
+  retryCount: number;
+}
+```
+
+### **Error Recovery & Resilience**
+
+**Multi-Level Recovery System**:
+
+1. **Action-Level Recovery**: Retry failed actions with slight variations
+2. **Step-Level Recovery**: Skip or modify individual steps
+3. **Plan-Level Recovery**: Generate alternative strategies
+4. **Session-Level Recovery**: Resume from saved checkpoints
+
+**Recovery Strategies**:
+```typescript
+interface RecoveryStrategies {
+  // Immediate retry with variations
+  retryWithVariation(action: Action): Promise<ActionResult>;
+  
+  // Alternative element selection
+  findAlternativeSelector(originalSelector: string): Promise<string[]>;
+  
+  // Fallback action sequences
+  executeFailsafe(context: PageContext): Promise<void>;
+  
+  // Human intervention request
+  requestUserAssistance(issue: Issue): Promise<UserGuidance>;
+}
 ```
 
 ---
 
-## 🌐 Backend Service Architecture
+## 🌐 Centralized API Architecture
 
-### **Express.js API Service**
+### **Backend Service Design**
 
-**Core Technologies:**
-```javascript
-// Backend stack
-Express.js + Node.js + TypeScript
-+ rate-limiter-flexible    // Rate limiting
-+ helmet                   // Security headers
-+ cors                     // Cross-origin resource sharing
-+ node-fetch              // HTTP client for OpenRouter
-```
-
-**API Endpoints:**
+**Express.js API Service Structure**:
 ```typescript
-// Health monitoring
-GET  /health              // Service health check
-GET  /stats               // Usage statistics
-
-// OpenRouter proxy
-POST /api/openrouter/*    // Generic OpenRouter proxy
-POST /api/chat/completions // Simplified chat endpoint
-```
-
-**Request Flow:**
-```
-1. Extension → POST /api/chat/completions
-2. Validate CORS + Rate limiting
-3. Add OpenRouter API key
-4. Forward to OpenRouter API
-5. Stream response back to extension
-6. Log usage (optional)
-```
-
-### **Security & Rate Limiting**
-
-**Security Layers:**
-```typescript
-// CORS configuration
-const corsOptions = {
-  origin: (origin, callback) => {
-    const allowed = ['chrome-extension://*'];
-    // Pattern matching for chrome-extension://* origins
+// Core service architecture
+class CentralizedAPIService {
+  // Model routing and load balancing
+  async routeRequest(request: ChatRequest): Promise<ChatResponse> {
+    const optimalProvider = await this.selectOptimalProvider(request);
+    return await this.forwardToProvider(optimalProvider, request);
   }
-};
-
-// Rate limiting per IP
-const rateLimiter = new RateLimiterMemory({
-  points: process.env.RATE_LIMIT_PER_MINUTE || 100,
-  duration: 60, // Per 60 seconds
-});
-
-// Security headers via Helmet
-app.use(helmet({
-  contentSecurityPolicy: false, // Disabled for API service
-}));
-```
-
----
-
-## 🤖 LLM Integration System
-
-### **Provider Architecture**
-
-**Multi-Provider Support:**
-```typescript
-enum ProviderTypeEnum {
-  OpenAI = 'openai',
-  Anthropic = 'anthropic', 
-  Google = 'google',
-  CentralizedAPI = 'centralized-api', // 🆕 Our custom provider
-}
-
-interface LLMProvider {
-  type: ProviderTypeEnum;
-  apiKey: string;
-  baseUrl: string;
-  modelNames: string[];
-  name: string;
-}
-```
-
-**Centralized API Provider:**
-```typescript
-// No API key required for end users
-const centralizedProvider: LLMProvider = {
-  type: ProviderTypeEnum.CentralizedAPI,
-  apiKey: 'not-required',
-  baseUrl: 'https://einanoshou.onrender.com/api/chat/completions',
-  modelNames: [
-    'openai/gpt-4o',
-    'anthropic/claude-3-5-sonnet-20241022',
-    'google/gemini-2.0-flash',
-    // ... more models
-  ],
-  name: 'エイナーのAI (APIキー不要)'
-};
-```
-
-### **OpenRouter Integration**
-
-**API Communication:**
-```typescript
-// OpenRouter request structure
-interface ChatCompletionRequest {
-  model: string;
-  messages: Message[];
-  temperature?: number;
-  max_tokens?: number;
-  stream?: boolean;
-}
-
-// Request headers with authentication
-const headers = {
-  'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-  'Content-Type': 'application/json',
-  'HTTP-Referer': 'https://nanobrowser.ai',
-  'X-Title': 'Nanobrowser (Centralized API)',
-};
-```
-
----
-
-## 🌏 Internationalization (i18n) System
-
-### **Japanese Localization Architecture**
-
-**Translation System:**
-```typescript
-// Translation key structure
-interface TranslationKeys {
-  // UI Components
-  'sidebar.title': string;
-  'templates.create.title': string;
-  'settings.provider.centralized': string;
   
-  // Error messages  
-  'error.api.connection': string;
-  'error.rate.limit': string;
+  // Provider health monitoring
+  async monitorProviderHealth(): Promise<ProviderStatus[]> {
+    return await Promise.all(
+      this.providers.map(provider => this.checkProviderHealth(provider))
+    );
+  }
   
-  // Custom templates
-  'template.email.title': string;
-  'template.news.title': string;
-  'template.meeting.title': string;
-}
-
-// Translation files
-packages/i18n/
-├── locales/
-│   ├── ja.json            # Japanese translations
-│   └── en.json            # English fallback
-└── lib/
-    └── i18n.ts            # Translation utilities
-```
-
-**Japanese Text Optimization:**
-```css
-/* Tailwind CSS customizations for Japanese */
-.jp-text {
-  font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
-  line-height: 1.7;
-  letter-spacing: 0.05em;
-}
-
-/* Wider sidebar for Japanese text */
-.sidebar {
-  width: 380px; /* Increased from 320px */
+  // Usage analytics and cost tracking
+  async trackUsage(request: ChatRequest, response: ChatResponse): Promise<void> {
+    await this.analytics.record({
+      model: request.model,
+      tokens: response.usage,
+      latency: response.responseTime,
+      cost: this.calculateCost(request, response)
+    });
+  }
 }
 ```
+
+**Model Selection Intelligence**:
+```typescript
+interface ModelSelectionCriteria {
+  // Task-specific optimization
+  taskType: 'planning' | 'execution' | 'validation';
+  
+  // Performance requirements
+  latencyRequirement: 'low' | 'medium' | 'high';
+  qualityRequirement: 'fast' | 'balanced' | 'premium';
+  
+  // Cost considerations
+  budgetConstraint: 'economy' | 'standard' | 'premium';
+  
+  // Language requirements
+  languageSupport: 'japanese' | 'multilingual' | 'english';
+}
+
+// Intelligent model routing
+const modelRouter = {
+  planning: ['claude-sonnet-4', 'gpt-4o', 'deepseek-r1'],
+  execution: ['claude-3.5-sonnet', 'gemini-2.0-flash', 'gpt-4o-mini'],
+  validation: ['claude-3.5-haiku', 'gemini-1.5-pro', 'gpt-4o-mini'],
+  japanese: ['gemini-2.5-pro', 'claude-3.5-sonnet', 'gpt-4o']
+};
+```
+
+### **Latest Model Integration (2025)**
+
+**Flagship Models Available**:
+
+**🧠 Reasoning Powerhouses**:
+- **Claude Sonnet 4** (`anthropic/claude-sonnet-4`) - Latest flagship reasoning
+- **OpenAI O3** (`openai/o3`) - Advanced reasoning capabilities  
+- **DeepSeek R1** (`deepseek/deepseek-r1`) - Open-source reasoning leader
+
+**⚡ Speed Champions**:
+- **Gemini 2.5 Pro** (`google/gemini-2.5-pro-preview`) - Multimodal excellence
+- **Claude 3.5 Sonnet** (`anthropic/claude-3.5-sonnet`) - Balanced performance
+- **Gemini 2.0 Flash** (`google/gemini-2.0-flash`) - Ultra-fast responses
+
+**🌏 Japanese Specialists**:
+- **Gemini Models** - Excellent Japanese language support
+- **Claude Models** - Superior Japanese reasoning
+- **Qwen Max** (`qwen/qwen-max`) - Strong multilingual capabilities
 
 ---
 
-## 📝 Custom Template System
+## 🎛️ Configuration & Customization
 
-### **Template Management Architecture**
+### **Theme System**
 
-**Template Data Structure:**
+**Dynamic Theme Management**:
 ```typescript
-interface Template {
+interface ThemeConfiguration {
+  mode: 'light' | 'dark' | 'system';
+  
+  // Custom color schemes
+  lightTheme: {
+    primary: '#ede2c7',    // Warm cream
+    secondary: '#d4c4a8',  // Muted tan
+    accent: '#8b7355',     // Medium brown
+    hover: '#6d5a44'       // Dark brown
+  };
+  
+  darkTheme: {
+    primary: '#2d2d2d',
+    secondary: '#404040',
+    accent: '#ffffff',
+    hover: '#555555'
+  };
+  
+  // Japanese-optimized typography
+  fonts: {
+    japanese: 'Noto Sans JP, Hiragino Sans, Yu Gothic',
+    english: 'Inter, system-ui, sans-serif'
+  };
+}
+```
+
+### **Template System**
+
+**Custom Workflow Templates**:
+```typescript
+interface WorkflowTemplate {
   id: string;
-  title: string;         // e.g., "重要なメールのまとめ"
-  content: string;       // Prompt template
-  createdAt: number;
-  category?: string;
-  isDefault: boolean;
+  name: string;
+  description: string;
+  category: 'ecommerce' | 'forms' | 'research' | 'social';
+  
+  // Template steps
+  steps: TemplateStep[];
+  
+  // Customizable parameters
+  parameters: {
+    [key: string]: {
+      type: 'text' | 'number' | 'select' | 'boolean';
+      label: string;
+      required: boolean;
+      defaultValue?: any;
+    };
+  };
+  
+  // Success criteria
+  successCriteria: ValidationCriteria[];
 }
 
-// Default templates (Japanese-focused)
-const defaultTemplates: Template[] = [
-  {
-    id: 'email-summary',
-    title: '重要なメールのまとめ',
-    content: '最新のメールから重要な内容をまとめてください。',
-    isDefault: true
-  },
-  {
-    id: 'news-summary', 
-    title: '今日のニュース要約',
-    content: '今日の主要なニュースを要約してください。',
-    isDefault: true
-  },
-  {
-    id: 'meeting-notes',
-    title: '会議の議事録作成', 
-    content: '会議の内容から議事録を作成してください。',
-    isDefault: true
-  }
-];
-```
-
-**Template UI Components:**
-```typescript
-// BookmarkList.tsx - Template management UI
-const BookmarkList: React.FC = () => {
-  const { templates, addTemplate } = useTemplates();
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  
-  return (
-    <div className="template-list">
-      {templates.map(template => (
-        <TemplateCard key={template.id} template={template} />
-      ))}
-      <AddTemplateButton onClick={() => setShowCreateForm(true)} />
-      {showCreateForm && <CreateTemplateForm onSave={addTemplate} />}
-    </div>
-  );
-};
-```
-
----
-
-## ⚙️ Build & Deployment System
-
-### **Monorepo Structure (Turbo)**
-
-**Project Organization:**
-```
-nanobrowser/
-├── packages/
-│   ├── storage/           # Storage abstractions
-│   ├── ui/               # Shared UI components  
-│   ├── i18n/             # Internationalization
-│   ├── shared/           # Common utilities
-│   └── ...
-├── chrome-extension/     # Main extension code
-├── backend-service/      # Express.js API service
-├── pages/
-│   ├── sidepanel/        # Main UI entry point
-│   ├── options/          # Settings page
-│   └── content/          # Content scripts
-└── dist/                 # Built extension
-```
-
-**Build Pipeline:**
-```bash
-# Turbo orchestrates parallel builds
-npm run build
-├── packages/* → dist/    # Compile shared packages  
-├── pages/* → dist/       # Build UI pages
-└── chrome-extension/ → dist/manifest.json
-
-# Build stages
-1. clean:bundle          # Clear previous builds
-2. turbo ready          # Prepare dependencies
-3. turbo build          # Parallel compilation
-```
-
-### **GitHub Actions CI/CD**
-
-**Automated Deployment:**
-```yaml
-# .github/workflows/build-release.yml
-name: Build and Release Extension
-
-on:
-  push:
-    branches: [master]
-
-jobs:
-  build:
-    - Setup Node.js + pnpm
-    - Install dependencies
-    - Build extension → dist/
-    - Create release ZIP
-    - Publish GitHub release
-    
-  test-backend:
-    - Test backend dependencies  
-    - Verify server startup
-```
-
-**Release Automation:**
-- ✅ **Every push** to master triggers build
-- ✅ **Auto-creates** GitHub release with ZIP
-- ✅ **Version naming**: `v{YYYYMMDD-HHMMSS}`
-- ✅ **Release notes** with features and health check
-
-### **Render.com Deployment**
-
-**Auto-Deployment:**
-```yaml
-# Backend deployment configuration
-Service: Web Service
-Runtime: Node.js
-Root Directory: backend-service/
-Build Command: npm install
-Start Command: npm start
-
-# Environment variables
-OPENROUTER_API_KEY: ${SECRET}
-NODE_ENV: production
-PORT: 10000
-RATE_LIMIT_PER_MINUTE: 100
-```
-
-**Deployment Flow:**
-```
-1. Git push → GitHub webhook → Render
-2. Render clones repo → backend-service/
-3. npm install → Builds dependencies
-4. npm start → Starts Express server
-5. Health check → Service goes live
-```
-
----
-
-## 🔍 Development Workflow
-
-### **Local Development**
-
-**Extension Development:**
-```bash
-# Start development server
-npm run dev
-
-# Watch for changes
-npm run dev:watch
-
-# Build for testing
-npm run build
-
-# Load in Chrome
-# chrome://extensions/ → Load unpacked → dist/
-```
-
-**Backend Development:**
-```bash
-cd backend-service
-
-# Install dependencies
-npm install
-
-# Start with hot reload
-npm run dev
-
-# Test endpoints
-curl http://localhost:3001/health
-```
-
-### **Testing Strategy**
-
-**Extension Testing:**
-```typescript
-// Manual testing checklist
-✅ Extension loads without errors
-✅ Japanese UI renders correctly
-✅ Templates system functional
-✅ API calls succeed
-✅ Settings persist across sessions
-
-// Browser console testing
-console.log('Testing centralized API...');
-chrome.storage.local.get(['llmProviders']);
-```
-
-**Backend Testing:**
-```bash
-# Health check
-curl https://einanoshou.onrender.com/health
-
-# Stats endpoint  
-curl https://einanoshou.onrender.com/stats
-
-# Chat completion test
-curl -X POST https://einanoshou.onrender.com/api/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{"model":"gpt-4o","messages":[{"role":"user","content":"Hello"}]}'
-```
-
----
-
-## 📊 Performance & Optimization
-
-### **Extension Performance**
-
-**Bundle Optimization:**
-- **Code splitting**: Separate chunks for different pages
-- **Tree shaking**: Remove unused code
-- **Minification**: Compressed production builds
-- **Lazy loading**: Load components on demand
-
-**Memory Management:**
-```typescript
-// Chrome storage optimization
-const storage = {
-  // Batch operations
-  setBatch: async (items: Record<string, any>) => {
-    await chrome.storage.local.set(items);
-  },
-  
-  // Memory-efficient listeners
-  addListener: (callback: (changes: any) => void) => {
-    chrome.storage.onChanged.addListener(callback);
-    return () => chrome.storage.onChanged.removeListener(callback);
-  }
-};
-```
-
-### **Backend Performance**
-
-**API Optimization:**
-```typescript
-// Response streaming for real-time updates
-app.post('/api/chat/completions', async (req, res) => {
-  const stream = await fetch(openrouterUrl, {
-    method: 'POST',
-    body: JSON.stringify({...req.body, stream: true}),
-    headers: {...headers}
-  });
-  
-  // Pipe stream directly to client
-  stream.body.pipe(res);
-});
-
-// Memory-efficient rate limiting
-const rateLimiter = new RateLimiterMemory({
-  points: 100,       // 100 requests
-  duration: 60,      // per 60 seconds
-  blockDuration: 60, // block for 60 seconds when exceeded
-});
-```
-
----
-
-## 🔐 Security Considerations
-
-### **Extension Security**
-
-**Content Security Policy:**
-```json
-// manifest.json
-{
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self';"
-  },
-  "permissions": [
-    "storage",
-    "sidePanel", 
-    "activeTab",
-    "scripting"
+// Example Japanese e-commerce template
+const amazonJapanTemplate: WorkflowTemplate = {
+  id: 'amazon-japan-search',
+  name: 'Amazon Japan 商品検索',
+  description: 'Amazon Japanで商品を検索し、価格比較を行います',
+  category: 'ecommerce',
+  steps: [
+    {
+      action: 'navigate',
+      target: 'https://amazon.co.jp',
+      description: 'Amazon Japanにアクセス'
+    },
+    {
+      action: 'search',
+      target: '#twotabsearchtextbox',
+      value: '{{searchTerm}}',
+      description: '商品を検索'
+    },
+    {
+      action: 'analyze',
+      target: '.s-result-item',
+      description: '検索結果を分析'
+    }
   ],
-  "host_permissions": [
-    "https://einanoshou.onrender.com/*"
-  ]
-}
-```
-
-**Data Protection:**
-```typescript
-// No sensitive data stored locally
-interface SafeStorage {
-  // ✅ Safe to store
-  userPreferences: UserSettings;
-  customTemplates: Template[];
-  
-  // ❌ Never stored locally
-  // apiKeys: string;
-  // userCredentials: any;
-}
-```
-
-### **Backend Security**
-
-**API Security Layers:**
-```typescript
-// 1. CORS protection
-const corsOptions = {
-  origin: /^chrome-extension:\/\/[a-z]{32}$/,
-  credentials: false
-};
-
-// 2. Rate limiting per IP
-const rateLimiter = new RateLimiterMemory({
-  keyGeneratorFunction: req => req.ip,
-  points: 100,
-  duration: 60
-});
-
-// 3. Request validation
-const validateRequest = (req, res, next) => {
-  if (!req.body.messages || !Array.isArray(req.body.messages)) {
-    return res.status(400).json({error: 'Invalid request format'});
+  parameters: {
+    searchTerm: {
+      type: 'text',
+      label: '検索キーワード',
+      required: true
+    }
   }
-  next();
 };
-
-// 4. Security headers
-app.use(helmet({
-  crossOriginEmbedderPolicy: false,
-  contentSecurityPolicy: false
-}));
 ```
 
 ---
 
-## 🎯 Future Enhancements
+## 🔒 Security & Privacy
 
-### **Planned Features**
+### **Data Protection**
 
-**Technical Improvements:**
-- **Offline support**: Cache responses for offline use
-- **Performance monitoring**: Real-time performance metrics
-- **Error tracking**: Sentry or similar error reporting
-- **Analytics**: Usage patterns and optimization insights
+**Privacy-First Architecture**:
+- **Local Storage**: Sensitive data stored locally in Chrome storage
+- **No Data Persistence**: API service doesn't store user data
+- **Encrypted Communication**: All API calls use HTTPS/TLS
+- **API Key Management**: Centralized service eliminates user API key exposure
 
-**User Experience:**
-- **Voice input**: Speech-to-text integration
-- **Export functions**: Save conversations/templates
-- **Collaborative templates**: Share templates between users
-- **Custom themes**: UI customization options
-
-### **Scalability Considerations**
-
-**Backend Scaling:**
+**Security Measures**:
 ```typescript
-// Database integration (future)
-interface ScalableStorage {
-  users: UserCollection;
-  templates: TemplateCollection; 
-  usage: AnalyticsCollection;
-}
-
-// Microservices architecture (future)
-services: {
-  apiGateway: 'Kong/Nginx',
-  llmProxy: 'Current backend',
-  userManagement: 'Auth0/Firebase',
-  analytics: 'PostHog/Mixpanel'
+interface SecurityConfiguration {
+  // Content Security Policy
+  csp: {
+    scriptSrc: ["'self'", "'unsafe-inline'"];
+    connectSrc: ["'self'", "https://einanoshou.onrender.com"];
+    imgSrc: ["'self'", "data:", "https:"];
+  };
+  
+  // Rate limiting
+  rateLimits: {
+    requestsPerMinute: 100;
+    requestsPerHour: 1000;
+    burstLimit: 10;
+  };
+  
+  // Input validation
+  validation: {
+    maxPromptLength: 10000;
+    allowedDomains: string[];
+    blockedPatterns: RegExp[];
+  };
 }
 ```
 
-This technical documentation provides a comprehensive overview of how **えいなーの手** achieves its sophisticated AI browsing automation capabilities through a carefully architected system combining modern web technologies, Chrome extension APIs, and cloud infrastructure. 
+---
+
+## 📊 Performance & Monitoring
+
+### **Analytics Dashboard**
+
+**Usage Metrics**:
+- **Task Success Rate**: Percentage of completed tasks
+- **Average Execution Time**: Time from start to completion
+- **Model Performance**: Response times and accuracy by model
+- **Error Patterns**: Common failure points and recovery success
+- **Cost Tracking**: Token usage and API costs per task
+
+**Performance Optimization**:
+```typescript
+interface PerformanceMetrics {
+  // Execution metrics
+  taskCompletionRate: number;
+  averageExecutionTime: number;
+  stepSuccessRate: number;
+  
+  // Model performance
+  modelLatency: Record<string, number>;
+  modelAccuracy: Record<string, number>;
+  modelCostEfficiency: Record<string, number>;
+  
+  // System health
+  memoryUsage: number;
+  cpuUsage: number;
+  networkLatency: number;
+}
+```
+
+---
+
+## 🚀 Deployment & Scaling
+
+### **Production Architecture**
+
+**Scalable Infrastructure**:
+```mermaid
+graph TB
+    Users[👥 Users] --> CDN[🌐 CDN/Edge Cache]
+    CDN --> LB[⚖️ Load Balancer]
+    LB --> API1[🖥️ API Server 1]
+    LB --> API2[🖥️ API Server 2]
+    LB --> API3[🖥️ API Server 3]
+    
+    API1 --> Redis[📦 Redis Cache]
+    API2 --> Redis
+    API3 --> Redis
+    
+    API1 --> OpenRouter[🤖 OpenRouter]
+    API2 --> OpenRouter
+    API3 --> OpenRouter
+    
+    subgraph "Monitoring"
+        Metrics[📊 Metrics]
+        Logs[📝 Logs]
+        Alerts[🚨 Alerts]
+    end
+    
+    API1 --> Metrics
+    API2 --> Logs
+    API3 --> Alerts
+```
+
+**Deployment Configuration**:
+```yaml
+# Docker deployment
+version: '3.8'
+services:
+  nanobrowser-api:
+    image: nanobrowser/api:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - RATE_LIMIT_PER_MINUTE=100
+      - ENABLE_ANALYTICS=true
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+```
+
+---
+
+## 🔧 Development & Extension
+
+### **Plugin Architecture**
+
+**Extensible Action System**:
+```typescript
+interface ActionPlugin {
+  name: string;
+  version: string;
+  
+  // Action definitions
+  actions: {
+    [actionName: string]: {
+      execute: (params: ActionParams) => Promise<ActionResult>;
+      validate: (params: ActionParams) => boolean;
+      description: string;
+    };
+  };
+  
+  // Custom UI components
+  components?: {
+    [componentName: string]: React.ComponentType;
+  };
+  
+  // Configuration schema
+  configSchema?: JSONSchema;
+}
+
+// Example custom action plugin
+const japaneseFormsPlugin: ActionPlugin = {
+  name: 'japanese-forms',
+  version: '1.0.0',
+  actions: {
+    fillJapaneseForm: {
+      execute: async (params) => {
+        // Custom logic for Japanese form filling
+        return await fillFormWithJapaneseData(params);
+      },
+      validate: (params) => validateJapaneseFormParams(params),
+      description: '日本語フォームの自動入力'
+    }
+  }
+};
+```
+
+### **API Extensions**
+
+**Custom Model Integration**:
+```typescript
+interface CustomModelProvider {
+  name: string;
+  endpoint: string;
+  
+  // Model capabilities
+  capabilities: {
+    chat: boolean;
+    vision: boolean;
+    reasoning: boolean;
+    japanese: boolean;
+  };
+  
+  // Request transformation
+  transformRequest: (request: StandardRequest) => ProviderRequest;
+  transformResponse: (response: ProviderResponse) => StandardResponse;
+  
+  // Cost calculation
+  calculateCost: (usage: TokenUsage) => number;
+}
+```
+
+---
+
+This comprehensive technical architecture enables ネコノテ to provide intelligent, reliable, and scalable browser automation with deep Japanese market integration and cutting-edge AI capabilities. 

@@ -121,7 +121,9 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
         <button
           onClick={handleAddClick}
           className={`rounded-md p-1.5 text-xs ${
-            isDarkMode ? 'bg-slate-700 text-sky-400 hover:bg-slate-600' : 'bg-sky-100 text-sky-600 hover:bg-sky-200'
+            isDarkMode
+              ? 'bg-slate-700 text-sky-400 hover:bg-slate-600'
+              : 'bg-[#8b7355]/20 text-[#8b7355] hover:bg-[#8b7355]/30'
           } transition-colors`}
           aria-label={t('addTemplate')}
           type="button">
@@ -133,7 +135,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
       {showAddForm && (
         <div
           className={`mb-4 rounded-lg border p-4 ${
-            isDarkMode ? 'border-slate-600 bg-slate-800' : 'border-sky-200 bg-sky-50'
+            isDarkMode ? 'border-slate-600 bg-slate-800' : 'border-[#d4c4a8] bg-[#ede2c7]/50'
           }`}>
           <div className="mb-3">
             <label className={`mb-1 block text-xs font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -146,7 +148,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
               onChange={e => setNewTitle(e.target.value)}
               placeholder={t('templateTitlePlaceholder')}
               className={`w-full rounded border px-3 py-2 text-sm ${
-                isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-sky-200 bg-white text-gray-700'
+                isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-[#d4c4a8] bg-white text-gray-700'
               }`}
             />
           </div>
@@ -161,7 +163,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
               placeholder={t('templateContentPlaceholder')}
               rows={3}
               className={`w-full rounded border px-3 py-2 text-sm ${
-                isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-sky-200 bg-white text-gray-700'
+                isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-[#d4c4a8] bg-white text-gray-700'
               }`}
             />
           </div>
@@ -182,7 +184,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
               className={`rounded px-3 py-1.5 text-xs ${
                 isDarkMode
                   ? 'bg-sky-600 text-white hover:bg-sky-700 disabled:bg-slate-600'
-                  : 'bg-sky-500 text-white hover:bg-sky-600 disabled:bg-gray-300'
+                  : 'bg-[#8b7355] text-white hover:bg-[#6d5a44] disabled:bg-gray-300'
               } disabled:cursor-not-allowed`}
               type="button">
               {t('save')}
@@ -201,8 +203,8 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
             onDragOver={handleDragOver}
             onDrop={e => handleDrop(e, bookmark.id)}
             className={`group relative rounded-lg p-3 ${
-              isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-white hover:bg-sky-50'
-            } border ${isDarkMode ? 'border-slate-700' : 'border-sky-100'}`}>
+              isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-white hover:bg-[#ede2c7]/30'
+            } border ${isDarkMode ? 'border-slate-700' : 'border-[#d4c4a8]'}`}>
             {editingId === bookmark.id ? (
               <div className="flex items-center">
                 <input
@@ -211,7 +213,9 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
                   value={editTitle}
                   onChange={e => setEditTitle(e.target.value)}
                   className={`mr-2 grow rounded px-2 py-1 text-sm ${
-                    isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-sky-100 bg-white text-gray-700'
+                    isDarkMode
+                      ? 'border-slate-600 bg-slate-700 text-gray-200'
+                      : 'border-[#d4c4a8] bg-white text-gray-700'
                   } border`}
                 />
                 <button
@@ -269,7 +273,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
                   className={`absolute right-[28px] top-1/2 z-10 -translate-y-1/2 rounded p-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${
                     isDarkMode
                       ? 'bg-slate-700 text-sky-400 hover:bg-slate-600'
-                      : 'bg-white text-sky-500 hover:bg-gray-100'
+                      : 'bg-white text-[#8b7355] hover:bg-gray-100'
                   }`}
                   aria-label={t('editBookmark')}
                   type="button">

@@ -15,6 +15,7 @@ import { Actors, type EventCallback, EventType, ExecutionState } from './event/t
 import { ChatModelAuthError, ChatModelForbiddenError, RequestCancelledError } from './agents/errors';
 import { wrapUntrustedContent } from './messages/utils';
 import { URLNotAllowedError } from '../browser/views';
+import { detectLanguage } from './utils/languageDetection';
 const logger = createLogger('Executor');
 
 export interface ExecutorExtraArgs {
@@ -55,9 +56,14 @@ export class Executor {
     );
 
     this.tasks.push(task);
-    this.navigatorPrompt = new NavigatorPrompt(context.options.maxActionsPerStep);
-    this.plannerPrompt = new PlannerPrompt();
-    this.validatorPrompt = new ValidatorPrompt(task);
+
+    // Detect language from the initial task
+    const detectedLanguage = detectLanguage(task);
+    context.language = detectedLanguage;
+
+    this.navigatorPrompt = new NavigatorPrompt(context.options.maxActionsPerStep, detectedLanguage);
+    this.plannerPrompt = new PlannerPrompt(detectedLanguage);
+    this.validatorPrompt = new ValidatorPrompt(task, detectedLanguage);
 
     const actionBuilder = new ActionBuilder(context, extractorLLM);
     const navigatorActionRegistry = new NavigatorActionRegistry(actionBuilder.buildDefaultActions());

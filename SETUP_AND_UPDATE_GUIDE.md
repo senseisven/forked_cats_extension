@@ -1,4 +1,4 @@
-# 🛠️ えいなーの手 (Einar's Hand) - Setup & Update Guide
+# 🛠️ ネコノテ (Cat's Paw) - Setup & Update Guide
 
 ## 📋 Table of Contents
 - [Quick Setup](#quick-setup)
@@ -16,7 +16,7 @@
 
 **Option A: From GitHub Releases (Recommended)**
 1. Go to your repository's [Releases page](https://github.com/senseisven/nanobrowser/releases)
-2. Download the latest `えいなーの手-extension-*.zip` file
+2. Download the latest `ネコノテ-extension-*.zip` file
 3. Unzip the contents to a folder
 
 **Option B: Build from Source**
@@ -37,7 +37,7 @@ npm run build
 ### 3. **Verify Installation**
 1. Click the extension icon in Chrome toolbar
 2. You should see the Japanese interface
-3. The default provider should be **"エイナーのAI (APIキー不要)"**
+3. The default provider should be **"ネコノテAI (APIキー不要)"**
 4. No API key configuration required!
 
 ---
@@ -144,7 +144,7 @@ Update in Render dashboard → Your Service → Environment:
 - ✅ Restart Chrome
 - ✅ Check if Japanese fonts are installed on your system
 
-**Problem**: "エイナーのAI" not showing up
+**Problem**: "ネコノテAI" not showing up
 - ✅ Extension might need a few seconds to initialize
 - ✅ Check browser console for errors (F12)
 - ✅ Try reloading the extension

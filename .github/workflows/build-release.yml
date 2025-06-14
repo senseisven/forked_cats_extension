@@ -37,7 +37,7 @@ jobs:
     - name: Archive extension build
       uses: actions/upload-artifact@v4
       with:
-        name: えいなーの手-extension-${{ github.sha }}
+        name: ネコノテ-extension-${{ github.sha }}
         path: dist/
         retention-days: 30
         
@@ -45,7 +45,7 @@ jobs:
       if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
       run: |
         cd dist
-        zip -r ../えいなーの手-extension-v$(date +%Y%m%d-%H%M%S).zip .
+        zip -r ../ネコノテ-extension-v$(date +%Y%m%d-%H%M%S).zip .
         cd ..
         
     - name: Create Release
@@ -53,7 +53,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: v$(date +%Y%m%d-%H%M%S)
-        name: えいなーの手 Extension Build $(date +%Y-%m-%d)
+                  name: ネコノテ Extension Build $(date +%Y-%m-%d)
         body: |
           🚀 **Automatic Build Release**
           
@@ -74,7 +74,7 @@ jobs:
           
           Built from commit: ${{ github.sha }}
         files: |
-          えいなーの手-extension-*.zip
+          ネコノテ-extension-*.zip
         draft: false
         prerelease: false
       env:

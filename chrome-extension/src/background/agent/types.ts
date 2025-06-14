@@ -3,6 +3,7 @@ import type BrowserContext from '../browser/context';
 import type MessageManager from './messages/service';
 import type { EventManager } from './event/manager';
 import { type Actors, type ExecutionState, AgentEvent } from './event/types';
+import type { DetectedLanguage } from './utils/languageDetection';
 
 export interface AgentOptions {
   maxSteps: number;
@@ -62,6 +63,7 @@ export class AgentContext {
   stepInfo: AgentStepInfo | null;
   actionResults: ActionResult[];
   stateMessageAdded: boolean;
+  language: DetectedLanguage;
   constructor(
     taskId: string,
     browserContext: BrowserContext,
@@ -84,6 +86,7 @@ export class AgentContext {
     this.stepInfo = null;
     this.actionResults = [];
     this.stateMessageAdded = false;
+    this.language = 'auto';
   }
 
   async emitEvent(actor: Actors, state: ExecutionState, eventDetails: string) {

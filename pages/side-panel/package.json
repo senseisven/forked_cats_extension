@@ -22,10 +22,8 @@
     "@extension/i18n": "workspace:*",
     "@extension/shared": "workspace:*",
     "@extension/storage": "workspace:*",
-    "nanoid": "3.3.11",
     "react-icons": "^5.0.0",
-    "webextension-polyfill": "^0.12.0",
-    "zod": "3.25.58"
+    "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
     "@extension/tailwindcss-config": "workspace:*",

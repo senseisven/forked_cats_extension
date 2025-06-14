@@ -7,6 +7,7 @@ import { buildDynamicActionSchema } from '../actions/builder';
 import { agentBrainSchema } from '../types';
 import { type BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { Actors, ExecutionState } from '../event/types';
+import { getStatusMessages } from '../prompts/templates/dynamic';
 import {
   ChatModelAuthError,
   ChatModelForbiddenError,
@@ -95,8 +96,8 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
         if (isAbortedError(error)) {
           throw error;
         }
-        const errorMessage = `Failed to invoke ${this.modelName} with structured output: ${error}`;
-        throw new Error(errorMessage);
+        const errorMessage = `構造化出力での${this.modelName}の呼び出しに失敗しました: ${error}`;
+        throw new Error(`${this.modelName}の構造化出力呼び出しに失敗しました: ${error}`);
       }
 
       // Use type assertion to access the properties
@@ -132,7 +133,8 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
     let cancelled = false;
 
     try {
-      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.STEP_START, 'Navigating...');
+      const statusMessages = getStatusMessages(this.context.language);
+      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.STEP_START, statusMessages.navigating);
 
       const messageManager = this.context.messageManager;
       // add the browser state message
@@ -168,7 +170,7 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
         return agentOutput;
       }
       // emit event
-      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.STEP_OK, 'Navigation done');
+      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.STEP_OK, statusMessages.navigationComplete);
       let done = false;
       if (actionResults.length > 0 && actionResults[actionResults.length - 1].isDone) {
         done = true;
@@ -192,7 +194,7 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
       }
 
       const errorMessage = error instanceof Error ? error.message : String(error);
-      const errorString = `Navigation failed: ${errorMessage}`;
+      const errorString = `ナビゲーションに失敗しました: ${errorMessage}`;
       logger.error(errorString);
       this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.STEP_FAIL, errorString);
       agentOutput.error = errorMessage;

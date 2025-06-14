@@ -125,7 +125,7 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
         if (isAbortedError(error)) {
           throw error;
         }
-        const errorMessage = `Failed to invoke ${this.modelName} with structured output: ${error}`;
+        const errorMessage = `${this.modelName}の構造化出力呼び出しに失敗しました: ${error}`;
         throw new Error(errorMessage);
       }
     }

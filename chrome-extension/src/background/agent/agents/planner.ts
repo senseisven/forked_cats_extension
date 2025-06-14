@@ -4,6 +4,7 @@ import { z } from 'zod';
 import type { AgentOutput } from '../types';
 import { HumanMessage } from '@langchain/core/messages';
 import { Actors, ExecutionState } from '../event/types';
+import { getStatusMessages } from '../prompts/templates/dynamic';
 import {
   ChatModelAuthError,
   ChatModelForbiddenError,
@@ -48,7 +49,8 @@ export class PlannerAgent extends BaseAgent<typeof plannerOutputSchema, PlannerO
 
   async execute(): Promise<AgentOutput<PlannerOutput>> {
     try {
-      this.context.emitEvent(Actors.PLANNER, ExecutionState.STEP_START, 'Planning...');
+      const statusMessages = getStatusMessages(this.context.language);
+      this.context.emitEvent(Actors.PLANNER, ExecutionState.STEP_START, statusMessages.planning);
       // get all messages from the message manager, state message should be the last one
       const messages = this.context.messageManager.getMessages();
       // Use full message history except the first one
@@ -75,7 +77,8 @@ export class PlannerAgent extends BaseAgent<typeof plannerOutputSchema, PlannerO
 
       const modelOutput = await this.invoke(plannerMessages);
       if (!modelOutput) {
-        throw new Error('Failed to validate planner output');
+        const statusMessages = getStatusMessages(this.context.language);
+        throw new Error(statusMessages.plannerFailed);
       }
       this.context.emitEvent(Actors.PLANNER, ExecutionState.STEP_OK, modelOutput.next_steps);
       logger.info('Planner output', JSON.stringify(modelOutput, null, 2));
@@ -98,7 +101,7 @@ export class PlannerAgent extends BaseAgent<typeof plannerOutputSchema, PlannerO
 
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error(`Planning failed: ${errorMessage}`);
-      this.context.emitEvent(Actors.PLANNER, ExecutionState.STEP_FAIL, `Planning failed: ${errorMessage}`);
+      this.context.emitEvent(Actors.PLANNER, ExecutionState.STEP_FAIL, `計画失敗: ${errorMessage}`);
       return {
         id: this.id,
         error: errorMessage,

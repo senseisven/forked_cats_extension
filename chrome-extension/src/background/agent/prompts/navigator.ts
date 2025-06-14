@@ -4,16 +4,22 @@ import { type HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { AgentContext } from '@src/background/agent/types';
 import { createLogger } from '@src/background/log';
 import { navigatorSystemPromptTemplate } from './templates/navigator';
+import { getDynamicNavigatorPrompt, type DetectedLanguage } from './templates/dynamic';
 
 const logger = createLogger('agent/prompts/navigator');
 
 export class NavigatorPrompt extends BasePrompt {
   private systemMessage: SystemMessage;
+  private language: DetectedLanguage;
 
-  constructor(private readonly maxActionsPerStep = 10) {
+  constructor(
+    private readonly maxActionsPerStep = 10,
+    language: DetectedLanguage = 'auto',
+  ) {
     super();
+    this.language = language;
 
-    const promptTemplate = navigatorSystemPromptTemplate;
+    const promptTemplate = getDynamicNavigatorPrompt(language);
     // Format the template with the maxActionsPerStep
     const formattedPrompt = promptTemplate.replace('{{max_actions}}', this.maxActionsPerStep.toString()).trim();
     this.systemMessage = new SystemMessage(formattedPrompt);

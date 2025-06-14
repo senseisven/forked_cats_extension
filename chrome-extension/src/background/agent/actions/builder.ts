@@ -158,7 +158,7 @@ export class ActionBuilder {
     actions.push(searchGoogle);
 
     const goToUrl = new Action(async (input: z.infer<typeof goToUrlActionSchema.schema>) => {
-      const intent = input.intent || `Navigating to ${input.url}`;
+      const intent = input.intent || `${input.url}にナビゲート中`;
       this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_START, intent);
 
       await this.context.browserContext.navigateTo(input.url);
@@ -173,7 +173,7 @@ export class ActionBuilder {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const goBack = new Action(async (input: z.infer<typeof goBackActionSchema.schema>) => {
-      const intent = input.intent || 'Navigating back';
+      const intent = input.intent || '戻る';
       this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_START, intent);
 
       const page = await this.context.browserContext.getCurrentPage();

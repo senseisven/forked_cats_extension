@@ -100,7 +100,7 @@ You should see:
 The extension will automatically:
 1. Initialize the centralized API provider on startup
 2. Set it as the default (no API key required)
-3. Show "エイナーのAI (APIキー不要)" in the settings
+3. Show "ネコノテAI (APIキー不要)" in the settings
 
 ---
 

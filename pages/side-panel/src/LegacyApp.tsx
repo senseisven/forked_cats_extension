@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { RxDiscordLogo } from 'react-icons/rx';
 import { FiSettings } from 'react-icons/fi';
 import { PiPlusBold } from 'react-icons/pi';
 import { GrHistory } from 'react-icons/gr';
@@ -881,7 +880,7 @@ const SidePanel = () => {
   return (
     <div>
       <div
-        className={`flex h-screen flex-col ${isDarkMode ? 'bg-slate-900' : "bg-[url('/bg.jpg')] bg-cover bg-no-repeat"} overflow-hidden border ${isDarkMode ? 'border-sky-800' : 'border-[rgb(186,230,253)]'} rounded-2xl`}>
+        className={`flex h-screen flex-col ${isDarkMode ? 'bg-slate-900' : 'bg-[#ede2c7]'} overflow-hidden border ${isDarkMode ? 'border-sky-800' : 'border-[#d4c4a8]'} rounded-2xl`}>
         <header className="header relative">
           <div className="header-logo">
             {showHistory ? (
@@ -893,7 +892,7 @@ const SidePanel = () => {
                 ← Back
               </button>
             ) : (
-              <img src="/icon-128.png" alt="Extension Logo" className="size-6" />
+              <img src="/icon-128.png" alt="ネコノテ" className="size-6" />
             )}
           </div>
           <div className="header-icons">
@@ -919,13 +918,7 @@ const SidePanel = () => {
                 </button>
               </>
             )}
-            <a
-              href="https://discord.gg/NN3ABHggMK"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'}`}>
-              <RxDiscordLogo size={20} />
-            </a>
+
             <button
               type="button"
               onClick={() => chrome.runtime.openOptionsPage()}
@@ -966,12 +959,12 @@ const SidePanel = () => {
               <div
                 className={`flex flex-1 items-center justify-center p-8 ${isDarkMode ? 'text-sky-300' : 'text-sky-600'}`}>
                 <div className="max-w-md text-center">
-                  <img src="/icon-128.png" alt="エイナーの手ロゴ" className="mx-auto mb-4 size-12" />
+                  <img src="/icon-128.png" alt="ネコノテロゴ" className="mx-auto mb-4 size-12" />
                   <h3 className={`mb-2 text-lg font-semibold ${isDarkMode ? 'text-sky-200' : 'text-sky-700'}`}>
-                    エイナーの手へようこそ！
+                    ネコノテへようこそ！
                   </h3>
                   <p className="mb-4">
-                    使い始めるにはAIモデルを設定してください。設定パネルでAPIキーを構成するか、APIキー不要のエイナーのAIを選択してください。
+                    使い始めるにはAIモデルを設定してください。設定パネルでAPIキーを構成するか、APIキー不要のネコノテAIを選択してください。
                   </p>
                   <button
                     onClick={() => chrome.runtime.openOptionsPage()}
@@ -987,14 +980,6 @@ const SidePanel = () => {
                       rel="noopener noreferrer"
                       className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-600'}`}>
                       Quick Start Guide
-                    </a>
-                    <span className="mx-2">•</span>
-                    <a
-                      href="https://discord.gg/NN3ABHggMK"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-600'}`}>
-                      Join Our Community
                     </a>
                   </div>
                 </div>

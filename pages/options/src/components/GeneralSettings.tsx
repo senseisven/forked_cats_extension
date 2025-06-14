@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { type GeneralSettingsConfig, generalSettingsStore, DEFAULT_GENERAL_SETTINGS } from '@extension/storage';
+import {
+  type GeneralSettingsConfig,
+  generalSettingsStore,
+  DEFAULT_GENERAL_SETTINGS,
+  type ThemeMode,
+} from '@extension/storage';
 import { t } from '@extension/i18n';
 
 interface GeneralSettingsProps {
@@ -27,6 +32,19 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
     setSettings(latestSettings);
   };
 
+  const getThemeDisplayName = (mode: ThemeMode): string => {
+    switch (mode) {
+      case 'light':
+        return t('lightTheme') || 'Light (Warm Cream)';
+      case 'dark':
+        return t('darkTheme') || 'Dark';
+      case 'system':
+        return t('systemTheme') || 'System Default';
+      default:
+        return 'Light (Warm Cream)';
+    }
+  };
+
   return (
     <section className="space-y-6">
       <div
@@ -36,6 +54,29 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
         </h2>
 
         <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                {t('themeMode') || 'Theme Mode'}
+              </h3>
+              <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                {t('themeModeDescription') || 'Choose between light, dark, or system default theme'}
+              </p>
+            </div>
+            <label htmlFor="themeMode" className="sr-only">
+              {t('themeMode') || 'Theme Mode'}
+            </label>
+            <select
+              id="themeMode"
+              value={settings.themeMode}
+              onChange={e => updateSetting('themeMode', e.target.value as ThemeMode)}
+              className={`rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} px-3 py-2 min-w-[180px]`}>
+              <option value="light">{getThemeDisplayName('light')}</option>
+              <option value="dark">{getThemeDisplayName('dark')}</option>
+              <option value="system">{getThemeDisplayName('system')}</option>
+            </select>
+          </div>
+
           <div className="flex items-center justify-between">
             <div>
               <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>

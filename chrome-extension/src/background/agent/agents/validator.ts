@@ -52,7 +52,7 @@ export class ValidatorAgent extends BaseAgent<typeof validatorOutputSchema, Vali
    */
   async execute(): Promise<AgentOutput<ValidatorOutput>> {
     try {
-      this.context.emitEvent(Actors.VALIDATOR, ExecutionState.STEP_START, 'Validating...');
+      this.context.emitEvent(Actors.VALIDATOR, ExecutionState.STEP_START, '検証中...');
 
       let stateMessage = await this.prompt.getUserMessage(this.context);
       if (this.plan) {
@@ -67,7 +67,7 @@ export class ValidatorAgent extends BaseAgent<typeof validatorOutputSchema, Vali
 
       const modelOutput = await this.invoke(inputMessages);
       if (!modelOutput) {
-        throw new Error('Failed to validate task result');
+        throw new Error('タスク結果の検証に失敗しました');
       }
 
       logger.info('validator output', JSON.stringify(modelOutput, null, 2));

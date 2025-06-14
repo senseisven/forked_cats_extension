@@ -2,6 +2,9 @@ import { StorageEnum } from '../base/enums';
 import { createStorage } from '../base/base';
 import type { BaseStorage } from '../base/types';
 
+// Theme mode options
+export type ThemeMode = 'light' | 'dark' | 'system';
+
 // Interface for general settings configuration
 export interface GeneralSettingsConfig {
   maxSteps: number;
@@ -12,6 +15,7 @@ export interface GeneralSettingsConfig {
   planningInterval: number;
   displayHighlights: boolean;
   minWaitPageLoad: number;
+  themeMode: ThemeMode;
 }
 
 export type GeneralSettingsStorage = BaseStorage<GeneralSettingsConfig> & {
@@ -30,6 +34,7 @@ export const DEFAULT_GENERAL_SETTINGS: GeneralSettingsConfig = {
   planningInterval: 3,
   displayHighlights: true,
   minWaitPageLoad: 250,
+  themeMode: 'light',
 };
 
 const storage = createStorage<GeneralSettingsConfig>('general-settings', DEFAULT_GENERAL_SETTINGS, {

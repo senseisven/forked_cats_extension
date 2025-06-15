@@ -6,22 +6,22 @@ export const ACTOR_PROFILES = {
   },
   system: {
     name: 'System',
-    icon: 'icons/system.svg',
+    icon: '/system.png',
     iconBackground: '#2196F3',
   },
   planner: {
     name: 'プランナー',
-    icon: 'planner.png',
+    icon: '/planner.png',
     iconBackground: '#FF9800',
   },
   navigator: {
     name: 'ナビゲーター',
-    icon: 'navigator.png',
+    icon: '/navigator.png',
     iconBackground: '#40A9FF',
   },
   validator: {
     name: 'バリデーター',
-    icon: 'validator.png',
+    icon: '/validator.png',
     iconBackground: '#EC407A',
   },
   manager: {

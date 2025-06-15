@@ -32,7 +32,39 @@
 
 ## Recent Major Updates
 
-### Dynamic Language Detection System (Latest)
+### Speech-to-Text & Language-Aware System Messages Fix (Latest)
+- **Speech-to-Text Dropdown Issue**: Fixed empty dropdown in settings - was only showing direct Gemini providers, now includes Gemini models from CentralizedAPI (google/gemini-* models)
+- **Model Filtering**: Updated ModelSettings.tsx to show speech-to-text models from both `ProviderTypeEnum.Gemini` and `ProviderTypeEnum.CentralizedAPI` with `google/gemini` prefix
+- **Language-Aware Error Messages**: Implemented Japanese error messages for speech-to-text service instead of hardcoded English
+- **Error Message Translation**: Added Japanese translations for "speechToTextNotConfigured", "speechToTextProviderNotFound", and "speechTranscriptionFailed"
+- **Service Integration**: Updated speechToText.ts to use Japanese error messages for better user experience
+- **Branding Update**: Changed user-facing references from "nanobrowser" to "ネコノテ" in API headers, startup messages, and UI links
+- **System Icon Update**: Replaced system icon from old SVG (`icons/system.svg`) to new PNG (`/system.png`) for consistency with other agent icons
+- **Result**: Speech-to-text dropdown now properly shows available Gemini models, all system messages appear in Japanese, and system icon uses new design
+
+### Provider Name Cache Fix
+- **Issue**: Browser extension storage was caching old provider name "エイナーのAI (No API Key Required)" despite code updates
+- **Root Cause**: `setupDefaultCentralizedProvider()` wasn't force-updating existing provider names, only models
+- **Solution**: Enhanced provider update logic to detect and fix cached naming issues
+- **Detection Logic**: Checks for old names containing "エイナー" or "No API Key Required"
+- **Force Update**: Now updates both model list AND provider name to ensure "ネコノテAPI" is displayed correctly
+- **Result**: Provider now consistently shows as "ネコノテAPI" across all interfaces after extension restart
+
+### Token-Based Usage System
+- **Token Management**: Implemented Cursor-style token system with `TokenUsageManager` class
+- **Usage Tracking**: Tokens consumed when agents (Planner, Navigator, Validator) are invoked, not on user input
+- **Free Tier**: 50 tokens per month for free users, resets monthly on the 1st
+- **Model-Based Costs**: Different token costs based on model quality (1-6 tokens per request)
+  - Premium models (Claude Sonnet 4, GPT-4.1, O3): 3-6 tokens
+  - Standard models (GPT-4o, DeepSeek): 2-3 tokens  
+  - Light models (GPT-4o-mini, Haiku): 1 token
+- **Token Counter**: Real-time usage display in chat panel with progress bars
+- **Settings Integration**: Complete token management page in settings with usage statistics
+- **Japanese UI**: All token-related text and explanations in Japanese
+- **Error Handling**: Graceful token exhaustion with Japanese error messages
+- **Storage Integration**: Persistent token usage tracking with auto-reset functionality
+
+### Dynamic Language Detection System
 - **Language Detection**: Implemented `languageDetection.ts` with proper regex patterns
 - **Fixed Critical Bug**: Language detection regex was missing global flags, causing incorrect detection
 - **Dynamic Prompts**: Created `templates/dynamic.ts` with language-specific prompt templates
@@ -61,8 +93,9 @@
 - **Added `setLanguage` Method**: Implemented `setLanguage` method in all prompt classes (`PlannerPrompt`, `NavigatorPrompt`, `ValidatorPrompt`)
 - **Enhanced `Executor.addFollowUpTask`**: Updated `Executor.addFollowUpTask` to detect the language of each new task and propagate it to the prompts and context at runtime
 - **Fix for Language Persistence**: Ensures the Planner/Navigator/Validator always respond in the same language as the latest user input, fixing the issue where later tasks kept the initial language
-- **UI Improvements**: Updated agent icons to use new PNG files from dist directory (navigator.png, planner.png, validator.png), improved timestamp readability by making the text darker (from text-gray-300 to text-gray-600 in light mode), and cleaned up the provider name from "ネコノテAI (No API Key Required)" to just "ネコノテAI" for better display in model selection dropdowns.
+- **UI Improvements**: Updated agent icons to use new PNG files from dist directory (navigator.png, planner.png, validator.png), improved timestamp readability by making the text darker (from text-gray-300 to text-gray-600 in light mode), and cleaned up the provider name from "ネコノテAI (No API Key Required)" to just "ネコノテAPI" for better display in model selection dropdowns.
 - **Modern Loader Animations**: Completely redesigned the loading animations throughout the chat panel with modern, stylish loaders. Each agent now has a unique animation style: Planner uses pulsing dots (thinking/planning), Navigator uses wave animation (navigating/moving), Validator uses breathing circles (checking/validating), and general loading states use breathing dots. Added new Tailwind keyframes for pulse-dot, wave, rotate-gradient, breathe, and shimmer animations.
+- **Icon Path Fix & Language-Aware Loaders**: Fixed agent icon display by correcting PNG file paths to use absolute paths (/planner.png, /navigator.png, /validator.png). Added language detection to loading animations so they display localized text (Japanese: "計画中...", "ナビゲーション中...", "検証中..." vs English: "Planning...", "Navigating...", "Validating...") based on the user's recent messages.
 
 ## File Structure
 ```
@@ -93,7 +126,7 @@ nanobrowser/
 - **Installation**: Chrome → Extensions → Developer mode → Load unpacked
 
 ## Configuration
-- **Default Provider**: ネコノテAI (no API key required)
+- **Default Provider**: ネコノテAPI (no API key required)
 - **Model Selection**: Automatic based on task type
 - **Theme**: Warm cream default, user-configurable
 - **Language**: Japanese throughout system

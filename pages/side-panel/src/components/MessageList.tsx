@@ -2,12 +2,69 @@ import type { Message } from '@extension/storage';
 import { ACTOR_PROFILES } from '../types/message';
 import { memo } from 'react';
 
+// Simple language detection for UI
+type DetectedLanguage = 'ja' | 'en' | 'auto';
+
+function detectLanguageFromText(text: string): DetectedLanguage {
+  if (!text || text.trim().length === 0) {
+    return 'auto';
+  }
+
+  // Japanese character ranges
+  const japaneseRegex = /[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf]/g;
+  const japaneseMatches = text.match(japaneseRegex) || [];
+  const japaneseRatio = japaneseMatches.length / text.length;
+
+  // If more than 10% of characters are Japanese, consider it Japanese
+  if (japaneseRatio > 0.1) {
+    return 'ja';
+  }
+
+  // Otherwise assume English
+  return 'en';
+}
+
+function detectLanguageFromMessages(messages: Message[]): DetectedLanguage {
+  // Look at the last few user messages to detect language
+  const userMessages = messages
+    .filter(msg => msg.actor === 'user')
+    .slice(-3) // Last 3 user messages
+    .map(msg => msg.content)
+    .join(' ');
+
+  return detectLanguageFromText(userMessages);
+}
+
+// Localized loading text
+const loadingText = {
+  ja: {
+    planning: '計画中...',
+    navigating: 'ナビゲーション中...',
+    validating: '検証中...',
+    processing: '処理中...',
+  },
+  en: {
+    planning: 'Planning...',
+    navigating: 'Navigating...',
+    validating: 'Validating...',
+    processing: 'Processing...',
+  },
+  auto: {
+    planning: 'Planning...',
+    navigating: 'Navigating...',
+    validating: 'Validating...',
+    processing: 'Processing...',
+  },
+};
+
 interface MessageListProps {
   messages: Message[];
   isDarkMode?: boolean;
 }
 
 export default memo(function MessageList({ messages, isDarkMode = false }: MessageListProps) {
+  const detectedLanguage = detectLanguageFromMessages(messages);
+
   return (
     <div className="max-w-full space-y-4">
       {messages.map((message, index) => (
@@ -16,6 +73,7 @@ export default memo(function MessageList({ messages, isDarkMode = false }: Messa
           message={message}
           isSameActor={index > 0 ? messages[index - 1].actor === message.actor : false}
           isDarkMode={isDarkMode}
+          detectedLanguage={detectedLanguage}
         />
       ))}
     </div>
@@ -26,10 +84,21 @@ interface MessageBlockProps {
   message: Message;
   isSameActor: boolean;
   isDarkMode?: boolean;
+  detectedLanguage: DetectedLanguage;
 }
 
 // Modern loader component with different styles for each agent
-function ModernLoader({ actor, isDarkMode = false }: { actor: string; isDarkMode?: boolean }) {
+function ModernLoader({
+  actor,
+  isDarkMode = false,
+  language = 'en',
+}: {
+  actor: string;
+  isDarkMode?: boolean;
+  language?: DetectedLanguage;
+}) {
+  const texts = loadingText[language];
+
   const getLoaderStyle = () => {
     switch (actor) {
       case 'planner':
@@ -49,7 +118,7 @@ function ModernLoader({ actor, isDarkMode = false }: { actor: string; isDarkMode
               style={{ animationDelay: '320ms' }}
             />
             <span className={`ml-2 text-xs ${isDarkMode ? 'text-orange-300' : 'text-orange-600'} font-medium`}>
-              Planning...
+              {texts.planning}
             </span>
           </div>
         );
@@ -79,7 +148,7 @@ function ModernLoader({ actor, isDarkMode = false }: { actor: string; isDarkMode
               style={{ animationDelay: '400ms' }}
             />
             <span className={`ml-2 text-xs ${isDarkMode ? 'text-blue-300' : 'text-blue-600'} font-medium`}>
-              Navigating...
+              {texts.navigating}
             </span>
           </div>
         );
@@ -90,7 +159,7 @@ function ModernLoader({ actor, isDarkMode = false }: { actor: string; isDarkMode
           <div className="flex items-center space-x-2">
             <div className={`h-3 w-3 rounded-full ${isDarkMode ? 'bg-pink-400' : 'bg-pink-500'} animate-breathe`} />
             <span className={`text-xs ${isDarkMode ? 'text-pink-300' : 'text-pink-600'} font-medium`}>
-              Validating...
+              {texts.validating}
             </span>
           </div>
         );
@@ -109,7 +178,7 @@ function ModernLoader({ actor, isDarkMode = false }: { actor: string; isDarkMode
               }}
             />
             <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} font-medium`}>
-              Processing...
+              {texts.processing}
             </span>
           </div>
         );
@@ -119,7 +188,7 @@ function ModernLoader({ actor, isDarkMode = false }: { actor: string; isDarkMode
   return <div className="flex items-center py-1">{getLoaderStyle()}</div>;
 }
 
-function MessageBlock({ message, isSameActor, isDarkMode = false }: MessageBlockProps) {
+function MessageBlock({ message, isSameActor, isDarkMode = false, detectedLanguage }: MessageBlockProps) {
   if (!message.actor) {
     console.error('No actor found');
     return <div />;
@@ -152,7 +221,11 @@ function MessageBlock({ message, isSameActor, isDarkMode = false }: MessageBlock
 
         <div className="space-y-0.5">
           <div className={`whitespace-pre-wrap break-words text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-            {isProgress ? <ModernLoader actor={message.actor} isDarkMode={isDarkMode} /> : message.content}
+            {isProgress ? (
+              <ModernLoader actor={message.actor} isDarkMode={isDarkMode} language={detectedLanguage} />
+            ) : (
+              message.content
+            )}
           </div>
           {!isProgress && (
             <div className={`text-right text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>

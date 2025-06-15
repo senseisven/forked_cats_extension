@@ -977,7 +977,7 @@ const SidePanel = () => {
                     ネコノテへようこそ！
                   </h3>
                   <p className="mb-4">
-                    使い始めるにはAIモデルを設定してください。設定パネルでAPIキーを構成するか、APIキー不要のネコノテAIを選択してください。
+                    使い始めるにはAIモデルを設定してください。設定パネルでAPIキーを構成するか、APIキー不要のネコノテAPIを選択してください。
                   </p>
                   <button
                     onClick={() => chrome.runtime.openOptionsPage()}
@@ -991,8 +991,8 @@ const SidePanel = () => {
                       href="https://github.com/nanobrowser/nanobrowser?tab=readme-ov-file#-quick-start"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-600'}`}>
-                      Quick Start Guide
+                      className="text-blue-500 hover:text-blue-700">
+                      ネコノテ使用ガイド
                     </a>
                   </div>
                 </div>

@@ -340,7 +340,7 @@
     "message": "覚えておいてください："
   },
   "centralizedApi": {
-    "message": "ネコノテAI (APIキー不要)"
+    "message": "ネコノテAPI (APIキー不要)"
   },
   "centralizedApiDescription": {
     "message": "APIキーの設定は不要です。すぐに使用できます。"
@@ -377,5 +377,14 @@
   },
   "taskFailed": {
     "message": "タスクが失敗しました"
+  },
+  "speechToTextNotConfigured": {
+    "message": "音声テキスト変換モデルが設定されていません。設定でGeminiモデルを設定してください。"
+  },
+  "speechToTextProviderNotFound": {
+    "message": "音声テキスト変換モデルのプロバイダーが見つからないか、Geminiプロバイダーではありません。設定でGeminiモデルを設定してください。"
+  },
+  "speechTranscriptionFailed": {
+    "message": "音声の文字起こしに失敗しました"
   }
 }

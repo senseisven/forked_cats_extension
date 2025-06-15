@@ -7,12 +7,14 @@ import { generalSettingsStore, type ThemeMode } from '@extension/storage';
 import { GeneralSettings } from './components/GeneralSettings';
 import { ModelSettings } from './components/ModelSettings';
 import { FirewallSettings } from './components/FirewallSettings';
+import { TokenSettings } from './components/TokenSettings';
 
-type TabTypes = 'general' | 'models' | 'firewall';
+type TabTypes = 'general' | 'models' | 'tokens' | 'firewall';
 
 const TABS: { id: TabTypes; icon: string; label: string }[] = [
   { id: 'general', icon: '⚙️', label: t('generalTab') },
   { id: 'models', icon: '📊', label: t('modelsTab') },
+  { id: 'tokens', icon: '🎯', label: 'トークン' },
   { id: 'firewall', icon: '🔒', label: t('firewallTab') },
 ];
 
@@ -63,6 +65,8 @@ const Options = () => {
         return <GeneralSettings isDarkMode={isDarkMode} />;
       case 'models':
         return <ModelSettings isDarkMode={isDarkMode} />;
+      case 'tokens':
+        return <TokenSettings isDarkMode={isDarkMode} />;
       case 'firewall':
         return <FirewallSettings isDarkMode={isDarkMode} />;
       default:

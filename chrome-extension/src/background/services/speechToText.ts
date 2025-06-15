@@ -5,6 +5,19 @@ import { ProviderConfig, speechToTextModelStore } from '@extension/storage';
 
 const logger = createLogger('SpeechToText');
 
+// Simplified message function - will use Japanese for common error messages
+function getMessage(
+  key: 'speechToTextNotConfigured' | 'speechToTextProviderNotFound' | 'speechTranscriptionFailed',
+): string {
+  const messages = {
+    speechToTextNotConfigured: '音声テキスト変換モデルが設定されていません。設定でGeminiモデルを設定してください。',
+    speechToTextProviderNotFound:
+      '音声テキスト変換モデルのプロバイダーが見つからないか、Geminiプロバイダーではありません。設定でGeminiモデルを設定してください。',
+    speechTranscriptionFailed: '音声の文字起こしに失敗しました',
+  };
+  return messages[key];
+}
+
 export class SpeechToTextService {
   private llm: ChatGoogleGenerativeAI;
 
@@ -17,16 +30,18 @@ export class SpeechToTextService {
       const config = await speechToTextModelStore.getSpeechToTextModel();
 
       if (!config?.provider || !config?.modelName) {
-        throw new Error('No speech-to-text model configured. Please configure a Gemini model in settings.');
+        throw new Error(getMessage('speechToTextNotConfigured'));
       }
 
       const provider = providers[config.provider];
       logger.info('Found provider for speech-to-text:', provider ? 'yes' : 'no', provider?.type);
 
-      if (!provider || provider.type !== 'gemini') {
-        throw new Error(
-          'Speech-to-text model provider not found or not a Gemini provider. Please configure a Gemini model in settings.',
-        );
+      if (
+        !provider ||
+        (provider.type !== 'gemini' &&
+          !(provider.type === 'centralized_api' && config.modelName.startsWith('google/gemini')))
+      ) {
+        throw new Error(getMessage('speechToTextProviderNotFound'));
       }
 
       const llm = new ChatGoogleGenerativeAI({
@@ -71,7 +86,9 @@ export class SpeechToTextService {
       return transcribedText;
     } catch (error) {
       logger.error('Failed to transcribe audio:', error);
-      throw new Error(`Speech transcription failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `${getMessage('speechTranscriptionFailed')}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 }

@@ -16,6 +16,7 @@ import MessageList from './components/MessageList';
 import ChatInput from './components/ChatInput';
 import ChatHistoryList from './components/ChatHistoryList';
 import BookmarkList from './components/BookmarkList';
+import TokenCounter from './components/TokenCounter';
 import { EventType, type AgentEvent, ExecutionState } from './types/event';
 import { t } from '@extension/i18n';
 import './SidePanel.css';
@@ -1004,7 +1005,7 @@ const SidePanel = () => {
                     ネコノテへようこそ！
                   </h3>
                   <p className="mb-4">
-                    使い始めるにはAIモデルを設定してください。設定パネルでAPIキーを構成するか、APIキー不要のネコノテAIを選択してください。
+                    使い始めるにはAIモデルを設定してください。設定パネルでAPIキーを構成するか、APIキー不要のネコノテAPIを選択してください。
                   </p>
                   <button
                     onClick={() => chrome.runtime.openOptionsPage()}
@@ -1020,8 +1021,8 @@ const SidePanel = () => {
                       href="https://github.com/nanobrowser/nanobrowser?tab=readme-ov-file#-quick-start"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-[#8b7355] hover:text-[#6d5a44]'}`}>
-                      Quick Start Guide
+                      className="text-blue-500 hover:text-blue-700">
+                      ネコノテ使用ガイド
                     </a>
                   </div>
                 </div>
@@ -1033,6 +1034,9 @@ const SidePanel = () => {
               <>
                 {messages.length === 0 && (
                   <>
+                    <div className="p-2">
+                      <TokenCounter isDarkMode={isDarkMode} />
+                    </div>
                     <div
                       className={`border-t ${isDarkMode ? 'border-sky-900' : 'border-[#d4c4a8]'} mb-2 p-2 shadow-sm backdrop-blur-sm`}>
                       <ChatInput
@@ -1064,8 +1068,13 @@ const SidePanel = () => {
                 )}
                 {messages.length > 0 && (
                   <div
-                    className={`scrollbar-gutter-stable flex-1 overflow-x-hidden overflow-y-scroll scroll-smooth p-2 ${isDarkMode ? 'bg-slate-900/80' : ''}`}>
-                    <MessageList messages={messages} isDarkMode={isDarkMode} />
+                    className={`scrollbar-gutter-stable flex-1 overflow-x-hidden overflow-y-scroll scroll-smooth ${isDarkMode ? 'bg-slate-900/80' : ''}`}>
+                    <div className="p-2 pb-0">
+                      <TokenCounter isDarkMode={isDarkMode} />
+                    </div>
+                    <div className="p-2">
+                      <MessageList messages={messages} isDarkMode={isDarkMode} />
+                    </div>
                     <div ref={messagesEndRef} />
                   </div>
                 )}

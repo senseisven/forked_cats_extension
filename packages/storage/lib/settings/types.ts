@@ -5,6 +5,70 @@ export enum AgentNameEnum {
   Validator = 'validator',
 }
 
+// Token usage tracking
+export interface TokenUsage {
+  used: number;
+  limit: number;
+  resetDate: string; // ISO date string when tokens reset
+  lastUsed: string; // ISO date string of last usage
+}
+
+export interface TokenCost {
+  [model: string]: number;
+}
+
+// Default token costs per model (similar to Cursor)
+export const DEFAULT_TOKEN_COSTS: TokenCost = {
+  // OpenAI models
+  'openai/gpt-4.1': 3,
+  'openai/gpt-4.1-mini': 1,
+  'openai/o4-mini': 2,
+  'openai/gpt-4o': 3,
+  'openai/gpt-4o-mini': 1,
+  'openai/o3': 5,
+  'openai/o3-mini': 2,
+
+  // Claude models (premium)
+  'anthropic/claude-sonnet-4': 5,
+  'anthropic/claude-3.7-sonnet': 4,
+  'anthropic/claude-3.5-sonnet': 3,
+  'anthropic/claude-3.5-haiku': 1,
+  'anthropic/claude-opus-4': 6,
+
+  // Google models (cost-effective)
+  'google/gemini-2.5-pro-preview': 3,
+  'google/gemini-2.5-flash-preview-05-20': 1,
+  'google/gemini-2.5-flash-preview-05-20:thinking': 2,
+  'google/gemini-2.0-flash': 1,
+  'google/gemini-1.5-pro': 2,
+  'google/gemini-1.5-flash': 1,
+
+  // LLaMA models (open source, cheaper)
+  'meta-llama/llama-4-maverick': 2,
+  'meta-llama/llama-4-scout': 2,
+  'meta-llama/llama-3.3-70b-instruct': 1,
+  'meta-llama/llama-3.1-70b-instruct': 1,
+  'meta-llama/llama-3.1-8b-instruct': 1,
+
+  // DeepSeek models (reasoning)
+  'deepseek/deepseek-chat': 2,
+  'deepseek/deepseek-r1': 3,
+  'deepseek/deepseek-r1-0528-qwen3-8b': 2,
+
+  // Other models
+  'mistralai/mistral-large-2411': 2,
+  'mistralai/codestral-2501': 2,
+  'mistralai/mixtral-8x22b-instruct': 2,
+  'mistralai/pixtral-large-2411': 3,
+  'qwen/qwen-max': 2,
+  'qwen/qwen3-32b': 1,
+  'qwen/qwq-32b': 2,
+  'x-ai/grok-3-beta': 3,
+  'x-ai/grok-3-mini-beta': 1,
+  'perplexity/sonar-pro': 2,
+  'cohere/command-r-plus': 2,
+};
+
 // Provider type, types before CustomOpenAI are built-in providers, CustomOpenAI is a custom provider
 // For built-in providers, we will create ChatModel instances with its respective LangChain ChatModel classes
 // For custom providers, we will create ChatModel instances with the ChatOpenAI class

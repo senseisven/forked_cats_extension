@@ -73,7 +73,7 @@ export async function setupDefaultCentralizedProvider(apiBaseUrl?: string): Prom
       // Create the provider configuration
       await llmProviderStore.setProvider(providerId, {
         apiKey: 'not-required',
-        name: 'ネコノテAI',
+        name: 'ネコノテAPI',
         type: ProviderTypeEnum.CentralizedAPI,
         baseUrl: baseUrl,
         modelNames: latestModelNames,
@@ -82,13 +82,14 @@ export async function setupDefaultCentralizedProvider(apiBaseUrl?: string): Prom
 
       console.log('✅ Default centralized API provider configured');
     } else {
-      // Check if existing provider needs model list update
-      console.log('Centralized API provider already exists, checking for model updates...');
+      // Provider exists - force update to fix any cached naming issues
+      console.log('Centralized API provider already exists, checking for updates...');
 
       const existingProvider = await llmProviderStore.getProvider(providerId);
 
       if (existingProvider) {
         const currentModels = existingProvider.modelNames || [];
+        const currentName = existingProvider.name;
 
         // Check if we have the old limited model set (7 or fewer models)
         // or if we're missing any of the key new flagship models
@@ -99,21 +100,29 @@ export async function setupDefaultCentralizedProvider(apiBaseUrl?: string): Prom
           currentModels.includes('deepseek/deepseek-r1') ||
           currentModels.includes('openai/o3');
 
-        // Force update if we have old models or missing new flagship models
-        if (currentModels.length <= 25 || !hasNewModels) {
+        // Force update if we have old models, missing new flagship models, or wrong name
+        const shouldUpdate =
+          currentModels.length <= 25 ||
+          !hasNewModels ||
+          currentName !== 'ネコノテAPI' ||
+          currentName?.includes('エイナー') ||
+          currentName?.includes('No API Key Required');
+
+        if (shouldUpdate) {
           console.log(
-            `Updating centralized API provider with latest models... (current: ${currentModels.length}, hasNew: ${hasNewModels})`,
+            `Updating centralized API provider... (models: ${currentModels.length}, hasNew: ${hasNewModels}, name: "${currentName}")`,
           );
 
           await llmProviderStore.setProvider(providerId, {
             ...existingProvider,
+            name: 'ネコノテAPI', // Force update the name to fix cached issues
             modelNames: latestModelNames,
             baseUrl: baseUrl, // Also update URL in case it changed
           });
 
-          console.log('✅ Centralized API provider updated with latest models');
+          console.log('✅ Centralized API provider updated with correct name and latest models');
         } else {
-          console.log('Centralized API provider already has latest models');
+          console.log('Centralized API provider already has correct name and latest models');
         }
       }
     }

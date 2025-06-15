@@ -93,7 +93,7 @@ export function getDefaultDisplayNameFromProviderId(providerId: string): string 
     case ProviderTypeEnum.OpenRouter:
       return 'OpenRouter';
     case ProviderTypeEnum.CentralizedAPI:
-      return 'ネコノテAI';
+      return 'ネコノテAPI';
     case ProviderTypeEnum.Groq:
       return 'Groq';
     case ProviderTypeEnum.Cerebras:

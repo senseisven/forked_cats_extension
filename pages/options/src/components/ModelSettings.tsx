@@ -1644,11 +1644,15 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
               value={selectedSpeechToTextModel}
               onChange={e => handleSpeechToTextModelChange(e.target.value)}>
               <option value="">{t('chooseModel')}</option>
-              {/* Filter available models to show only Gemini models */}
+              {/* Filter available models to show Gemini models from any provider */}
               {availableModels
                 .filter(({ provider, model }) => {
                   const providerConfig = providers[provider];
-                  return providerConfig?.type === ProviderTypeEnum.Gemini;
+                  // Show if it's a direct Gemini provider OR if it's a CentralizedAPI with Gemini models
+                  return (
+                    providerConfig?.type === ProviderTypeEnum.Gemini ||
+                    (providerConfig?.type === ProviderTypeEnum.CentralizedAPI && model.startsWith('google/gemini'))
+                  );
                 })
                 .map(({ provider, providerName, model }) => (
                   <option key={`${provider}>${model}`} value={`${provider}>${model}`}>

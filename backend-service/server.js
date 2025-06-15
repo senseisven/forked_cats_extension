@@ -193,8 +193,9 @@ app.post('/api/openrouter/*', async (req, res) => {
       headers: {
         Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://nanobrowser.ai',
-        'X-Title': 'Nanobrowser (Centralized API)',
+        'User-Agent': 'ネコノテ/1.0 (https://nekonote.ai)',
+        'HTTP-Referer': 'https://nekonote.ai',
+        'X-Title': 'ネコノテ (Centralized API)',
         // Don't forward all headers to avoid conflicts
       },
       body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined,
@@ -278,8 +279,9 @@ app.post('/api/chat/completions', async (req, res) => {
       headers: {
         Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://nanobrowser.ai',
-        'X-Title': 'Nanobrowser (Centralized API)',
+        'User-Agent': 'ネコノテ/1.0 (https://nekonote.ai)',
+        'HTTP-Referer': 'https://nekonote.ai',
+        'X-Title': 'ネコノテ (Centralized API)',
       },
       body: JSON.stringify({ ...req.body, stream: false }), // ensure non-streaming
       signal: controller.signal,
@@ -331,7 +333,7 @@ app.use((error, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Nanobrowser API Service running on port ${PORT}`);
+  console.log(`🚀 ネコノテ API Service running on port ${PORT}`);
   console.log(`📡 Health check: http://localhost:${PORT}/health`);
   console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔑 OpenRouter API configured: ${process.env.OPENROUTER_API_KEY ? '✅ Yes' : '❌ No'}`);

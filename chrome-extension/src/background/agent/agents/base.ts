@@ -7,6 +7,7 @@ import { createLogger } from '@src/background/log';
 import type { Action } from '../actions/builder';
 import { convertInputMessages, extractJsonFromModelOutput, removeThinkTags } from '../messages/utils';
 import { isAbortedError, RequestCancelledError } from './errors';
+import { TokenUsageManager } from '@extension/storage';
 
 const logger = createLogger('agent');
 
@@ -103,55 +104,89 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
   }
 
   async invoke(inputMessages: BaseMessage[]): Promise<this['ModelOutput']> {
-    // Use structured output
-    if (this.withStructuredOutput) {
-      const structuredLlm = this.chatLLM.withStructuredOutput(this.modelOutputSchema, {
-        includeRaw: true,
-        name: this.modelOutputToolName,
-      });
+    // Check token availability before making the call
+    const hasTokens = await TokenUsageManager.hasTokens(this.modelName);
+    if (!hasTokens) {
+      const remaining = await TokenUsageManager.getRemainingTokens();
+      const cost = TokenUsageManager.getTokenCost(this.modelName);
+      const errorMessage =
+        this.context.language === 'ja'
+          ? `トークンが不足しています。残り: ${remaining}、必要: ${cost}。来月まで待つか、プランをアップグレードしてください。`
+          : `Insufficient tokens. Remaining: ${remaining}, Required: ${cost}. Please wait until next month or upgrade your plan.`;
+      throw new Error(errorMessage);
+    }
 
-      try {
-        const response = await structuredLlm.invoke(inputMessages, {
+    let response;
+    let success = false;
+
+    try {
+      // Use structured output
+      if (this.withStructuredOutput) {
+        const structuredLlm = this.chatLLM.withStructuredOutput(this.modelOutputSchema, {
+          includeRaw: true,
+          name: this.modelOutputToolName,
+        });
+
+        response = await structuredLlm.invoke(inputMessages, {
           signal: this.context.controller.signal,
           ...this.callOptions,
         });
 
         if (response.parsed) {
+          success = true;
           return response.parsed;
         }
         logger.error('Failed to parse response', response);
         throw new Error('Could not parse response with structured output');
-      } catch (error) {
-        if (isAbortedError(error)) {
-          throw error;
+      } else {
+        // Without structured output support, need to extract JSON from model output manually
+        const convertedInputMessages = convertInputMessages(inputMessages, this.modelName);
+        response = await this.chatLLM.invoke(convertedInputMessages, {
+          signal: this.context.controller.signal,
+          ...this.callOptions,
+        });
+
+        if (typeof response.content === 'string') {
+          response.content = removeThinkTags(response.content);
+          try {
+            const extractedJson = extractJsonFromModelOutput(response.content);
+            const parsed = this.validateModelOutput(extractedJson);
+            if (parsed) {
+              success = true;
+              return parsed;
+            }
+          } catch (error) {
+            const errorMessage = `Failed to extract JSON from response: ${error}`;
+            throw new Error(errorMessage);
+          }
         }
+        const errorMessage = `Failed to parse response: ${response}`;
+        logger.error(errorMessage);
+        throw new Error('Could not parse response');
+      }
+    } catch (error) {
+      if (isAbortedError(error)) {
+        throw error;
+      }
+
+      // Only consume tokens if the request was successful
+      // For errors, we don't charge the user
+      if (success) {
+        await TokenUsageManager.consumeTokens(this.modelName, this.id);
+      }
+
+      if (this.withStructuredOutput) {
         const errorMessage = `${this.modelName}の構造化出力呼び出しに失敗しました: ${error}`;
         throw new Error(errorMessage);
+      } else {
+        throw error;
+      }
+    } finally {
+      // Consume tokens only on successful completion
+      if (success) {
+        await TokenUsageManager.consumeTokens(this.modelName, this.id);
       }
     }
-
-    // Without structured output support, need to extract JSON from model output manually
-    const convertedInputMessages = convertInputMessages(inputMessages, this.modelName);
-    const response = await this.chatLLM.invoke(convertedInputMessages, {
-      signal: this.context.controller.signal,
-      ...this.callOptions,
-    });
-    if (typeof response.content === 'string') {
-      response.content = removeThinkTags(response.content);
-      try {
-        const extractedJson = extractJsonFromModelOutput(response.content);
-        const parsed = this.validateModelOutput(extractedJson);
-        if (parsed) {
-          return parsed;
-        }
-      } catch (error) {
-        const errorMessage = `Failed to extract JSON from response: ${error}`;
-        throw new Error(errorMessage);
-      }
-    }
-    const errorMessage = `Failed to parse response: ${response}`;
-    logger.error(errorMessage);
-    throw new Error('Could not parse response');
   }
 
   // Execute the agent and return the result

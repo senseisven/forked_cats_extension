@@ -97,9 +97,22 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
 
   // Set whether to use structured output based on the model name
   private setWithStructuredOutput(): boolean {
-    if (this.modelName === 'deepseek-reasoner' || this.modelName === 'deepseek-r1') {
+    // Disable structured output for models known to have issues
+    const modelLower = this.modelName.toLowerCase();
+
+    // DeepSeek reasoning models don't support structured output well
+    if (modelLower.includes('deepseek-reasoner') || modelLower.includes('deepseek-r1')) {
       return false;
     }
+
+    // Some older OpenAI models might have structured output issues
+    if (modelLower.includes('gpt-4o-mini') && modelLower.includes('openai/')) {
+      console.warn(
+        `Model ${this.modelName} may have structured output compatibility issues, trying alternative approach`,
+      );
+      return false; // Temporarily disable to test
+    }
+
     return true;
   }
 
@@ -134,6 +147,8 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
 
         if (response.parsed) {
           success = true;
+          // Consume tokens on successful completion
+          await TokenUsageManager.consumeTokens(this.modelName, this.id);
           return response.parsed;
         }
         logger.error('Failed to parse response', response);
@@ -153,6 +168,8 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
             const parsed = this.validateModelOutput(extractedJson);
             if (parsed) {
               success = true;
+              // Consume tokens on successful completion
+              await TokenUsageManager.consumeTokens(this.modelName, this.id);
               return parsed;
             }
           } catch (error) {
@@ -169,22 +186,12 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
         throw error;
       }
 
-      // Only consume tokens if the request was successful
-      // For errors, we don't charge the user
-      if (success) {
-        await TokenUsageManager.consumeTokens(this.modelName, this.id);
-      }
-
+      // Don't consume tokens on error - user shouldn't be charged for failed requests
       if (this.withStructuredOutput) {
         const errorMessage = `${this.modelName}の構造化出力呼び出しに失敗しました: ${error}`;
         throw new Error(errorMessage);
       } else {
         throw error;
-      }
-    } finally {
-      // Consume tokens only on successful completion
-      if (success) {
-        await TokenUsageManager.consumeTokens(this.modelName, this.id);
       }
     }
   }

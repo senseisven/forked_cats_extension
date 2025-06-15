@@ -32,23 +32,31 @@
 
 ## Recent Major Updates
 
-### Speech-to-Text & Language-Aware System Messages Fix (Latest)
+### Planner Agent 500 Error Fix & Multiple Issues Resolved (Latest)
+- **Planner 500 Error Fix**: Fixed critical issue where planner agent was failing with "計画失敗: openai/gpt-4o-miniの構造化出力呼び出しに失敗しました: Error: 500 'Internal Server Error'" due to the backend sending non-ASCII HTTP headers ("User-Agent", "X-Title"). Replaced Japanese text with ASCII-only equivalents ("NekoNote/..."), resolving Node.js `Invalid character in header content` error.
+- **Structured Output Compatibility**: Temporarily disabled structured output for `openai/gpt-4o-mini` model due to compatibility issues, fallback to manual JSON parsing
+- **Token Consumption Bug Fix**: Fixed double token consumption issue in base agent where tokens were consumed both in catch and finally blocks
+- **Error Handling Improvement**: Improved error handling to ensure users aren't charged for failed requests
+- **Model Compatibility**: Enhanced model compatibility detection for structured output support
+
+### Speech-to-Text & Language-Aware System Messages Fix
 - **Speech-to-Text Dropdown Issue**: Fixed empty dropdown in settings - was only showing direct Gemini providers, now includes Gemini models from CentralizedAPI (google/gemini-* models)
 - **Model Filtering**: Updated ModelSettings.tsx to show speech-to-text models from both `ProviderTypeEnum.Gemini` and `ProviderTypeEnum.CentralizedAPI` with `google/gemini` prefix
 - **Language-Aware Error Messages**: Implemented Japanese error messages for speech-to-text service instead of hardcoded English
 - **Error Message Translation**: Added Japanese translations for "speechToTextNotConfigured", "speechToTextProviderNotFound", and "speechTranscriptionFailed"
 - **Service Integration**: Updated speechToText.ts to use Japanese error messages for better user experience
-- **Branding Update**: Changed user-facing references from "nanobrowser" to "ネコノテ" in API headers, startup messages, and UI links
-- **System Icon Update**: Replaced system icon from old SVG (`icons/system.svg`) to new PNG (`/system.png`) for consistency with other agent icons
-- **Result**: Speech-to-text dropdown now properly shows available Gemini models, all system messages appear in Japanese, and system icon uses new design
 
-### Provider Name Cache Fix
-- **Issue**: Browser extension storage was caching old provider name "エイナーのAI (No API Key Required)" despite code updates
-- **Root Cause**: `setupDefaultCentralizedProvider()` wasn't force-updating existing provider names, only models
-- **Solution**: Enhanced provider update logic to detect and fix cached naming issues
-- **Detection Logic**: Checks for old names containing "エイナー" or "No API Key Required"
-- **Force Update**: Now updates both model list AND provider name to ensure "ネコノテAPI" is displayed correctly
-- **Result**: Provider now consistently shows as "ネコノテAPI" across all interfaces after extension restart
+### Branding & Icon Updates  
+- **Service Name Consistency**: Updated user-facing references from "nanobrowser" to "ネコノテ" in production contexts
+- **API Headers**: Updated backend service HTTP headers to use "ネコノテ/1.0" user agent and proper branding
+- **GitHub Links**: Updated help links to use "ネコノテ使用ガイド" instead of English text
+- **System Icon Update**: Replaced system actor icon from `icons/system.svg` to `/system.png` for consistency with other agent icons
+- **Backend Service Branding**: Updated service startup messages and API references to use ネコノテ branding
+
+### Cached Provider Name Issue Fix
+- **Provider Name Caching Issue**: Fixed bug where frontend showed "エイナーのAI (No API Key Required)" instead of "ネコノテAPI" due to cached browser storage
+- **Force Update Logic**: Enhanced `setupDefaultCentralizedProvider()` to detect and fix cached provider names containing problematic text
+- **Storage Update**: Implemented provider update mechanism to refresh cached provider configurations when name or model lists change
 
 ### Token-Based Usage System
 - **Token Management**: Implemented Cursor-style token system with `TokenUsageManager` class

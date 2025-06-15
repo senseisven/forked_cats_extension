@@ -152,6 +152,54 @@ app.get('/debug/openrouter', async (req, res) => {
   }
 });
 
+// Debug endpoint to test structured output requests
+app.post('/debug/structured-output', async (req, res) => {
+  console.log('🔍 Debug: Structured output request received');
+  console.log('Request body:', JSON.stringify(req.body, null, 2));
+
+  try {
+    // Forward to OpenRouter and log detailed response
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://nekonote.ai',
+        'X-Title': 'NekoNote (Debug Test)',
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    const responseText = await response.text();
+    console.log(`🔍 OpenRouter response status: ${response.status}`);
+    console.log(`🔍 OpenRouter response body: ${responseText}`);
+
+    if (response.ok) {
+      const responseData = JSON.parse(responseText);
+      res.json({
+        status: 'Success',
+        openrouter_status: response.status,
+        response_data: responseData,
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      res.status(response.status).json({
+        status: 'OpenRouter error',
+        openrouter_status: response.status,
+        error_details: responseText,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  } catch (error) {
+    console.error('❌ Debug structured output test failed:', error);
+    res.status(500).json({
+      error: 'Failed to test structured output',
+      details: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
 // Usage stats endpoint (optional)
 app.get('/stats', (req, res) => {
   const stats = {
@@ -193,9 +241,9 @@ app.post('/api/openrouter/*', async (req, res) => {
       headers: {
         Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'User-Agent': 'ネコノテ/1.0 (https://nekonote.ai)',
+        'User-Agent': 'NekoNote/1.0 (https://nekonote.ai)',
         'HTTP-Referer': 'https://nekonote.ai',
-        'X-Title': 'ネコノテ (Centralized API)',
+        'X-Title': 'NekoNote (Centralized API)',
         // Don't forward all headers to avoid conflicts
       },
       body: req.method !== 'GET' ? JSON.stringify(req.body) : undefined,
@@ -279,9 +327,9 @@ app.post('/api/chat/completions', async (req, res) => {
       headers: {
         Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'User-Agent': 'ネコノテ/1.0 (https://nekonote.ai)',
+        'User-Agent': 'NekoNote/1.0 (https://nekonote.ai)',
         'HTTP-Referer': 'https://nekonote.ai',
-        'X-Title': 'ネコノテ (Centralized API)',
+        'X-Title': 'NekoNote (Centralized API)',
       },
       body: JSON.stringify({ ...req.body, stream: false }), // ensure non-streaming
       signal: controller.signal,
@@ -333,7 +381,7 @@ app.use((error, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 ネコノテ API Service running on port ${PORT}`);
+  console.log(`🚀 NekoNote API Service running on port ${PORT}`);
   console.log(`📡 Health check: http://localhost:${PORT}/health`);
   console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔑 OpenRouter API configured: ${process.env.OPENROUTER_API_KEY ? '✅ Yes' : '❌ No'}`);

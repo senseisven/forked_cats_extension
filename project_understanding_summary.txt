@@ -33,7 +33,9 @@
 ## Recent Major Updates
 
 ### Planner Agent 500 Error Fix & Multiple Issues Resolved (Latest)
-- **Planner 500 Error Fix**: Fixed critical issue where planner agent was failing with "計画失敗: openai/gpt-4o-miniの構造化出力呼び出しに失敗しました: Error: 500 'Internal Server Error'" due to the backend sending non-ASCII HTTP headers ("User-Agent", "X-Title"). Replaced Japanese text with ASCII-only equivalents ("NekoNote/..."), resolving Node.js `Invalid character in header content` error.
+- **Chrome Web Store Localization Fix**: Fixed Chrome Web Store language selection issue where extension defaulted to English despite Japanese content. Created proper Japanese locale (`dist/_locales/ja/messages.json`) with corrected extension description (removed "オープンソース" reference), updated English locale with proper translations, and changed `manifest.json` default_locale to "ja". Extension now properly displays as Japanese in Chrome Web Store.
+- **Japanese Localization Completion**: Fixed remaining English text in settings and models pages. Added Japanese translations for "Page Load Wait Time" (`pageLoadWaitTime`) and "Minimum wait time after page loads" (`pageLoadWaitTimeDescription`) in GeneralSettings. Updated ModelSettings to use proper translation keys (`planner`, `navigator`, `validator`) instead of capitalizing English enum values. All UI text now properly displays in Japanese when extension locale is set to Japanese.
+- **Planner 500 Error Fix**: Fixed critical issue where planner agent was failing with "計画失敗: ... 500 'Internal Server Error'" due to the backend sending non-ASCII HTTP headers ("User-Agent", "X-Title"). Replaced Japanese text with ASCII-only equivalents ("NekoNote/..."), resolving Node.js `Invalid character in header content` error.
 - **Structured Output Compatibility**: Temporarily disabled structured output for `openai/gpt-4o-mini` model due to compatibility issues, fallback to manual JSON parsing
 - **Token Consumption Bug Fix**: Fixed double token consumption issue in base agent where tokens were consumed both in catch and finally blocks
 - **Error Handling Improvement**: Improved error handling to ensure users aren't charged for failed requests
@@ -104,6 +106,15 @@
 - **UI Improvements**: Updated agent icons to use new PNG files from dist directory (navigator.png, planner.png, validator.png), improved timestamp readability by making the text darker (from text-gray-300 to text-gray-600 in light mode), and cleaned up the provider name from "ネコノテAI (No API Key Required)" to just "ネコノテAPI" for better display in model selection dropdowns.
 - **Modern Loader Animations**: Completely redesigned the loading animations throughout the chat panel with modern, stylish loaders. Each agent now has a unique animation style: Planner uses pulsing dots (thinking/planning), Navigator uses wave animation (navigating/moving), Validator uses breathing circles (checking/validating), and general loading states use breathing dots. Added new Tailwind keyframes for pulse-dot, wave, rotate-gradient, breathe, and shimmer animations.
 - **Icon Path Fix & Language-Aware Loaders**: Fixed agent icon display by correcting PNG file paths to use absolute paths (/planner.png, /navigator.png, /validator.png). Added language detection to loading animations so they display localized text (Japanese: "計画中...", "ナビゲーション中...", "検証中..." vs English: "Planning...", "Navigating...", "Validating...") based on the user's recent messages.
+
+### Translation Hotfix & UI Alignment (Latest)
+- **Load Wait Time Translation Fix**: Resolved issue where "ページロード待機時間" (pageLoadWaitTime) and its description were not shown in settings. Added the missing keys to `packages/i18n/locales/en/messages.json` and created `packages/i18n/locales/ja/messages.json` to ensure Chrome i18n can load Japanese strings correctly.
+- **UI Alignment**: Adjusted CSS classes to left-align the sidebar title "設定" and all headers within the Token explanation panel (🎯 トークンシステムについて, トークンとは？, etc.) plus the Token Usage title.
+- **Provider UI Removal**: Wrapped the entire LLM Provider management block in `ModelSettings.tsx` with a `SHOW_PROVIDERS` constant (set to `false`), effectively hiding API key and provider management UI since users now always use the built-in centralized API.
+
+### Performance Improvement: Reduced Navigator Wait Time (Latest)
+- **Wait Action Clamped to 1–3 Seconds**: Updated `waitActionSchema` to default to 1 s and allow max 3 s, discouraging long waits unless explicitly requested.
+- **Navigator Wait Implementation**: Modified `builder.ts` to clamp any requested wait time to 1–3 s, significantly improving UX by preventing the agent from pausing for 5 s after every action.
 
 ## File Structure
 ```

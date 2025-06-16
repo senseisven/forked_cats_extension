@@ -1,44 +1,61 @@
-# Privacy Policy for Nanobrowser
+# ネコノテ プライバシーポリシー
 
-## Introduction
+## はじめに
 
-[Nanobrowser](https://github.com/nanobrowser/nanobrowser) is an open-source AI web automation tool that runs in your browser as a Chrome extension. This Privacy Policy explains how Nanobrowser handles your data and protects your privacy.
+ネコノテは、ブラウザ内でChrome拡張機能として動作するAI搭載のウェブ自動化ツールです。このプライバシーポリシーでは、ネコノテがお客様のデータをどのように取り扱い、プライバシーを保護するかについて説明します。
 
-## Open Source Commitment
+## データ収集と処理
 
-Nanobrowser is an open-source project licensed under the Apache License 2.0. All source code is publicly available in our [GitHub repository](https://github.com/nanobrowser/nanobrowser), ensuring complete transparency in how the application functions and processes data.
+### ローカル処理
+- ネコノテは完全にお客様のブラウザ内でChrome拡張機能として動作します
+- お客様のログイン認証情報やブラウザクッキーは、ブラウザ外部に抽出・送信されることはありません
+- ネコノテ開発者によるユーザーデータの収集、保存、処理は一切行いません
 
-## Data Collection and Processing
+### LLMプロバイダーとの連携
+- ネコノテのAI機能を使用する際、ウェブページのデータ（スクリーンショットやHTMLコンテンツを含む）は、お客様が選択した大規模言語モデル（LLM）プロバイダーに直接送信されます
+- このデータ送信は、AI機能が適切に動作するために必要です
+- お客様が選択したLLMプロバイダー以外の第三者プラットフォームがこのデータにアクセスすることはありません
+- お客様のデータプライバシーは、選択されたLLMプロバイダーのプライバシーポリシーに従います
 
-### Local Processing
-- Nanobrowser operates entirely within your browser as a Chrome extension.
-- Your login credentials and browser cookies are never extracted or transmitted outside your browser.
-- No user data is collected, stored, or processed by Nanobrowser developers.
+## APIキー
 
-### LLM Provider Interactions
-- When using Nanobrowser's AI features, web page data (including screenshots and HTML content) are sent directly to the large language model (LLM) provider you have chosen.
-- This data transmission is necessary for the AI functionality to work properly.
-- No third-party platforms besides your selected LLM provider will have access to this data.
-- Your data privacy is subject to the privacy policies of your chosen LLM provider.
+- ネコノテでは、LLMプロバイダー用のAPIキーをお客様自身で提供していただく場合があります
+- これらのAPIキーはお客様のブラウザ内にローカルに保存され、ネコノテのサーバーに送信されることはありません
+- APIキーの管理とセキュリティは、LLMプロバイダーの利用規約に従ってお客様の責任となります
 
-## API Keys
+## Chrome Web Store 固有の開示事項
 
-- Nanobrowser requires you to provide your own API keys for LLM providers.
-- These API keys are stored locally in your browser and are never transmitted to Nanobrowser servers.
-- You are responsible for managing and securing your API keys according to the LLM provider's terms of service.
+### データ使用の透明性
+- スクリーンショットとウェブコンテンツはAIサービスによって処理されます
+- ネコノテ開発者による個人データの収集は行いません
+- すべてのデータ処理は、お客様が選択したAIプロバイダーのポリシーに準拠します
 
-## User Control and Rights
+### 権限の正当化
+- `<all_urls>` : あらゆるウェブサイトでのウェブ自動化に必要
+- `debugger` : 高度なウェブインタラクション機能を有効にします
+- `scripting` : ウェブページに自動化スクリプトを注入します
+- `tabs` : ブラウザタブのインタラクションを管理します
 
-- You have complete control over your data within Nanobrowser.
-- You can clear your conversation history and settings at any time through the extension interface.
-- You can uninstall the extension to remove all locally stored data.
+## データの取り扱いに関する保証
 
-## Changes to This Privacy Policy
+お客様のデータについて、以下を保証いたします：
 
-We may update this Privacy Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We encourage you to review this Privacy Policy periodically.
+- **第三者への販売禁止**: 承認された使用ケース以外で、お客様のデータを第三者に販売することはありません
+- **目的外使用の禁止**: アイテムの中核機能に関連しない目的でデータを使用または転送することはありません
+- **信用審査等での使用禁止**: 信用度の判定や融資目的でデータを使用または転送することはありません
 
-## Contact Us
+## ユーザーの制御と権利
 
-If you have any questions or concerns about this Privacy Policy, please contact us at cws@felight.xyz
+- ネコノテ内でお客様のデータを完全に制御できます
+- 拡張機能のインターフェースを通じて、いつでも会話履歴と設定をクリアできます
+- 拡張機能をアンインストールすることで、ローカルに保存されたすべてのデータを削除できます
 
-Last Updated: March 5, 2025
+## このプライバシーポリシーの変更
+
+当社は、実践の変更やその他の運用上、法的、または規制上の理由により、このプライバシーポリシーを随時更新する場合があります。このプライバシーポリシーを定期的にご確認いただくことをお勧めします。
+
+## お問い合わせ
+
+このプライバシーポリシーについてご質問やご不明な点がございましたら、einar.tokyo@gmail.com までお気軽にお問い合わせください。
+
+最終更新日：2025年6月15日

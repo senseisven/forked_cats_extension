@@ -61,7 +61,9 @@ export function TokenSettings({ isDarkMode = false }: TokenSettingsProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>🎯 トークン使用量</h2>
+        <h2 className={`text-left text-2xl font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+          🎯 トークン使用量
+        </h2>
         <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
           AIエージェントの使用状況とトークン管理
         </p>

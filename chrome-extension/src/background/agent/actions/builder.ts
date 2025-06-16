@@ -188,7 +188,8 @@ export class ActionBuilder {
     actions.push(goBack);
 
     const wait = new Action(async (input: z.infer<typeof waitActionSchema.schema>) => {
-      const seconds = input.seconds || 3;
+      // Ensure waiting time stays within an acceptable, UX-friendly range
+      const seconds = Math.min(Math.max(input.seconds ?? 1, 1), 3);
       const intent = input.intent || `Waiting for ${seconds} seconds`;
       this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_START, intent);
       await new Promise(resolve => setTimeout(resolve, seconds * 1000));

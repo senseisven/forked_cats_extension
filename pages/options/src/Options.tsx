@@ -81,7 +81,7 @@ const Options = () => {
       <nav
         className={`w-56 border-r ${isDarkMode ? 'border-slate-700 bg-slate-800/80' : 'border-[#d4c4a8] bg-[#8b7355]/10'} backdrop-blur-sm`}>
         <div className="p-4">
-          <h1 className={`mb-6 text-xl font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+          <h1 className={`mb-6 text-left text-xl font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
             {t('settingsTitle')}
           </h1>
           <ul className="space-y-2">

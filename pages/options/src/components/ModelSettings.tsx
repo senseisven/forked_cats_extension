@@ -71,6 +71,8 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
 
   const [selectedSpeechToTextModel, setSelectedSpeechToTextModel] = useState<string>('');
 
+  const SHOW_PROVIDERS = false; // hide provider management UI for centralized API usage
+
   useEffect(() => {
     const loadProviders = async () => {
       try {
@@ -692,9 +694,7 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
   const renderModelSelect = (agentName: AgentNameEnum) => (
     <div
       className={`rounded-lg border ${isDarkMode ? 'border-gray-700 bg-slate-800' : 'border-gray-200 bg-gray-50'} p-4`}>
-      <h3 className={`mb-2 text-lg font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-        {agentName.charAt(0).toUpperCase() + agentName.slice(1)}
-      </h3>
+      <h3 className={`mb-2 text-lg font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{t(agentName)}</h3>
       <p className={`mb-4 text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
         {getAgentDescription(agentName)}
       </p>
@@ -1122,492 +1122,496 @@ export const ModelSettings = ({ isDarkMode = false }: ModelSettingsProps) => {
 
   return (
     <section className="space-y-6">
-      {/* LLM Providers Section */}
-      <div
-        className={`rounded-lg border ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-blue-100 bg-gray-50'} p-6 text-left shadow-sm`}>
-        <h2 className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-          {t('llmProviders')}
-        </h2>
-        <div className="space-y-6">
-          {getSortedProviders().length === 0 ? (
-            <div className="py-8 text-center text-gray-500">
-              <p className="mb-4">{t('noProvidersConfigured')}</p>
-            </div>
-          ) : (
-            getSortedProviders().map(([providerId, providerConfig]) => {
-              // Add type guard to satisfy TypeScript
-              if (!providerConfig || !providerConfig.type) {
-                console.warn(`Skipping rendering for providerId ${providerId} due to missing config or type`);
-                return null; // Skip rendering this item if config/type is somehow missing
-              }
+      {/* LLM Providers Section (hidden when SHOW_PROVIDERS is false) */}
+      {SHOW_PROVIDERS && (
+        <div
+          className={`rounded-lg border ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-blue-100 bg-gray-50'} p-6 text-left shadow-sm`}>
+          <h2 className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+            {t('llmProviders')}
+          </h2>
+          <div className="space-y-6">
+            {getSortedProviders().length === 0 ? (
+              <div className="py-8 text-center text-gray-500">
+                <p className="mb-4">{t('noProvidersConfigured')}</p>
+              </div>
+            ) : (
+              getSortedProviders().map(([providerId, providerConfig]) => {
+                // Add type guard to satisfy TypeScript
+                if (!providerConfig || !providerConfig.type) {
+                  console.warn(`Skipping rendering for providerId ${providerId} due to missing config or type`);
+                  return null; // Skip rendering this item if config/type is somehow missing
+                }
 
-              return (
-                <div
-                  key={providerId}
-                  id={`provider-${providerId}`}
-                  className={`space-y-4 ${modifiedProviders.has(providerId) && !providersFromStorage.has(providerId) ? `rounded-lg border p-4 ${isDarkMode ? 'border-blue-700 bg-slate-700' : 'border-blue-200 bg-blue-50/70'}` : ''}`}>
-                  <div className="flex items-center justify-between">
-                    <h3 className={`text-lg font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {providerConfig.name || providerId}
-                    </h3>
-                    <div className="flex space-x-2">
-                      {/* Show Cancel button for newly added providers */}
-                      {modifiedProviders.has(providerId) && !providersFromStorage.has(providerId) && (
-                        <Button variant="secondary" onClick={() => handleCancelProvider(providerId)}>
-                          {t('cancel')}
-                        </Button>
-                      )}
-                      <Button
-                        variant={getButtonProps(providerId).variant}
-                        disabled={getButtonProps(providerId).disabled}
-                        onClick={() =>
-                          providersFromStorage.has(providerId) && !modifiedProviders.has(providerId)
-                            ? handleDelete(providerId)
-                            : handleSave(providerId)
-                        }>
-                        {getButtonProps(providerId).children}
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Show message for newly added providers */}
-                  {modifiedProviders.has(providerId) && !providersFromStorage.has(providerId) && (
-                    <div className={`mb-2 text-sm ${isDarkMode ? 'text-teal-300' : 'text-teal-700'}`}>
-                      <p>{t('newlyAddedProvider')}</p>
-                    </div>
-                  )}
-
-                  <div className="space-y-3">
-                    {/* Name input (only for custom_openai) - moved to top for prominence */}
-                    {providerConfig.type === ProviderTypeEnum.CustomOpenAI && (
-                      <div className="flex flex-col">
-                        <div className="flex items-center">
-                          <label
-                            htmlFor={`${providerId}-name`}
-                            className={`w-20 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                            {t('name')}
-                          </label>
-                          <input
-                            id={`${providerId}-name`}
-                            type="text"
-                            placeholder="Provider name"
-                            value={providerConfig.name || ''}
-                            onChange={e => {
-                              console.log('Name input changed:', e.target.value);
-                              handleNameChange(providerId, e.target.value);
-                            }}
-                            className={`flex-1 rounded-md border p-2 text-sm ${
-                              nameErrors[providerId]
-                                ? isDarkMode
-                                  ? 'border-red-700 bg-slate-700 text-gray-200 focus:border-red-600 focus:ring-2 focus:ring-red-900'
-                                  : 'border-red-300 bg-gray-50 focus:border-red-400 focus:ring-2 focus:ring-red-200'
-                                : isDarkMode
-                                  ? 'border-blue-700 bg-slate-700 text-gray-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-900'
-                                  : 'border-blue-300 bg-gray-50 focus:border-blue-400 focus:ring-2 focus:ring-blue-200'
-                            } outline-none`}
-                          />
-                        </div>
-                        {nameErrors[providerId] ? (
-                          <p className={`ml-20 mt-1 text-xs ${isDarkMode ? 'text-red-400' : 'text-red-500'}`}>
-                            {nameErrors[providerId]}
-                          </p>
-                        ) : (
-                          <p className={`ml-20 mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {t('providerName')}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    {/* API Key input with label */}
-                    <div className="flex items-center">
-                      <label
-                        htmlFor={`${providerId}-api-key`}
-                        className={`w-20 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                        {t('apiKey')}
-                        {/* Show asterisk only if required */}
-                        {providerConfig.type !== ProviderTypeEnum.CustomOpenAI &&
-                        providerConfig.type !== ProviderTypeEnum.Ollama
-                          ? '*'
-                          : ''}
-                      </label>
-                      <div className="relative flex-1">
-                        <input
-                          id={`${providerId}-api-key`}
-                          type="password"
-                          placeholder={
-                            providerConfig.type === ProviderTypeEnum.CentralizedAPI
-                              ? t('apiKeyNotRequired')
-                              : providerConfig.type === ProviderTypeEnum.CustomOpenAI
-                                ? `${providerConfig.name || providerId} ${t('apiKeyOptional')}`
-                                : providerConfig.type === ProviderTypeEnum.Ollama
-                                  ? t('apiKeyLeaveEmpty')
-                                  : `${providerConfig.name || providerId} ${t('apiKeyRequired')}`
-                          }
-                          value={providerConfig.apiKey || ''}
-                          onChange={e => handleApiKeyChange(providerId, e.target.value, providerConfig.baseUrl)}
-                          disabled={providerConfig.type === ProviderTypeEnum.CentralizedAPI}
-                          className={`w-full rounded-md border text-sm ${
-                            providerConfig.type === ProviderTypeEnum.CentralizedAPI
-                              ? 'cursor-not-allowed opacity-60'
-                              : ''
-                          } ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-800' : 'border-gray-300 bg-white text-gray-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-200'} p-2 outline-none`}
-                        />
-                        {/* Show eye button only for newly added providers */}
+                return (
+                  <div
+                    key={providerId}
+                    id={`provider-${providerId}`}
+                    className={`space-y-4 ${modifiedProviders.has(providerId) && !providersFromStorage.has(providerId) ? `rounded-lg border p-4 ${isDarkMode ? 'border-blue-700 bg-slate-700' : 'border-blue-200 bg-blue-50/70'}` : ''}`}>
+                    <div className="flex items-center justify-between">
+                      <h3 className={`text-lg font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {providerConfig.name || providerId}
+                      </h3>
+                      <div className="flex space-x-2">
+                        {/* Show Cancel button for newly added providers */}
                         {modifiedProviders.has(providerId) && !providersFromStorage.has(providerId) && (
-                          <button
-                            type="button"
-                            className={`absolute right-2 top-1/2 -translate-y-1/2 ${
-                              isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                            onClick={() => toggleApiKeyVisibility(providerId)}
-                            aria-label={visibleApiKeys[providerId] ? t('hideApiKey') : t('showApiKey')}>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="size-5"
-                              aria-hidden="true">
-                              <title>{visibleApiKeys[providerId] ? t('hideApiKey') : t('showApiKey')}</title>
-                              {visibleApiKeys[providerId] ? (
-                                <>
-                                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                  <circle cx="12" cy="12" r="3" />
-                                  <line x1="2" y1="22" x2="22" y2="2" />
-                                </>
-                              ) : (
-                                <>
-                                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                  <circle cx="12" cy="12" r="3" />
-                                </>
-                              )}
-                            </svg>
-                          </button>
+                          <Button variant="secondary" onClick={() => handleCancelProvider(providerId)}>
+                            {t('cancel')}
+                          </Button>
                         )}
+                        <Button
+                          variant={getButtonProps(providerId).variant}
+                          disabled={getButtonProps(providerId).disabled}
+                          onClick={() =>
+                            providersFromStorage.has(providerId) && !modifiedProviders.has(providerId)
+                              ? handleDelete(providerId)
+                              : handleSave(providerId)
+                          }>
+                          {getButtonProps(providerId).children}
+                        </Button>
                       </div>
                     </div>
 
-                    {/* Display API key for newly added providers only when visible */}
-                    {modifiedProviders.has(providerId) &&
-                      !providersFromStorage.has(providerId) &&
-                      visibleApiKeys[providerId] &&
-                      providerConfig.apiKey && (
-                        <div className="ml-20 mt-1">
-                          <p
-                            className={`break-words font-mono text-sm ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
-                            {providerConfig.apiKey}
-                          </p>
-                        </div>
-                      )}
-
-                    {/* Base URL input (for custom_openai, ollama, azure_openai, and openrouter) */}
-                    {(providerConfig.type === ProviderTypeEnum.CustomOpenAI ||
-                      providerConfig.type === ProviderTypeEnum.Ollama ||
-                      providerConfig.type === ProviderTypeEnum.AzureOpenAI ||
-                      providerConfig.type === ProviderTypeEnum.OpenRouter) && (
-                      <div className="flex flex-col">
-                        <div className="flex items-center">
-                          <label
-                            htmlFor={`${providerId}-base-url`}
-                            className={`w-20 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                            {/* Adjust Label based on provider */}
-                            {providerConfig.type === ProviderTypeEnum.AzureOpenAI ? t('endpoint') : t('baseUrl')}
-                            {/* Show asterisk only if required */}
-                            {/* OpenRouter has a default, so not strictly required, but needed for save button */}
-                            {providerConfig.type === ProviderTypeEnum.CustomOpenAI ||
-                            providerConfig.type === ProviderTypeEnum.AzureOpenAI
-                              ? '*'
-                              : ''}
-                          </label>
-                          <input
-                            id={`${providerId}-base-url`}
-                            type="text"
-                            placeholder={
-                              providerConfig.type === ProviderTypeEnum.CustomOpenAI
-                                ? 'Required OpenAI-compatible API endpoint'
-                                : providerConfig.type === ProviderTypeEnum.AzureOpenAI
-                                  ? // Updated Azure placeholder
-                                    'https://YOUR_RESOURCE_NAME.openai.azure.com/'
-                                  : providerConfig.type === ProviderTypeEnum.OpenRouter
-                                    ? 'OpenRouter Base URL (optional, defaults to https://openrouter.ai/api/v1)'
-                                    : 'Ollama base URL'
-                            }
-                            value={providerConfig.baseUrl || ''}
-                            onChange={e => handleApiKeyChange(providerId, providerConfig.apiKey || '', e.target.value)}
-                            className={`flex-1 rounded-md border text-sm ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-800' : 'border-gray-300 bg-white text-gray-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-200'} p-2 outline-none`}
-                          />
-                        </div>
+                    {/* Show message for newly added providers */}
+                    {modifiedProviders.has(providerId) && !providersFromStorage.has(providerId) && (
+                      <div className={`mb-2 text-sm ${isDarkMode ? 'text-teal-300' : 'text-teal-700'}`}>
+                        <p>{t('newlyAddedProvider')}</p>
                       </div>
                     )}
 
-                    {/* Azure Deployment Name input as tags/chips like OpenRouter models */}
-                    {(providerConfig.type as ProviderTypeEnum) === ProviderTypeEnum.AzureOpenAI && (
-                      <div className="flex items-start">
-                        <label
-                          htmlFor={`${providerId}-azure-deployment`}
-                          className={`w-20 pt-2 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Deployment*
-                        </label>
-                        <div className="flex-1 space-y-2">
-                          <div
-                            className={`flex min-h-[42px] flex-wrap items-center gap-2 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} p-2`}>
-                            {/* Show azure deployments */}
-                            {(providerConfig.azureDeploymentNames || []).length > 0
-                              ? (providerConfig.azureDeploymentNames || []).map((deploymentName: string) => (
-                                  <div
-                                    key={deploymentName}
-                                    className={`flex items-center rounded-full ${isDarkMode ? 'bg-blue-900 text-blue-100' : 'bg-blue-100 text-blue-800'} px-2 py-1 text-sm`}>
-                                    <span>{deploymentName}</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => removeAzureDeployment(providerId, deploymentName)}
-                                      className={`ml-1 font-bold ${isDarkMode ? 'text-blue-300 hover:text-blue-100' : 'text-blue-600 hover:text-blue-800'}`}
-                                      aria-label={`Remove ${deploymentName}`}>
-                                      ×
-                                    </button>
-                                  </div>
-                                ))
-                              : null}
+                    <div className="space-y-3">
+                      {/* Name input (only for custom_openai) - moved to top for prominence */}
+                      {providerConfig.type === ProviderTypeEnum.CustomOpenAI && (
+                        <div className="flex flex-col">
+                          <div className="flex items-center">
+                            <label
+                              htmlFor={`${providerId}-name`}
+                              className={`w-20 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                              {t('name')}
+                            </label>
                             <input
-                              id={`${providerId}-azure-deployment-input`}
+                              id={`${providerId}-name`}
                               type="text"
-                              placeholder="Enter Azure model name (e.g. gpt-4o, gpt-4o-mini)"
-                              value={newModelInputs[providerId] || ''}
-                              onChange={e => handleModelsChange(providerId, e.target.value)}
-                              onKeyDown={e => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                  e.preventDefault();
-                                  const value = newModelInputs[providerId] || '';
-                                  if (value.trim()) {
-                                    addAzureDeployment(providerId, value.trim());
-                                    // Clear the input
-                                    setNewModelInputs(prev => ({
-                                      ...prev,
-                                      [providerId]: '',
-                                    }));
-                                  }
-                                }
+                              placeholder="Provider name"
+                              value={providerConfig.name || ''}
+                              onChange={e => {
+                                console.log('Name input changed:', e.target.value);
+                                handleNameChange(providerId, e.target.value);
                               }}
-                              className={`min-w-[150px] flex-1 border-none text-sm ${isDarkMode ? 'bg-transparent text-gray-200' : 'bg-transparent text-gray-700'} p-1 outline-none`}
+                              className={`flex-1 rounded-md border p-2 text-sm ${
+                                nameErrors[providerId]
+                                  ? isDarkMode
+                                    ? 'border-red-700 bg-slate-700 text-gray-200 focus:border-red-600 focus:ring-2 focus:ring-red-900'
+                                    : 'border-red-300 bg-gray-50 focus:border-red-400 focus:ring-2 focus:ring-red-200'
+                                  : isDarkMode
+                                    ? 'border-blue-700 bg-slate-700 text-gray-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-900'
+                                    : 'border-blue-300 bg-gray-50 focus:border-blue-400 focus:ring-2 focus:ring-blue-200'
+                              } outline-none`}
                             />
                           </div>
-                          <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            Type model name and press Enter or Space to set. Deployment name should match OpenAI model
-                            name (e.g., gpt-4o) for best compatibility.
-                          </p>
+                          {nameErrors[providerId] ? (
+                            <p className={`ml-20 mt-1 text-xs ${isDarkMode ? 'text-red-400' : 'text-red-500'}`}>
+                              {nameErrors[providerId]}
+                            </p>
+                          ) : (
+                            <p className={`ml-20 mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                              {t('providerName')}
+                            </p>
+                          )}
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* NEW: Azure API Version input */}
-                    {(providerConfig.type as ProviderTypeEnum) === ProviderTypeEnum.AzureOpenAI && (
+                      {/* API Key input with label */}
                       <div className="flex items-center">
                         <label
-                          htmlFor={`${providerId}-azure-version`}
+                          htmlFor={`${providerId}-api-key`}
                           className={`w-20 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {t('apiVersion')}*
+                          {t('apiKey')}
+                          {/* Show asterisk only if required */}
+                          {providerConfig.type !== ProviderTypeEnum.CustomOpenAI &&
+                          providerConfig.type !== ProviderTypeEnum.Ollama
+                            ? '*'
+                            : ''}
                         </label>
-                        <input
-                          id={`${providerId}-azure-version`}
-                          type="text"
-                          placeholder="e.g., 2024-02-15-preview" // Common example
-                          value={providerConfig.azureApiVersion || ''}
-                          onChange={e => handleAzureApiVersionChange(providerId, e.target.value)}
-                          className={`flex-1 rounded-md border text-sm ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-800' : 'border-gray-300 bg-white text-gray-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-200'} p-2 outline-none`}
-                        />
+                        <div className="relative flex-1">
+                          <input
+                            id={`${providerId}-api-key`}
+                            type="password"
+                            placeholder={
+                              providerConfig.type === ProviderTypeEnum.CentralizedAPI
+                                ? t('apiKeyNotRequired')
+                                : providerConfig.type === ProviderTypeEnum.CustomOpenAI
+                                  ? `${providerConfig.name || providerId} ${t('apiKeyOptional')}`
+                                  : providerConfig.type === ProviderTypeEnum.Ollama
+                                    ? t('apiKeyLeaveEmpty')
+                                    : `${providerConfig.name || providerId} ${t('apiKeyRequired')}`
+                            }
+                            value={providerConfig.apiKey || ''}
+                            onChange={e => handleApiKeyChange(providerId, e.target.value, providerConfig.baseUrl)}
+                            disabled={providerConfig.type === ProviderTypeEnum.CentralizedAPI}
+                            className={`w-full rounded-md border text-sm ${
+                              providerConfig.type === ProviderTypeEnum.CentralizedAPI
+                                ? 'cursor-not-allowed opacity-60'
+                                : ''
+                            } ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-800' : 'border-gray-300 bg-white text-gray-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-200'} p-2 outline-none`}
+                          />
+                          {/* Show eye button only for newly added providers */}
+                          {modifiedProviders.has(providerId) && !providersFromStorage.has(providerId) && (
+                            <button
+                              type="button"
+                              className={`absolute right-2 top-1/2 -translate-y-1/2 ${
+                                isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'
+                              }`}
+                              onClick={() => toggleApiKeyVisibility(providerId)}
+                              aria-label={visibleApiKeys[providerId] ? t('hideApiKey') : t('showApiKey')}>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="size-5"
+                                aria-hidden="true">
+                                <title>{visibleApiKeys[providerId] ? t('hideApiKey') : t('showApiKey')}</title>
+                                {visibleApiKeys[providerId] ? (
+                                  <>
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                    <line x1="2" y1="22" x2="22" y2="2" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                  </>
+                                )}
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    )}
 
-                    {/* Models input section (for non-Azure providers) */}
-                    {(providerConfig.type as ProviderTypeEnum) !== ProviderTypeEnum.AzureOpenAI && (
-                      <div className="flex items-start">
-                        <label
-                          htmlFor={`${providerId}-models-label`}
-                          className={`w-20 pt-2 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          {t('models')}
-                        </label>
-                        <div className="flex-1 space-y-2">
-                          {/* Conditional UI for OpenRouter */}
-                          {(providerConfig.type as ProviderTypeEnum) === ProviderTypeEnum.OpenRouter ? (
-                            <>
-                              <div
-                                className={`flex min-h-[42px] flex-wrap items-center gap-2 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} p-2`}>
-                                {providerConfig.modelNames && providerConfig.modelNames.length > 0 ? (
-                                  providerConfig.modelNames.map(model => (
+                      {/* Display API key for newly added providers only when visible */}
+                      {modifiedProviders.has(providerId) &&
+                        !providersFromStorage.has(providerId) &&
+                        visibleApiKeys[providerId] &&
+                        providerConfig.apiKey && (
+                          <div className="ml-20 mt-1">
+                            <p
+                              className={`break-words font-mono text-sm ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                              {providerConfig.apiKey}
+                            </p>
+                          </div>
+                        )}
+
+                      {/* Base URL input (for custom_openai, ollama, azure_openai, and openrouter) */}
+                      {(providerConfig.type === ProviderTypeEnum.CustomOpenAI ||
+                        providerConfig.type === ProviderTypeEnum.Ollama ||
+                        providerConfig.type === ProviderTypeEnum.AzureOpenAI ||
+                        providerConfig.type === ProviderTypeEnum.OpenRouter) && (
+                        <div className="flex flex-col">
+                          <div className="flex items-center">
+                            <label
+                              htmlFor={`${providerId}-base-url`}
+                              className={`w-20 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                              {/* Adjust Label based on provider */}
+                              {providerConfig.type === ProviderTypeEnum.AzureOpenAI ? t('endpoint') : t('baseUrl')}
+                              {/* Show asterisk only if required */}
+                              {/* OpenRouter has a default, so not strictly required, but needed for save button */}
+                              {providerConfig.type === ProviderTypeEnum.CustomOpenAI ||
+                              providerConfig.type === ProviderTypeEnum.AzureOpenAI
+                                ? '*'
+                                : ''}
+                            </label>
+                            <input
+                              id={`${providerId}-base-url`}
+                              type="text"
+                              placeholder={
+                                providerConfig.type === ProviderTypeEnum.CustomOpenAI
+                                  ? 'Required OpenAI-compatible API endpoint'
+                                  : providerConfig.type === ProviderTypeEnum.AzureOpenAI
+                                    ? // Updated Azure placeholder
+                                      'https://YOUR_RESOURCE_NAME.openai.azure.com/'
+                                    : providerConfig.type === ProviderTypeEnum.OpenRouter
+                                      ? 'OpenRouter Base URL (optional, defaults to https://openrouter.ai/api/v1)'
+                                      : 'Ollama base URL'
+                              }
+                              value={providerConfig.baseUrl || ''}
+                              onChange={e =>
+                                handleApiKeyChange(providerId, providerConfig.apiKey || '', e.target.value)
+                              }
+                              className={`flex-1 rounded-md border text-sm ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-800' : 'border-gray-300 bg-white text-gray-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-200'} p-2 outline-none`}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Azure Deployment Name input as tags/chips like OpenRouter models */}
+                      {(providerConfig.type as ProviderTypeEnum) === ProviderTypeEnum.AzureOpenAI && (
+                        <div className="flex items-start">
+                          <label
+                            htmlFor={`${providerId}-azure-deployment`}
+                            className={`w-20 pt-2 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            Deployment*
+                          </label>
+                          <div className="flex-1 space-y-2">
+                            <div
+                              className={`flex min-h-[42px] flex-wrap items-center gap-2 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} p-2`}>
+                              {/* Show azure deployments */}
+                              {(providerConfig.azureDeploymentNames || []).length > 0
+                                ? (providerConfig.azureDeploymentNames || []).map((deploymentName: string) => (
                                     <div
-                                      key={model}
+                                      key={deploymentName}
                                       className={`flex items-center rounded-full ${isDarkMode ? 'bg-blue-900 text-blue-100' : 'bg-blue-100 text-blue-800'} px-2 py-1 text-sm`}>
-                                      <span>{model}</span>
+                                      <span>{deploymentName}</span>
                                       <button
                                         type="button"
-                                        onClick={() => removeModel(providerId, model)}
+                                        onClick={() => removeAzureDeployment(providerId, deploymentName)}
                                         className={`ml-1 font-bold ${isDarkMode ? 'text-blue-300 hover:text-blue-100' : 'text-blue-600 hover:text-blue-800'}`}
-                                        aria-label={`${t('removeModel')} ${model}`}>
+                                        aria-label={`Remove ${deploymentName}`}>
                                         ×
                                       </button>
                                     </div>
                                   ))
-                                ) : (
-                                  <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                    {t('noModelsSelected')}
-                                  </span>
-                                )}
-                                <input
-                                  id={`${providerId}-models-input`}
-                                  type="text"
-                                  placeholder=""
-                                  value={newModelInputs[providerId] || ''}
-                                  onChange={e => handleModelsChange(providerId, e.target.value)}
-                                  onKeyDown={e => handleKeyDown(e, providerId)}
-                                  className={`min-w-[150px] flex-1 border-none text-sm ${isDarkMode ? 'bg-transparent text-gray-200' : 'bg-transparent text-gray-700'} p-1 outline-none`}
-                                />
-                              </div>
-                              <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                {t('typeAndPressEnter')}
-                              </p>
-                            </>
-                          ) : (
-                            /* Default Tag Input for other providers */
-                            <>
-                              <div
-                                className={`flex min-h-[42px] flex-wrap items-center gap-2 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} p-2`}>
-                                {(() => {
-                                  const models =
-                                    providerConfig.modelNames !== undefined
-                                      ? providerConfig.modelNames
-                                      : llmProviderModelNames[providerId as keyof typeof llmProviderModelNames] || [];
-                                  return models.map(model => (
-                                    <div
-                                      key={model}
-                                      className={`flex items-center rounded-full ${isDarkMode ? 'bg-blue-900 text-blue-100' : 'bg-blue-100 text-blue-800'} px-2 py-1 text-sm`}>
-                                      <span>{model}</span>
-                                      <button
-                                        type="button"
-                                        onClick={() => removeModel(providerId, model)}
-                                        className={`ml-1 font-bold ${isDarkMode ? 'text-blue-300 hover:text-blue-100' : 'text-blue-600 hover:text-blue-800'}`}
-                                        aria-label={`${t('removeModel')} ${model}`}>
-                                        ×
-                                      </button>
-                                    </div>
-                                  ));
-                                })()}
-                                <input
-                                  id={`${providerId}-models-input`}
-                                  type="text"
-                                  placeholder=""
-                                  value={newModelInputs[providerId] || ''}
-                                  onChange={e => handleModelsChange(providerId, e.target.value)}
-                                  onKeyDown={e => handleKeyDown(e, providerId)}
-                                  className={`min-w-[150px] flex-1 border-none text-sm ${isDarkMode ? 'bg-transparent text-gray-200' : 'bg-transparent text-gray-700'} p-1 outline-none`}
-                                />
-                              </div>
-                              <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                {t('typeAndPressEnter')}
-                              </p>
-                            </>
-                          )}
-                          {/* === END: Conditional UI === */}
+                                : null}
+                              <input
+                                id={`${providerId}-azure-deployment-input`}
+                                type="text"
+                                placeholder="Enter Azure model name (e.g. gpt-4o, gpt-4o-mini)"
+                                value={newModelInputs[providerId] || ''}
+                                onChange={e => handleModelsChange(providerId, e.target.value)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    const value = newModelInputs[providerId] || '';
+                                    if (value.trim()) {
+                                      addAzureDeployment(providerId, value.trim());
+                                      // Clear the input
+                                      setNewModelInputs(prev => ({
+                                        ...prev,
+                                        [providerId]: '',
+                                      }));
+                                    }
+                                  }
+                                }}
+                                className={`min-w-[150px] flex-1 border-none text-sm ${isDarkMode ? 'bg-transparent text-gray-200' : 'bg-transparent text-gray-700'} p-1 outline-none`}
+                              />
+                            </div>
+                            <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                              Type model name and press Enter or Space to set. Deployment name should match OpenAI model
+                              name (e.g., gpt-4o) for best compatibility.
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Ollama reminder at the bottom of the section */}
-                    {providerConfig.type === ProviderTypeEnum.Ollama && (
-                      <div
-                        className={`mt-4 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700' : 'border-blue-100 bg-blue-50'} p-3`}>
-                        <p className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                          <strong>{t('remember')}</strong> {t('ollamaReminder')}{' '}
-                          <code
-                            className={`rounded italic ${isDarkMode ? 'bg-slate-600 px-1 py-0.5' : 'bg-blue-100 px-1 py-0.5'}`}>
-                            OLLAMA_ORIGINS=chrome-extension://*
-                          </code>{' '}
-                          <a
-                            href="https://github.com/ollama/ollama/issues/6489"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`ml-1 ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`}>
-                            {t('learnMore')}
-                          </a>
-                        </p>
-                      </div>
+                      {/* NEW: Azure API Version input */}
+                      {(providerConfig.type as ProviderTypeEnum) === ProviderTypeEnum.AzureOpenAI && (
+                        <div className="flex items-center">
+                          <label
+                            htmlFor={`${providerId}-azure-version`}
+                            className={`w-20 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            {t('apiVersion')}*
+                          </label>
+                          <input
+                            id={`${providerId}-azure-version`}
+                            type="text"
+                            placeholder="e.g., 2024-02-15-preview" // Common example
+                            value={providerConfig.azureApiVersion || ''}
+                            onChange={e => handleAzureApiVersionChange(providerId, e.target.value)}
+                            className={`flex-1 rounded-md border text-sm ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-800' : 'border-gray-300 bg-white text-gray-700 focus:border-blue-400 focus:ring-2 focus:ring-blue-200'} p-2 outline-none`}
+                          />
+                        </div>
+                      )}
+
+                      {/* Models input section (for non-Azure providers) */}
+                      {(providerConfig.type as ProviderTypeEnum) !== ProviderTypeEnum.AzureOpenAI && (
+                        <div className="flex items-start">
+                          <label
+                            htmlFor={`${providerId}-models-label`}
+                            className={`w-20 pt-2 text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            {t('models')}
+                          </label>
+                          <div className="flex-1 space-y-2">
+                            {/* Conditional UI for OpenRouter */}
+                            {(providerConfig.type as ProviderTypeEnum) === ProviderTypeEnum.OpenRouter ? (
+                              <>
+                                <div
+                                  className={`flex min-h-[42px] flex-wrap items-center gap-2 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} p-2`}>
+                                  {providerConfig.modelNames && providerConfig.modelNames.length > 0 ? (
+                                    providerConfig.modelNames.map(model => (
+                                      <div
+                                        key={model}
+                                        className={`flex items-center rounded-full ${isDarkMode ? 'bg-blue-900 text-blue-100' : 'bg-blue-100 text-blue-800'} px-2 py-1 text-sm`}>
+                                        <span>{model}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => removeModel(providerId, model)}
+                                          className={`ml-1 font-bold ${isDarkMode ? 'text-blue-300 hover:text-blue-100' : 'text-blue-600 hover:text-blue-800'}`}
+                                          aria-label={`${t('removeModel')} ${model}`}>
+                                          ×
+                                        </button>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                      {t('noModelsSelected')}
+                                    </span>
+                                  )}
+                                  <input
+                                    id={`${providerId}-models-input`}
+                                    type="text"
+                                    placeholder=""
+                                    value={newModelInputs[providerId] || ''}
+                                    onChange={e => handleModelsChange(providerId, e.target.value)}
+                                    onKeyDown={e => handleKeyDown(e, providerId)}
+                                    className={`min-w-[150px] flex-1 border-none text-sm ${isDarkMode ? 'bg-transparent text-gray-200' : 'bg-transparent text-gray-700'} p-1 outline-none`}
+                                  />
+                                </div>
+                                <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  {t('typeAndPressEnter')}
+                                </p>
+                              </>
+                            ) : (
+                              /* Default Tag Input for other providers */
+                              <>
+                                <div
+                                  className={`flex min-h-[42px] flex-wrap items-center gap-2 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-gray-300 bg-white text-gray-700'} p-2`}>
+                                  {(() => {
+                                    const models =
+                                      providerConfig.modelNames !== undefined
+                                        ? providerConfig.modelNames
+                                        : llmProviderModelNames[providerId as keyof typeof llmProviderModelNames] || [];
+                                    return models.map(model => (
+                                      <div
+                                        key={model}
+                                        className={`flex items-center rounded-full ${isDarkMode ? 'bg-blue-900 text-blue-100' : 'bg-blue-100 text-blue-800'} px-2 py-1 text-sm`}>
+                                        <span>{model}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => removeModel(providerId, model)}
+                                          className={`ml-1 font-bold ${isDarkMode ? 'text-blue-300 hover:text-blue-100' : 'text-blue-600 hover:text-blue-800'}`}
+                                          aria-label={`${t('removeModel')} ${model}`}>
+                                          ×
+                                        </button>
+                                      </div>
+                                    ));
+                                  })()}
+                                  <input
+                                    id={`${providerId}-models-input`}
+                                    type="text"
+                                    placeholder=""
+                                    value={newModelInputs[providerId] || ''}
+                                    onChange={e => handleModelsChange(providerId, e.target.value)}
+                                    onKeyDown={e => handleKeyDown(e, providerId)}
+                                    className={`min-w-[150px] flex-1 border-none text-sm ${isDarkMode ? 'bg-transparent text-gray-200' : 'bg-transparent text-gray-700'} p-1 outline-none`}
+                                  />
+                                </div>
+                                <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  {t('typeAndPressEnter')}
+                                </p>
+                              </>
+                            )}
+                            {/* === END: Conditional UI === */}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Ollama reminder at the bottom of the section */}
+                      {providerConfig.type === ProviderTypeEnum.Ollama && (
+                        <div
+                          className={`mt-4 rounded-md border ${isDarkMode ? 'border-slate-600 bg-slate-700' : 'border-blue-100 bg-blue-50'} p-3`}>
+                          <p className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                            <strong>{t('remember')}</strong> {t('ollamaReminder')}{' '}
+                            <code
+                              className={`rounded italic ${isDarkMode ? 'bg-slate-600 px-1 py-0.5' : 'bg-blue-100 px-1 py-0.5'}`}>
+                              OLLAMA_ORIGINS=chrome-extension://*
+                            </code>{' '}
+                            <a
+                              href="https://github.com/ollama/ollama/issues/6489"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`ml-1 ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`}>
+                              {t('learnMore')}
+                            </a>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Add divider except for the last item */}
+                    {Object.keys(providers).indexOf(providerId) < Object.keys(providers).length - 1 && (
+                      <div className={`mt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`} />
                     )}
                   </div>
-
-                  {/* Add divider except for the last item */}
-                  {Object.keys(providers).indexOf(providerId) < Object.keys(providers).length - 1 && (
-                    <div className={`mt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`} />
-                  )}
-                </div>
-              );
-            })
-          )}
-
-          {/* Add Provider button and dropdown */}
-          <div className="provider-selector-container relative pt-4">
-            <Button
-              variant="secondary"
-              onClick={() => setIsProviderSelectorOpen(prev => !prev)}
-              className={`flex w-full items-center justify-center font-medium ${
-                isDarkMode
-                  ? 'border-blue-700 bg-blue-600 text-white hover:bg-blue-500'
-                  : 'border-blue-200 bg-blue-100 text-blue-800 hover:bg-blue-200'
-              }`}>
-              <span className="mr-2 text-sm">+</span> <span className="text-sm">{t('addNewProvider')}</span>
-            </Button>
-
-            {isProviderSelectorOpen && (
-              <div
-                className={`absolute z-10 mt-2 w-full overflow-hidden rounded-md border ${
-                  isDarkMode
-                    ? 'border-blue-600 bg-slate-700 shadow-lg shadow-slate-900/50'
-                    : 'border-blue-200 bg-white shadow-xl shadow-blue-100/50'
-                }`}>
-                <div className="py-1">
-                  {/* Map through provider types to create buttons */}
-                  {Object.values(ProviderTypeEnum)
-                    // Allow Azure to appear multiple times, but filter out other already added providers
-                    .filter(
-                      type =>
-                        type === ProviderTypeEnum.AzureOpenAI || // Always show Azure
-                        (type !== ProviderTypeEnum.CustomOpenAI &&
-                          !providersFromStorage.has(type) &&
-                          !modifiedProviders.has(type)),
-                    )
-                    .map(type => (
-                      <button
-                        key={type}
-                        type="button"
-                        className={`flex w-full items-center px-4 py-3 text-left text-sm ${
-                          isDarkMode
-                            ? 'text-blue-200 hover:bg-blue-600/30 hover:text-white'
-                            : 'text-blue-700 hover:bg-blue-100 hover:text-blue-800'
-                        } transition-colors duration-150`}
-                        onClick={() => handleProviderSelection(type)}>
-                        <span className="font-medium">{getDefaultDisplayNameFromProviderId(type)}</span>
-                      </button>
-                    ))}
-
-                  {/* Custom provider button (always shown) */}
-                  <button
-                    type="button"
-                    className={`flex w-full items-center px-4 py-3 text-left text-sm ${
-                      isDarkMode
-                        ? 'text-blue-200 hover:bg-blue-600/30 hover:text-white'
-                        : 'text-blue-700 hover:bg-blue-100 hover:text-blue-800'
-                    } transition-colors duration-150`}
-                    onClick={() => handleProviderSelection(ProviderTypeEnum.CustomOpenAI)}>
-                    <span className="font-medium">OpenAI-compatible API Provider</span>
-                  </button>
-                </div>
-              </div>
+                );
+              })
             )}
+
+            {/* Add Provider button and dropdown */}
+            <div className="provider-selector-container relative pt-4">
+              <Button
+                variant="secondary"
+                onClick={() => setIsProviderSelectorOpen(prev => !prev)}
+                className={`flex w-full items-center justify-center font-medium ${
+                  isDarkMode
+                    ? 'border-blue-700 bg-blue-600 text-white hover:bg-blue-500'
+                    : 'border-blue-200 bg-blue-100 text-blue-800 hover:bg-blue-200'
+                }`}>
+                <span className="mr-2 text-sm">+</span> <span className="text-sm">{t('addNewProvider')}</span>
+              </Button>
+
+              {isProviderSelectorOpen && (
+                <div
+                  className={`absolute z-10 mt-2 w-full overflow-hidden rounded-md border ${
+                    isDarkMode
+                      ? 'border-blue-600 bg-slate-700 shadow-lg shadow-slate-900/50'
+                      : 'border-blue-200 bg-white shadow-xl shadow-blue-100/50'
+                  }`}>
+                  <div className="py-1">
+                    {/* Map through provider types to create buttons */}
+                    {Object.values(ProviderTypeEnum)
+                      // Allow Azure to appear multiple times, but filter out other already added providers
+                      .filter(
+                        type =>
+                          type === ProviderTypeEnum.AzureOpenAI || // Always show Azure
+                          (type !== ProviderTypeEnum.CustomOpenAI &&
+                            !providersFromStorage.has(type) &&
+                            !modifiedProviders.has(type)),
+                      )
+                      .map(type => (
+                        <button
+                          key={type}
+                          type="button"
+                          className={`flex w-full items-center px-4 py-3 text-left text-sm ${
+                            isDarkMode
+                              ? 'text-blue-200 hover:bg-blue-600/30 hover:text-white'
+                              : 'text-blue-700 hover:bg-blue-100 hover:text-blue-800'
+                          } transition-colors duration-150`}
+                          onClick={() => handleProviderSelection(type)}>
+                          <span className="font-medium">{getDefaultDisplayNameFromProviderId(type)}</span>
+                        </button>
+                      ))}
+
+                    {/* Custom provider button (always shown) */}
+                    <button
+                      type="button"
+                      className={`flex w-full items-center px-4 py-3 text-left text-sm ${
+                        isDarkMode
+                          ? 'text-blue-200 hover:bg-blue-600/30 hover:text-white'
+                          : 'text-blue-700 hover:bg-blue-100 hover:text-blue-800'
+                      } transition-colors duration-150`}
+                      onClick={() => handleProviderSelection(ProviderTypeEnum.CustomOpenAI)}>
+                      <span className="font-medium">OpenAI-compatible API Provider</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Updated Agent Models Section */}
       <div

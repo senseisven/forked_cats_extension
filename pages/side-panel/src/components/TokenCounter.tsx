@@ -105,14 +105,16 @@ export default function TokenCounter({ isDarkMode = false }: TokenCounterProps) 
 export function TokenExplanation({ isDarkMode = false }: { isDarkMode?: boolean }) {
   return (
     <div
-      className={`p-4 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
-      <h3 className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+      className={`p-4 rounded-lg border text-left ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+      <h3 className={`text-left text-lg font-semibold mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
         🎯 トークンシステムについて
       </h3>
 
       <div className="space-y-3 text-sm">
         <div>
-          <h4 className={`font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>トークンとは？</h4>
+          <h4 className={`text-left font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            トークンとは？
+          </h4>
           <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
             トークンはAIエージェント（プランナー、ナビゲーター、バリデーター）を使用するための通貨です。
             Cursorと同様のシステムで、モデルの品質に応じてトークンが消費されます。
@@ -120,7 +122,7 @@ export function TokenExplanation({ isDarkMode = false }: { isDarkMode?: boolean 
         </div>
 
         <div>
-          <h4 className={`font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          <h4 className={`text-left font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
             トークンの消費タイミング
           </h4>
           <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
@@ -130,14 +132,14 @@ export function TokenExplanation({ isDarkMode = false }: { isDarkMode?: boolean 
         </div>
 
         <div>
-          <h4 className={`font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>無料プラン</h4>
+          <h4 className={`text-left font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>無料プラン</h4>
           <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
             無料ユーザーは月額50トークンまで利用できます。トークンは毎月1日にリセットされます。
           </p>
         </div>
 
         <div>
-          <h4 className={`font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          <h4 className={`text-left font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
             モデル別のトークンコスト
           </h4>
           <div className={`text-xs space-y-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>

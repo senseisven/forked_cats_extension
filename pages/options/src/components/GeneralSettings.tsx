@@ -222,15 +222,15 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
           <div className="flex items-center justify-between">
             <div>
               <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Page Load Wait Time
+                {t('pageLoadWaitTime')}
               </h3>
               <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Minimum wait time after page loads (250-5000ms)
+                {t('pageLoadWaitTimeDescription')}
               </p>
             </div>
             <div className="flex items-center space-x-2">
               <label htmlFor="minWaitPageLoad" className="sr-only">
-                Page Load Wait Time
+                {t('pageLoadWaitTime')}
               </label>
               <input
                 id="minWaitPageLoad"

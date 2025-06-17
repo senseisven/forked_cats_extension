@@ -79,6 +79,24 @@ export const jsonNavigatorOutputSchema = {
             type: 'object',
             nullable: true,
           },
+          navigate: {
+            description: 'Alias for go_to_url. Navigate to URL in the current tab',
+            properties: {
+              intent: {
+                title: 'Intent',
+                type: 'string',
+                description: 'purpose of this action',
+              },
+              url: {
+                title: 'Url',
+                type: 'string',
+              },
+            },
+            required: ['intent', 'url'],
+            title: 'NavigateAction',
+            type: 'object',
+            nullable: true,
+          },
           go_back: {
             description: 'Go back to previous page',
             properties: {

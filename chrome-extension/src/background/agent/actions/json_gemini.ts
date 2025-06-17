@@ -68,6 +68,21 @@ export const geminiNavigatorOutputSchema = {
             },
             required: ['intent', 'url'],
           },
+          navigate: {
+            type: 'object',
+            description: 'Alias for go_to_url. Navigate to URL in the current tab',
+            nullable: true,
+            properties: {
+              intent: {
+                type: 'string',
+                description: 'purpose of this action',
+              },
+              url: {
+                type: 'string',
+              },
+            },
+            required: ['intent', 'url'],
+          },
           go_back: {
             type: 'object',
             description: 'Go back to previous page',

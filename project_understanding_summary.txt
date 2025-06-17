@@ -116,6 +116,19 @@
 - **Wait Action Clamped to 1–3 Seconds**: Updated `waitActionSchema` to default to 1 s and allow max 3 s, discouraging long waits unless explicitly requested.
 - **Navigator Wait Implementation**: Modified `builder.ts` to clamp any requested wait time to 1–3 s, significantly improving UX by preventing the agent from pausing for 5 s after every action.
 
+### Fix for Unsupported "navigate" Action & Catty Agent Names (Latest)
+- Added `navigate` action schema as alias of `go_to_url` to prevent "Action navigate not exists" errors from advanced models (O3, Opus, etc.).
+- Updated DOM view to use aria-label fallback (previous).  
+- Renamed agents (i18n): プランナー→プランニャー, ナビゲーター→ニャビゲーター, バリデーター→バリデーニャー.
+
+### Critical Navigator Schema Fix (Latest)
+- **Navigator Action Schema Inconsistency Fix**: Fixed critical issue where intelligent models like O3, Opus4 were getting "Action navigate_to_url not exists" and "Could not parse response" errors while Gemini 2.5 Pro worked fine
+- **Root Cause**: Static JSON schemas (`json_schema.ts`, `json_gemini.ts`, `packages/schema-utils/lib/json_schema.ts`) were missing the `navigate` action alias even though it was properly registered in ActionRegistry and available in dynamic schemas
+- **Schema Synchronization**: Added missing `navigate` action to all three static schema files with proper structure matching the dynamic schema generation
+- **Action Registry Consistency**: Ensured static schemas now match what's available in the ActionRegistry (both `go_to_url` and `navigate` actions)
+- **Model Compatibility**: This fixes navigation failures for advanced reasoning models that prefer the `navigate` action name over `go_to_url`
+- **Schema Structure**: Added proper NavigateAction definition with intent and url parameters to maintain consistency across all schema systems
+
 ## File Structure
 ```
 nanobrowser/

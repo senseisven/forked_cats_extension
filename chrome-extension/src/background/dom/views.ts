@@ -202,6 +202,10 @@ export class DOMElementNode extends DOMBaseNode {
           nextDepth += 1;
 
           const text = node.getAllTextTillNextClickableElement();
+          // If the element has no visible text but has an aria-label, use that as fallback. This is
+          // especially helpful for grid-based UIs (e.g. Google Sheets) where each cell is represented
+          // by a div with an aria-label like "A1" but no innerText.
+          const effectiveText = text || node.attributes?.['aria-label'] || '';
           let attributesHtmlStr = '';
 
           if (includeAttributes.length) {
@@ -223,13 +227,19 @@ export class DOMElementNode extends DOMBaseNode {
             }
 
             // if aria-label == text of the node, don't include it
-            if ('aria-label' in attributesToInclude && attributesToInclude['aria-label'].trim() === text.trim()) {
+            if (
+              'aria-label' in attributesToInclude &&
+              attributesToInclude['aria-label'].trim() === effectiveText.trim()
+            ) {
               // Use null instead of delete
               attributesToInclude['aria-label'] = null as unknown as string;
             }
 
             // if placeholder == text of the node, don't include it
-            if ('placeholder' in attributesToInclude && attributesToInclude.placeholder.trim() === text.trim()) {
+            if (
+              'placeholder' in attributesToInclude &&
+              attributesToInclude.placeholder.trim() === effectiveText.trim()
+            ) {
               // Use null instead of delete
               attributesToInclude.placeholder = null as unknown as string;
             }
@@ -252,12 +262,12 @@ export class DOMElementNode extends DOMBaseNode {
             line += ` ${attributesHtmlStr}`;
           }
 
-          if (text) {
+          if (effectiveText) {
             // Add space before >text only if there were NO attributes added before
             if (!attributesHtmlStr) {
               line += ' ';
             }
-            line += `>${text}`;
+            line += `>${effectiveText}`;
           }
           // Add space before /> only if neither attributes NOR text were added
           else if (!attributesHtmlStr) {

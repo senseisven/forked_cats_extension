@@ -223,19 +223,19 @@
     "message": "モデル選択"
   },
   "planner": {
-    "message": "プランナー"
+    "message": "プランニャー"
   },
   "developsAndRefinesStrategies": {
     "message": "タスクを完了するための戦略を開発・改良します"
   },
   "navigator": {
-    "message": "ナビゲーター"
+    "message": "ニャビゲーター"
   },
   "navigatesWebsitesAndPerformsActions": {
     "message": "Webサイトをナビゲートし、アクションを実行します"
   },
   "validator": {
-    "message": "バリデーター"
+    "message": "バリデーニャー"
   },
   "checksIfTasksAreCompleted": {
     "message": "タスクが正常に完了したかチェックします"

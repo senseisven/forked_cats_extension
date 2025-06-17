@@ -18,6 +18,7 @@ import {
   getDropdownOptionsActionSchema,
   closeTabActionSchema,
   waitActionSchema,
+  navigateActionSchema,
 } from './schemas';
 import { z } from 'zod';
 import { createLogger } from '@src/background/log';
@@ -170,6 +171,21 @@ export class ActionBuilder {
       });
     }, goToUrlActionSchema);
     actions.push(goToUrl);
+
+    // Alias: navigate -> go_to_url
+    const navigate = new Action(async (input: z.infer<typeof navigateActionSchema.schema>) => {
+      const intent = input.intent || `${input.url}にナビゲート中`;
+      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_START, intent);
+
+      await this.context.browserContext.navigateTo(input.url);
+      const msg2 = `Navigated to ${input.url}`;
+      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_OK, msg2);
+      return new ActionResult({
+        extractedContent: msg2,
+        includeInMemory: true,
+      });
+    }, navigateActionSchema);
+    actions.push(navigate);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const goBack = new Action(async (input: z.infer<typeof goBackActionSchema.schema>) => {

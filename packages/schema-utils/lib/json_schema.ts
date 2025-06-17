@@ -45,6 +45,17 @@ export const jsonNavigatorOutputSchema = {
           ],
           description: 'Navigate to URL in the current tab',
         },
+        navigate: {
+          anyOf: [
+            {
+              $ref: '#/$defs/NavigateAction',
+            },
+            {
+              type: 'null',
+            },
+          ],
+          description: 'Alias for go_to_url. Navigate to URL in the current tab',
+        },
         go_back: {
           anyOf: [
             {
@@ -298,6 +309,22 @@ export const jsonNavigatorOutputSchema = {
       },
       required: ['intent', 'url'],
       title: 'GoToUrlAction',
+      type: 'object',
+    },
+    NavigateAction: {
+      properties: {
+        intent: {
+          title: 'Intent',
+          type: 'string',
+          description: 'purpose of this action',
+        },
+        url: {
+          title: 'Url',
+          type: 'string',
+        },
+      },
+      required: ['intent', 'url'],
+      title: 'NavigateAction',
       type: 'object',
     },
     GoBackAction: {

@@ -35,6 +35,15 @@ export const goToUrlActionSchema: ActionSchema = {
   }),
 };
 
+export const navigateActionSchema: ActionSchema = {
+  name: 'navigate',
+  description: 'Alias for go_to_url. Navigate to URL in the current tab',
+  schema: z.object({
+    intent: z.string().default('').describe('purpose of this action'),
+    url: z.string(),
+  }),
+};
+
 export const goBackActionSchema: ActionSchema = {
   name: 'go_back',
   description: 'Go back to the previous page',

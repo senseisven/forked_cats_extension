@@ -206,6 +206,43 @@ export class DOMElementNode extends DOMBaseNode {
           // especially helpful for grid-based UIs (e.g. Google Sheets) where each cell is represented
           // by a div with an aria-label like "A1" but no innerText.
           const effectiveText = text || node.attributes?.['aria-label'] || '';
+
+          // **GOOGLE SHEETS ENHANCEMENT**: Provide clearer descriptions for spreadsheet elements
+          let enhancedText = effectiveText;
+          const elementRole = node.attributes?.['role'];
+          const ariaLabel = node.attributes?.['aria-label'];
+
+          // Identify and enhance Google Sheets cells
+          if (elementRole === 'gridcell' || elementRole === 'cell') {
+            if (ariaLabel && /^[A-Z]+\d+$/.test(ariaLabel.trim())) {
+              enhancedText = `Spreadsheet cell ${ariaLabel}${effectiveText ? ': ' + effectiveText : ''}`;
+            } else if (ariaLabel) {
+              enhancedText = `Cell: ${ariaLabel}${effectiveText ? ' - ' + effectiveText : ''}`;
+            } else {
+              enhancedText = `Spreadsheet cell${effectiveText ? ': ' + effectiveText : ''}`;
+            }
+          }
+          // Identify Google Sheets UI elements to distinguish from cells
+          else if (
+            ariaLabel &&
+            (ariaLabel.includes('toolbar') ||
+              ariaLabel.includes('menu') ||
+              ariaLabel.includes('button') ||
+              ariaLabel.includes('Bold') ||
+              ariaLabel.includes('Italic') ||
+              ariaLabel.includes('Format') ||
+              ariaLabel.includes('File') ||
+              ariaLabel.includes('Edit') ||
+              ariaLabel.includes('View'))
+          ) {
+            enhancedText = `UI: ${ariaLabel}${effectiveText ? ' - ' + effectiveText : ''}`;
+          }
+          // Cell coordinate pattern but not gridcell role - still likely a cell
+          else if (ariaLabel && /^[A-Z]+\d+$/.test(ariaLabel.trim())) {
+            enhancedText = `Cell ${ariaLabel}${effectiveText ? ': ' + effectiveText : ''}`;
+          }
+
+          const finalText = enhancedText;
           let attributesHtmlStr = '';
 
           if (includeAttributes.length) {
@@ -227,19 +264,13 @@ export class DOMElementNode extends DOMBaseNode {
             }
 
             // if aria-label == text of the node, don't include it
-            if (
-              'aria-label' in attributesToInclude &&
-              attributesToInclude['aria-label'].trim() === effectiveText.trim()
-            ) {
+            if ('aria-label' in attributesToInclude && attributesToInclude['aria-label'].trim() === finalText.trim()) {
               // Use null instead of delete
               attributesToInclude['aria-label'] = null as unknown as string;
             }
 
             // if placeholder == text of the node, don't include it
-            if (
-              'placeholder' in attributesToInclude &&
-              attributesToInclude.placeholder.trim() === effectiveText.trim()
-            ) {
+            if ('placeholder' in attributesToInclude && attributesToInclude.placeholder.trim() === finalText.trim()) {
               // Use null instead of delete
               attributesToInclude.placeholder = null as unknown as string;
             }
@@ -262,12 +293,12 @@ export class DOMElementNode extends DOMBaseNode {
             line += ` ${attributesHtmlStr}`;
           }
 
-          if (effectiveText) {
+          if (finalText) {
             // Add space before >text only if there were NO attributes added before
             if (!attributesHtmlStr) {
               line += ' ';
             }
-            line += `>${effectiveText}`;
+            line += `>${finalText}`;
           }
           // Add space before /> only if neither attributes NOR text were added
           else if (!attributesHtmlStr) {

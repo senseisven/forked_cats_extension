@@ -10,17 +10,17 @@ export const ACTOR_PROFILES = {
     iconBackground: '#2196F3',
   },
   planner: {
-    name: 'プランナー',
+    name: 'プランニャー',
     icon: '/planner.png',
     iconBackground: '#FF9800',
   },
   navigator: {
-    name: 'ナビゲーター',
+    name: 'ニャビゲーター',
     icon: '/navigator.png',
     iconBackground: '#40A9FF',
   },
   validator: {
-    name: 'バリデーター',
+    name: 'バリデーニャー',
     icon: '/validator.png',
     iconBackground: '#EC407A',
   },

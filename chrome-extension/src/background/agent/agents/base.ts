@@ -117,9 +117,13 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
   }
 
   async invoke(inputMessages: BaseMessage[]): Promise<this['ModelOutput']> {
+    logger.info(`🚀 Starting invoke for ${this.id} with model ${this.modelName}`);
+
     // Check token availability before making the call
+    logger.info('🔍 Checking token availability...');
     const hasTokens = await TokenUsageManager.hasTokens(this.modelName);
     if (!hasTokens) {
+      logger.error('❌ Insufficient tokens');
       const remaining = await TokenUsageManager.getRemainingTokens();
       const cost = TokenUsageManager.getTokenCost(this.modelName);
       const errorMessage =
@@ -128,6 +132,7 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
           : `Insufficient tokens. Remaining: ${remaining}, Required: ${cost}. Please wait until next month or upgrade your plan.`;
       throw new Error(errorMessage);
     }
+    logger.info('✅ Tokens available, proceeding...');
 
     let response;
     let success = false;
@@ -135,31 +140,41 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
     try {
       // Use structured output
       if (this.withStructuredOutput) {
+        logger.info('🔧 Using structured output approach...');
         const structuredLlm = this.chatLLM.withStructuredOutput(this.modelOutputSchema, {
           includeRaw: true,
           name: this.modelOutputToolName,
         });
+        logger.info('🔧 Structured LLM created, making API call...');
 
         response = await structuredLlm.invoke(inputMessages, {
           signal: this.context.controller.signal,
           ...this.callOptions,
         });
 
+        logger.info('📡 API call completed, checking response...');
+
         if (response.parsed) {
+          logger.info('✅ Response parsed successfully');
           success = true;
           // Consume tokens on successful completion
           await TokenUsageManager.consumeTokens(this.modelName, this.id);
           return response.parsed;
         }
-        logger.error('Failed to parse response', response);
+        logger.error('❌ Failed to parse response', response);
         throw new Error('Could not parse response with structured output');
       } else {
+        logger.info('🔧 Using non-structured output approach...');
         // Without structured output support, need to extract JSON from model output manually
         const convertedInputMessages = convertInputMessages(inputMessages, this.modelName);
+        logger.info('🔧 Input messages converted, making API call...');
+
         response = await this.chatLLM.invoke(convertedInputMessages, {
           signal: this.context.controller.signal,
           ...this.callOptions,
         });
+
+        logger.info('📡 API call completed, processing response...');
 
         if (typeof response.content === 'string') {
           response.content = removeThinkTags(response.content);
@@ -167,6 +182,7 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
             const extractedJson = extractJsonFromModelOutput(response.content);
             const parsed = this.validateModelOutput(extractedJson);
             if (parsed) {
+              logger.info('✅ Response processed successfully');
               success = true;
               // Consume tokens on successful completion
               await TokenUsageManager.consumeTokens(this.modelName, this.id);
@@ -174,14 +190,16 @@ export abstract class BaseAgent<T extends z.ZodType, M = unknown> {
             }
           } catch (error) {
             const errorMessage = `Failed to extract JSON from response: ${error}`;
+            logger.error('❌ JSON extraction failed:', errorMessage);
             throw new Error(errorMessage);
           }
         }
         const errorMessage = `Failed to parse response: ${response}`;
-        logger.error(errorMessage);
+        logger.error('❌ Response parsing failed:', errorMessage);
         throw new Error('Could not parse response');
       }
     } catch (error) {
+      logger.error('❌ Invoke error:', error);
       if (isAbortedError(error)) {
         throw error;
       }

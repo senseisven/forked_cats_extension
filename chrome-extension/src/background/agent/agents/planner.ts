@@ -49,15 +49,22 @@ export class PlannerAgent extends BaseAgent<typeof plannerOutputSchema, PlannerO
 
   async execute(): Promise<AgentOutput<PlannerOutput>> {
     try {
+      logger.info('🔄 Planner starting execution...');
       const statusMessages = getStatusMessages(this.context.language);
       this.context.emitEvent(Actors.PLANNER, ExecutionState.STEP_START, statusMessages.planning);
+
+      logger.info('📝 Getting messages from message manager...');
       // get all messages from the message manager, state message should be the last one
       const messages = this.context.messageManager.getMessages();
+      logger.info(`📝 Got ${messages.length} messages from message manager`);
+
       // Use full message history except the first one
       const plannerMessages = [this.prompt.getSystemMessage(), ...messages.slice(1)];
+      logger.info(`📝 Prepared ${plannerMessages.length} messages for planner`);
 
       // Remove images from last message if vision is not enabled for planner but vision is enabled
       if (!this.context.options.useVisionForPlanner && this.context.options.useVision) {
+        logger.info('🖼️ Removing images from last message (vision disabled for planner)');
         const lastStateMessage = plannerMessages[plannerMessages.length - 1];
         let newMsg = '';
 
@@ -73,13 +80,20 @@ export class PlannerAgent extends BaseAgent<typeof plannerOutputSchema, PlannerO
         }
 
         plannerMessages[plannerMessages.length - 1] = new HumanMessage(newMsg);
+        logger.info('🖼️ Images removed from last message');
       }
 
+      logger.info('🤖 Invoking planner model...');
       const modelOutput = await this.invoke(plannerMessages);
+      logger.info('✅ Planner model invocation completed');
+
       if (!modelOutput) {
+        logger.error('❌ Planner model returned null/undefined output');
         const statusMessages = getStatusMessages(this.context.language);
         throw new Error(statusMessages.plannerFailed);
       }
+
+      logger.info('📊 Planner model output received, emitting success event');
       this.context.emitEvent(Actors.PLANNER, ExecutionState.STEP_OK, modelOutput.next_steps);
       logger.info('Planner output', JSON.stringify(modelOutput, null, 2));
 
@@ -88,6 +102,7 @@ export class PlannerAgent extends BaseAgent<typeof plannerOutputSchema, PlannerO
         result: modelOutput,
       };
     } catch (error) {
+      logger.error('❌ Planner execution error:', error);
       // Check if this is an authentication error
       if (isAuthenticationError(error)) {
         throw new ChatModelAuthError('Planner API Authentication failed. Please verify your API key', error);

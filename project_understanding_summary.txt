@@ -123,11 +123,39 @@
 
 ### Critical Navigator Schema Fix (Latest)
 - **Navigator Action Schema Inconsistency Fix**: Fixed critical issue where intelligent models like O3, Opus4 were getting "Action navigate_to_url not exists" and "Could not parse response" errors while Gemini 2.5 Pro worked fine
-- **Root Cause**: Static JSON schemas (`json_schema.ts`, `json_gemini.ts`, `packages/schema-utils/lib/json_schema.ts`) were missing the `navigate` action alias even though it was properly registered in ActionRegistry and available in dynamic schemas
-- **Schema Synchronization**: Added missing `navigate` action to all three static schema files with proper structure matching the dynamic schema generation
-- **Action Registry Consistency**: Ensured static schemas now match what's available in the ActionRegistry (both `go_to_url` and `navigate` actions)
-- **Model Compatibility**: This fixes navigation failures for advanced reasoning models that prefer the `navigate` action name over `go_to_url`
-- **Schema Structure**: Added proper NavigateAction definition with intent and url parameters to maintain consistency across all schema systems
+- **Root Cause**: Static JSON schemas (`json_schema.ts`, `json_gemini.ts`, `packages/schema-utils/lib/json_schema.ts`) were missing the `navigate` action alias even though it was properly registered in ActionRegistry
+- **Solution**: Added `navigate` action schema definitions to all static schema files as an alias for `go_to_url`
+- **Result**: All AI models now have consistent access to both `go_to_url` and `navigate` actions, preventing schema lookup failures
+
+### Enhanced Debug Logging for Agent Hanging Issues (Latest)
+- **Problem**: Planner agent getting stuck silently during execution with no error messages
+- **Debug Enhancement**: Added comprehensive logging to both PlannerAgent and BaseAgent invoke methods
+- **Logging Coverage**: Token checks, message preparation, API calls, response parsing, and error handling
+- **Usage**: When agents hang, check browser console for detailed debug logs to identify exact failure point
+- **Benefits**: Faster troubleshooting of model communication issues, structured output problems, and API timeouts
+
+### Fixed Catified Agent Names Display & Extension Caching (Latest)
+- **Problem**: Catified agent names (プランニャー, ニャビゲーター, バリデーニャー) not showing in side panel even after npm run dev
+- **Root Cause**: Agent names in side panel UI (`pages/side-panel/src/types/message.ts`) were not updated to catified versions
+- **Solution**: Updated ACTOR_PROFILES to use catified names: プランナー→プランニャー, ナビゲーター→ニャビゲーター, バリデーター→バリデーニャー
+- **Build Process**: Extension requires `pnpm run build` after changes to ensure proper compilation and to clear caches
+- **Extension Reload**: After build, user must reload the unpacked extension in Chrome Extensions page (chrome://extensions/)
+- **Critical Steps for Changes**: 1) Make code changes 2) Run `pnpm run build` 3) Reload extension in Chrome 4) Refresh any open extension pages
+- **Cache Issues**: Chrome extension caching can prevent changes from showing - full build + extension reload is required
+
+### Google Sheets Cell Detection Fix (Latest)
+- **Problem**: Navigator agent selecting wrong elements in Google Sheets - choosing toolbar buttons (index #82) instead of actual cells (index #90) even with smart models like GPT-4.1 and Gemini 2.5 Pro
+- **Root Cause**: DOM element detection wasn't prioritizing spreadsheet cells over UI elements, causing cells to get higher indices than toolbar elements
+- **Enhanced Cell Detection**: Added specific logic in `buildDomTree.js` to identify Google Sheets cells:
+  - Detects `role="gridcell"` and `role="cell"` elements
+  - Recognizes cell coordinate patterns in aria-labels (A1, B2, AA100, etc.)
+  - Checks for grid container context for additional validation
+- **Improved Element Descriptions**: Enhanced text descriptions in DOM views to clearly distinguish:
+  - `"Spreadsheet cell A1"` for actual cells
+  - `"UI: Bold button"` for toolbar elements  
+  - `"Cell B2: some content"` for cells with content
+- **Expected Results**: AI models should now consistently select correct cell indices instead of toolbar elements
+- **Technical Details**: Modified `isInteractiveElement()` function and `clickableElementsToString()` method to prioritize and better describe grid-based UI elements
 
 ## File Structure
 ```

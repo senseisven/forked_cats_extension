@@ -644,6 +644,29 @@ window.buildDomTree = (
     const tagName = element.tagName.toLowerCase();
     const style = getCachedComputedStyle(element);
 
+    // **GOOGLE SHEETS SPECIFIC ENHANCEMENT**
+    // Prioritize spreadsheet cells over UI elements
+    const elementRole = element.getAttribute('role');
+    const ariaLabel = element.getAttribute('aria-label');
+
+    // Google Sheets cells have role="gridcell" and aria-label with coordinates like "A1", "B2"
+    if (elementRole === 'gridcell' || elementRole === 'cell') {
+      return true;
+    }
+
+    // Additional Google Sheets cell patterns
+    if (ariaLabel && /^[A-Z]+\d+$/.test(ariaLabel.trim())) {
+      // This matches patterns like "A1", "B2", "AA100", etc.
+      return true;
+    }
+
+    // Check if element is inside a grid container (additional safety)
+    if (element.closest('[role="grid"], [role="table"], .grid-container, .waffle-grid')) {
+      if (elementRole === 'gridcell' || (ariaLabel && /^[A-Z]+\d+$/.test(ariaLabel.trim()))) {
+        return true;
+      }
+    }
+
     // Define interactive cursors
     const interactiveCursors = new Set([
       'pointer', // Link/clickable elements

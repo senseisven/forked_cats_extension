@@ -19,12 +19,14 @@ import {
   closeTabActionSchema,
   waitActionSchema,
   navigateActionSchema,
+  mcpToolCallActionSchema,
 } from './schemas';
 import { z } from 'zod';
 import { createLogger } from '@src/background/log';
 import { ExecutionState, Actors } from '../event/types';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { wrapUntrustedContent } from '../messages/utils';
+import { mcpService } from '../../services/mcp';
 
 const logger = createLogger('Action');
 
@@ -160,30 +162,86 @@ export class ActionBuilder {
 
     const goToUrl = new Action(async (input: z.infer<typeof goToUrlActionSchema.schema>) => {
       const intent = input.intent || `${input.url}にナビゲート中`;
+
+      // Validate URL before navigation
+      if (input.url.toLowerCase().startsWith('chrome-extension://')) {
+        const errorMsg = `Cannot navigate to chrome-extension:// URLs. Please provide a regular web URL (http:// or https://).`;
+        this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_FAIL, errorMsg);
+        return new ActionResult({
+          error: errorMsg,
+          isDone: false,
+          includeInMemory: true,
+        });
+      }
+
+      // Ensure URL has protocol
+      let validUrl = input.url;
+      if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
+        validUrl = 'https://' + validUrl;
+      }
+
       this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_START, intent);
 
-      await this.context.browserContext.navigateTo(input.url);
-      const msg2 = `Navigated to ${input.url}`;
-      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_OK, msg2);
-      return new ActionResult({
-        extractedContent: msg2,
-        includeInMemory: true,
-      });
+      try {
+        await this.context.browserContext.navigateTo(validUrl);
+        const msg2 = `Navigated to ${validUrl}`;
+        this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_OK, msg2);
+        return new ActionResult({
+          extractedContent: msg2,
+          includeInMemory: true,
+        });
+      } catch (error) {
+        const errorMsg = `Navigation failed: ${error instanceof Error ? error.message : String(error)}`;
+        this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_FAIL, errorMsg);
+        return new ActionResult({
+          error: errorMsg,
+          isDone: false,
+          includeInMemory: true,
+        });
+      }
     }, goToUrlActionSchema);
     actions.push(goToUrl);
 
     // Alias: navigate -> go_to_url
     const navigate = new Action(async (input: z.infer<typeof navigateActionSchema.schema>) => {
       const intent = input.intent || `${input.url}にナビゲート中`;
+
+      // Validate URL before navigation
+      if (input.url.toLowerCase().startsWith('chrome-extension://')) {
+        const errorMsg = `Cannot navigate to chrome-extension:// URLs. Please provide a regular web URL (http:// or https://).`;
+        this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_FAIL, errorMsg);
+        return new ActionResult({
+          error: errorMsg,
+          isDone: false,
+          includeInMemory: true,
+        });
+      }
+
+      // Ensure URL has protocol
+      let validUrl = input.url;
+      if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
+        validUrl = 'https://' + validUrl;
+      }
+
       this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_START, intent);
 
-      await this.context.browserContext.navigateTo(input.url);
-      const msg2 = `Navigated to ${input.url}`;
-      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_OK, msg2);
-      return new ActionResult({
-        extractedContent: msg2,
-        includeInMemory: true,
-      });
+      try {
+        await this.context.browserContext.navigateTo(validUrl);
+        const msg2 = `Navigated to ${validUrl}`;
+        this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_OK, msg2);
+        return new ActionResult({
+          extractedContent: msg2,
+          includeInMemory: true,
+        });
+      } catch (error) {
+        const errorMsg = `Navigation failed: ${error instanceof Error ? error.message : String(error)}`;
+        this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_FAIL, errorMsg);
+        return new ActionResult({
+          error: errorMsg,
+          isDone: false,
+          includeInMemory: true,
+        });
+      }
     }, navigateActionSchema);
     actions.push(navigate);
 
@@ -597,6 +655,44 @@ export class ActionBuilder {
       true,
     );
     actions.push(selectDropdownOption);
+
+    // MCP Tool Call Action
+    const mcpToolCall = new Action(async (input: z.infer<typeof mcpToolCallActionSchema.schema>) => {
+      const intent = input.intent || `Execute MCP tool: ${input.serverName}.${input.toolName}`;
+      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_START, intent);
+
+      try {
+        const result = await mcpService.executeToolCall({
+          serverName: input.serverName,
+          toolName: input.toolName,
+          arguments: input.arguments,
+        });
+
+        if (result.success) {
+          const msg = `MCP tool executed successfully: ${input.toolName}`;
+          this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_OK, msg);
+          return new ActionResult({
+            extractedContent: result.content || msg,
+            includeInMemory: true,
+          });
+        } else {
+          const errorMsg = `MCP tool failed: ${result.error}`;
+          this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_FAIL, errorMsg);
+          return new ActionResult({
+            error: errorMsg,
+            includeInMemory: true,
+          });
+        }
+      } catch (error) {
+        const errorMsg = `MCP tool execution error: ${error instanceof Error ? error.message : String(error)}`;
+        this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_FAIL, errorMsg);
+        return new ActionResult({
+          error: errorMsg,
+          includeInMemory: true,
+        });
+      }
+    }, mcpToolCallActionSchema);
+    actions.push(mcpToolCall);
 
     return actions;
   }

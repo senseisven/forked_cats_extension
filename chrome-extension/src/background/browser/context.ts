@@ -231,8 +231,17 @@ export default class BrowserContext {
 
   public async navigateTo(url: string): Promise<void> {
     if (!isUrlAllowed(url, this._config.allowedUrls, this._config.deniedUrls)) {
+      logger.error(`URL navigation blocked by firewall: ${url}`);
       throw new URLNotAllowedError(`URL: ${url} is not allowed`);
     }
+
+    // Additional validation for chrome-extension URLs
+    if (url.toLowerCase().startsWith('chrome-extension://')) {
+      logger.error(`Attempted to navigate to chrome-extension URL: ${url}`);
+      throw new URLNotAllowedError(`Cannot navigate to chrome-extension:// URLs: ${url}`);
+    }
+
+    logger.info(`Attempting to navigate to: ${url}`);
 
     const page = await this.getCurrentPage();
     if (!page) {
@@ -241,19 +250,31 @@ export default class BrowserContext {
     }
     // if page is attached, use puppeteer to navigate to the url
     if (page.attached) {
-      await page.navigateTo(url);
-      return;
+      try {
+        await page.navigateTo(url);
+        logger.info(`Successfully navigated to: ${url}`);
+        return;
+      } catch (error) {
+        logger.error(`Puppeteer navigation failed for URL: ${url}`, error);
+        throw error;
+      }
     }
     //  Use chrome.tabs.update only if the page is not attached
     const tabId = page.tabId;
-    // Update tab and wait for events
-    await chrome.tabs.update(tabId, { url, active: true });
-    await this.waitForTabEvents(tabId);
+    try {
+      // Update tab and wait for events
+      await chrome.tabs.update(tabId, { url, active: true });
+      await this.waitForTabEvents(tabId);
 
-    // Reattach the page after navigation completes
-    const updatedPage = await this._getOrCreatePage(await chrome.tabs.get(tabId), true);
-    await this.attachPage(updatedPage);
-    this._currentTabId = tabId;
+      // Reattach the page after navigation completes
+      const updatedPage = await this._getOrCreatePage(await chrome.tabs.get(tabId), true);
+      await this.attachPage(updatedPage);
+      this._currentTabId = tabId;
+      logger.info(`Successfully navigated to: ${url}`);
+    } catch (error) {
+      logger.error(`Tab navigation failed for URL: ${url}`, error);
+      throw error;
+    }
   }
 
   public async openTab(url: string): Promise<Page> {

@@ -25,8 +25,33 @@ let currentPort: chrome.runtime.Port | null = null;
 // Setup side panel behavior
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(error => console.error(error));
 
-// Initialize default centralized API provider
-setupDefaultCentralizedProvider().catch(error => console.error('Failed to setup default centralized provider:', error));
+// Initialize default centralized API provider with better error handling
+(async () => {
+  try {
+    await setupDefaultCentralizedProvider();
+    logger.info('✅ Default centralized API provider setup complete');
+  } catch (error) {
+    logger.error('❌ Failed to setup default centralized provider:', error);
+    // Don't let provider setup failure break the extension
+    console.error('Failed to setup default centralized provider:', error);
+  }
+})();
+
+// Platform detection and debugging
+(async () => {
+  try {
+    const platformInfo = await chrome.runtime.getPlatformInfo();
+    logger.info(`🖥️ Platform detected: ${platformInfo.os} (${platformInfo.arch})`);
+
+    // Add Windows-specific initialization if needed
+    if (platformInfo.os === 'win') {
+      logger.info('🪟 Windows-specific initialization');
+      // Add any Windows-specific setup here
+    }
+  } catch (error) {
+    logger.error('Failed to get platform info:', error);
+  }
+})();
 
 // Temporary debug call to check OpenRouter key
 (async () => {
@@ -266,7 +291,25 @@ chrome.runtime.onConnect.addListener(port => {
 });
 
 async function setupExecutor(taskId: string, task: string, browserContext: BrowserContext) {
+  logger.info(`🚀 Setting up executor for task: ${task}`);
+
+  // Check if we have a valid current tab
+  const currentPage = await browserContext.getCurrentPage();
+  if (currentPage) {
+    const currentUrl = currentPage.url();
+    logger.info(`📍 Current page URL: ${currentUrl}`);
+
+    // Warn if we're starting from a chrome-extension:// URL
+    if (currentUrl.startsWith('chrome-extension://')) {
+      logger.warning('⚠️ Starting from chrome-extension:// URL, may need to navigate to a regular webpage first');
+    }
+  } else {
+    logger.info('📄 No current page available, will need to open a new tab');
+  }
+
   const providers = await llmProviderStore.getAllProviders();
+  logger.info(`🔑 Found ${Object.keys(providers).length} configured providers`);
+
   // if no providers, need to display the options page
   if (Object.keys(providers).length === 0) {
     throw new Error('Please configure API keys in the settings first');

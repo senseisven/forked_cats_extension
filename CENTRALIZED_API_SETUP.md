@@ -291,4 +291,94 @@ When updating the extension:
 - **OpenRouter Docs**: https://openrouter.ai/docs
 - **Railway Docs**: https://docs.railway.app
 - **Render Docs**: https://render.com/docs
-- **Vercel Docs**: https://vercel.com/docs 
+- **Vercel Docs**: https://vercel.com/docs
+
+## Model Context Protocol (MCP) Setup
+
+### Current Status
+The current Google Sheets MCP integration is a **placeholder implementation** and requires proper setup to work.
+
+### Setting Up Google Sheets MCP Integration
+
+To enable actual Google Sheets MCP functionality, you have several options:
+
+#### Option 1: Use mkummer225/google-sheets-mcp (Recommended)
+
+1. Clone and set up the official Google Sheets MCP server:
+```bash
+git clone https://github.com/mkummer225/google-sheets-mcp.git
+cd google-sheets-mcp
+npm install
+npm run build
+```
+
+2. Set up Google Cloud credentials:
+   - Create a new project in [Google Cloud Console](https://console.cloud.google.com/)
+   - Enable the Google Sheets API
+   - Configure OAuth consent screen
+   - Create OAuth client ID credentials (Desktop application)
+   - Download credentials and save as `gcp-oauth.keys.json` in the `dist` subdirectory
+
+3. Update `chrome-extension/src/background/services/mcp.ts`:
+```typescript
+// Replace the placeholder configuration
+endpoint: 'http://localhost:3000', // or your server URL
+command: 'node',
+args: ['/path/to/google-sheets-mcp/dist/index.js']
+```
+
+#### Option 2: Use felores/gdrive-mcp-server
+
+This includes Google Sheets functionality as part of Google Drive integration:
+
+1. Clone and set up:
+```bash
+git clone https://github.com/felores/gdrive-mcp-server.git
+cd gdrive-mcp-server
+npm install
+npm run build
+```
+
+2. Follow the authentication setup in their README
+
+3. Update the MCP service configuration accordingly
+
+#### Option 3: Disable MCP (Current Default)
+
+The system will automatically fall back to browser automation when MCP is not properly configured. This is the current behavior since `endpoint: undefined` is set.
+
+### Testing MCP Integration
+
+Once you have a real MCP server running:
+
+1. Update the endpoint in the MCP service configuration
+2. Test the integration by asking the AI to perform spreadsheet operations
+3. Check the console logs for MCP-related messages
+
+### Troubleshooting
+
+**"Failed to fetch" errors**: This indicates the MCP endpoint is not reachable
+- Verify the MCP server is running
+- Check the endpoint URL is correct
+- Ensure proper authentication is set up
+
+**MCP not being used**: The system will automatically fall back to browser automation
+- Check console logs for MCP availability messages
+- Verify the `shouldUseMCP` logic detects your task properly
+
+## Speech-to-Text API Setup
+
+### OpenAI Whisper
+1. Sign up for OpenAI API access
+2. Get your API key from the OpenAI dashboard
+3. Configure in extension settings
+
+### Google Cloud Speech-to-Text
+1. Create a Google Cloud project
+2. Enable the Speech-to-Text API
+3. Create service account credentials
+4. Configure in extension settings
+
+## Other API Integrations
+
+(Add other API setup instructions here as needed) 

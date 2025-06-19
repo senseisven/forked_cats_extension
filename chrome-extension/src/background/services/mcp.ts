@@ -1,4 +1,5 @@
 import { createLogger } from '@src/background/log';
+import { mcpSettingsStore, type MCPServerConfig as StoredMCPServerConfig } from '@extension/storage';
 
 const logger = createLogger('MCPService');
 
@@ -26,43 +27,99 @@ export interface MCPToolResult {
 }
 
 export class MCPService {
-  private readonly availableServers: MCPServerConfig[] = [
-    {
-      name: 'google-sheets',
-      command: 'node',
-      args: ['/tmp/google-sheets-mcp/dist/index.js'],
-      description: 'Google Sheets integration for reading, writing, and managing spreadsheets',
-      capabilities: [
-        'create_spreadsheet',
-        'list_sheets',
-        'create_sheet',
-        'read_all_from_sheet',
-        'read_headings',
-        'read_rows',
-        'read_columns',
-        'edit_cell',
-        'edit_row',
-        'edit_column',
-        'insert_row',
-        'insert_column',
-        'rename_sheet',
-        'rename_doc',
-        'refresh_auth',
-      ],
-      endpoint: undefined, // Temporarily disable remote endpoint
-      authHeader: undefined,
-    },
-  ];
+  private availableServers: MCPServerConfig[] = [];
+  private settingsLoaded = false;
 
   constructor() {
     logger.info('🔧 MCP Service initialized');
+    this.loadServersFromSettings();
+  }
+
+  private async loadServersFromSettings(): Promise<void> {
+    try {
+      const settings = await mcpSettingsStore.getSettings();
+
+      if (!settings.globalEnabled) {
+        logger.info('🔧 MCP Service disabled globally');
+        this.availableServers = [];
+        this.settingsLoaded = true;
+        return;
+      }
+
+      const enabledServers = settings.servers.filter(s => s.enabled);
+
+      this.availableServers = enabledServers.map(server => ({
+        name: server.name,
+        command: 'node', // Default command
+        args: [], // Will be configured per server type
+        description: server.description,
+        capabilities: server.capabilities,
+        endpoint: this.buildEndpointFromCredentials(server),
+        authHeader: this.buildAuthHeaderFromCredentials(server),
+      }));
+
+      logger.info(`🔧 Loaded ${this.availableServers.length} enabled MCP servers`);
+      this.settingsLoaded = true;
+    } catch (error) {
+      logger.error('🔧 Failed to load MCP settings:', error);
+      this.availableServers = [];
+      this.settingsLoaded = true;
+    }
+  }
+
+  private buildEndpointFromCredentials(server: StoredMCPServerConfig): string | undefined {
+    // For now, return undefined to force fallback to browser automation
+    // In a real implementation, this would construct the appropriate endpoint
+    // based on the server type and credentials
+
+    if (!server.credentials) {
+      return undefined;
+    }
+
+    // Example for different server types:
+    switch (server.providerType) {
+      case 'google-sheets':
+        // Would need actual MCP server endpoint
+        return undefined; // 'http://localhost:3000' when properly configured
+      case 'notion':
+        return undefined; // 'http://localhost:3001' when properly configured
+      case 'github':
+        return undefined; // 'http://localhost:3002' when properly configured
+      default:
+        return undefined;
+    }
+  }
+
+  private buildAuthHeaderFromCredentials(server: StoredMCPServerConfig): string | undefined {
+    if (!server.credentials) {
+      return undefined;
+    }
+
+    switch (server.credentials.type) {
+      case 'api_key':
+        return server.credentials.apiKey ? `Bearer ${server.credentials.apiKey}` : undefined;
+      case 'oauth':
+        return server.credentials.accessToken ? `Bearer ${server.credentials.accessToken}` : undefined;
+      default:
+        return undefined;
+    }
   }
 
   /**
    * Get all available MCP servers and their capabilities
    */
-  getAvailableServers(): MCPServerConfig[] {
+  async getAvailableServers(): Promise<MCPServerConfig[]> {
+    if (!this.settingsLoaded) {
+      await this.loadServersFromSettings();
+    }
     return this.availableServers;
+  }
+
+  /**
+   * Reload servers from settings (call when settings change)
+   */
+  async reloadServers(): Promise<void> {
+    await this.loadServersFromSettings();
   }
 
   /**
@@ -76,8 +133,9 @@ export class MCPService {
       return { success: false, error: `Unknown MCP server: ${serverName}` };
     }
 
-    if (!server.endpoint) {
-      const errorMsg = `MCP server '${serverName}' is not configured with a valid endpoint. Falling back to browser automation for Google Sheets operations.`;
+    // Multiple layers of protection against fake/invalid endpoints
+    if (!server.endpoint || server.endpoint.includes('glama.ai') || server.endpoint.includes('fake')) {
+      const errorMsg = `MCP server '${serverName}' is not configured with a valid endpoint (${server.endpoint || 'undefined'}). Falling back to browser automation for Google Sheets operations.`;
       logger.info(`🔧 [MCP] ${errorMsg}`);
       return { success: false, error: errorMsg };
     }
@@ -143,9 +201,17 @@ export class MCPService {
   /**
    * Check if MCP should be used for a given task
    */
-  shouldUseMCP(task: string, url?: string): { shouldUse: boolean; serverName?: string; reasoning?: string } {
+  async shouldUseMCP(
+    task: string,
+    url?: string,
+  ): Promise<{ shouldUse: boolean; serverName?: string; reasoning?: string }> {
     const lowerTask = task.toLowerCase();
     const lowerUrl = url?.toLowerCase() || '';
+
+    // Ensure servers are loaded
+    if (!this.settingsLoaded) {
+      await this.loadServersFromSettings();
+    }
 
     // Check if Google Sheets MCP server is properly configured
     const googleSheetsServer = this.availableServers.find(s => s.name === 'google-sheets');
@@ -202,10 +268,22 @@ export class MCPService {
   /**
    * Get MCP context for planner reasoning
    */
-  getMCPContext(): string {
+  async getMCPContext(): Promise<string> {
+    // Ensure servers are loaded
+    if (!this.settingsLoaded) {
+      await this.loadServersFromSettings();
+    }
+
     const serverInfos = this.availableServers.map(server => {
       return `${server.name}: ${server.description} (${server.capabilities.join(', ')})`;
     });
+
+    if (serverInfos.length === 0) {
+      return `No MCP servers are currently configured or enabled.
+Browser automation will be used for all tasks.
+
+To enable MCP integrations, configure servers in the extension settings.`;
+    }
 
     return `Available MCP Tools:
 ${serverInfos.join('\n')}
@@ -213,7 +291,8 @@ ${serverInfos.join('\n')}
 When to use MCP:
 - For Google Sheets: Use when task involves creating, reading, or modifying spreadsheet data
 - MCP provides more reliable and precise data manipulation than browser automation
-- Especially useful for complex data operations, bulk updates, or when exact cell positioning is critical`;
+- Especially useful for complex data operations, bulk updates, or when exact cell positioning is critical
+- Automatically falls back to browser automation if MCP servers are not available`;
   }
 }
 

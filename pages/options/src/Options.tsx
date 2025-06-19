@@ -8,14 +8,16 @@ import { GeneralSettings } from './components/GeneralSettings';
 import { ModelSettings } from './components/ModelSettings';
 import { FirewallSettings } from './components/FirewallSettings';
 import { TokenSettings } from './components/TokenSettings';
+import { MCPSettings } from './components/MCPSettings';
 
-type TabTypes = 'general' | 'models' | 'tokens' | 'firewall';
+type TabTypes = 'general' | 'models' | 'tokens' | 'firewall' | 'mcp';
 
 const TABS: { id: TabTypes; icon: string; label: string }[] = [
   { id: 'general', icon: '⚙️', label: t('generalTab') },
   { id: 'models', icon: '📊', label: t('modelsTab') },
   { id: 'tokens', icon: '🎯', label: 'トークン' },
   { id: 'firewall', icon: '🔒', label: t('firewallTab') },
+  { id: 'mcp', icon: '🔧', label: 'MCP Integrations' },
 ];
 
 const Options = () => {
@@ -69,6 +71,8 @@ const Options = () => {
         return <TokenSettings isDarkMode={isDarkMode} />;
       case 'firewall':
         return <FirewallSettings isDarkMode={isDarkMode} />;
+      case 'mcp':
+        return <MCPSettings isDarkMode={isDarkMode} />;
       default:
         return null;
     }

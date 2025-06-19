@@ -350,3 +350,117 @@ export const llmProviderParameters = {
     },
   },
 };
+
+// MCP Configuration Types
+export interface MCPCredentials {
+  type: 'oauth' | 'api_key' | 'service_account';
+  clientId?: string;
+  clientSecret?: string;
+  refreshToken?: string;
+  accessToken?: string;
+  apiKey?: string;
+  serviceAccountJson?: string;
+  scopes?: string[];
+  tokenExpiry?: string; // ISO date string
+}
+
+export interface MCPServerConfig {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string;
+  capabilities: string[];
+  enabled: boolean;
+  endpoint?: string;
+  credentials?: MCPCredentials;
+  lastTestResult?: {
+    success: boolean;
+    error?: string;
+    testedAt: string; // ISO date string
+  };
+  // Provider-specific settings
+  providerType: 'google-sheets' | 'notion' | 'slack' | 'github' | 'custom';
+  icon?: string;
+  category: 'productivity' | 'development' | 'communication' | 'storage' | 'other';
+}
+
+export interface MCPSettings {
+  servers: MCPServerConfig[];
+  globalEnabled: boolean;
+  fallbackToBrowserAutomation: boolean;
+  debugMode: boolean;
+}
+
+// Default MCP servers that users can configure
+export const DEFAULT_MCP_SERVERS: Partial<MCPServerConfig>[] = [
+  {
+    name: 'google-sheets',
+    displayName: 'Google Sheets',
+    description: 'Read, write, and manage Google Spreadsheets',
+    capabilities: [
+      'create_spreadsheet',
+      'list_sheets',
+      'create_sheet',
+      'read_all_from_sheet',
+      'read_headings',
+      'read_rows',
+      'read_columns',
+      'edit_cell',
+      'edit_row',
+      'edit_column',
+      'insert_row',
+      'insert_column',
+      'rename_sheet',
+      'rename_doc',
+    ],
+    providerType: 'google-sheets',
+    icon: '📊',
+    category: 'productivity',
+    enabled: false,
+  },
+  {
+    name: 'notion',
+    displayName: 'Notion',
+    description: 'Interact with Notion databases and pages',
+    capabilities: [
+      'create_page',
+      'update_page',
+      'search_pages',
+      'query_database',
+      'create_database',
+      'update_database',
+    ],
+    providerType: 'notion',
+    icon: '📝',
+    category: 'productivity',
+    enabled: false,
+  },
+  {
+    name: 'github',
+    displayName: 'GitHub',
+    description: 'Access GitHub repositories, issues, and pull requests',
+    capabilities: [
+      'list_repositories',
+      'get_repository',
+      'create_issue',
+      'list_issues',
+      'create_pull_request',
+      'get_file_contents',
+      'create_commit',
+    ],
+    providerType: 'github',
+    icon: '🐙',
+    category: 'development',
+    enabled: false,
+  },
+  {
+    name: 'slack',
+    displayName: 'Slack',
+    description: 'Send messages and interact with Slack workspaces',
+    capabilities: ['send_message', 'list_channels', 'get_channel_history', 'upload_file', 'set_status'],
+    providerType: 'slack',
+    icon: '💬',
+    category: 'communication',
+    enabled: false,
+  },
+];

@@ -170,6 +170,16 @@
   - Configuration steps for replacing placeholder implementation
   - Troubleshooting guide for common MCP issues
 - **Dependencies & Build**: Added @modelcontextprotocol/sdk to chrome-extension package.json and successfully built with `pnpm run build`
+- **MCP Settings UI (NEW)**: Comprehensive user interface for MCP configuration:
+  - **Settings Storage**: Added MCPSettings types, storage module, and management in `packages/storage/lib/settings/`
+  - **Settings Page**: Created MCPSettings component in options page with new "MCP Integrations" tab (🔧 icon)
+  - **User Configuration**: Users can now add/configure MCP servers through UI instead of code
+  - **OAuth/API Key Support**: Credential management for OAuth 2.0, API keys, and service accounts
+  - **Server Templates**: Pre-configured templates for Google Sheets, Notion, GitHub, Slack with setup wizards
+  - **Connection Testing**: Built-in connection testing and server status monitoring
+  - **Dynamic Loading**: MCP service now loads servers from user settings instead of hardcoded config
+  - **Global Controls**: Enable/disable MCP globally, fallback settings, debug mode toggle
+  - **User Answer**: **YES, users must configure their own OAuth credentials and API keys** - each MCP requires user-specific authentication for security, rate limits, privacy, and compliance reasons
 - **Current Status**: MCP framework is ready but requires real MCP server setup for actual functionality. System gracefully falls back to browser automation when MCP is not available.
 - **Key Benefits**: More reliable spreadsheet operations, precise cell targeting without DOM traversal, complex data manipulations, automatic task routing between MCP and browser automation
 

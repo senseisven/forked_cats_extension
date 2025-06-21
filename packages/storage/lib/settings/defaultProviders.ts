@@ -1,6 +1,7 @@
 import { llmProviderStore } from './llmProviders';
-import { ProviderTypeEnum } from './types';
+import { ProviderTypeEnum, AgentNameEnum } from './types';
 import { centralizedApiStore } from './centralizedApi';
+import { agentModelStore } from './agentModels';
 
 /**
  * Sets up the default centralized API provider if it doesn't exist
@@ -176,5 +177,88 @@ export async function checkCentralizedApiHealth(): Promise<boolean> {
   } catch (error) {
     console.error('Failed to check centralized API health:', error);
     return false;
+  }
+}
+
+/**
+ * Sets up default agent models with Gemini 2.5 Pro Preview for all agents
+ */
+export async function setupDefaultAgentModels(): Promise<void> {
+  try {
+    console.log('Setting up default agent models...');
+
+    // Check if we have a centralized API provider configured
+    const providerId = ProviderTypeEnum.CentralizedAPI;
+    const hasProvider = await llmProviderStore.hasProvider(providerId);
+
+    if (!hasProvider) {
+      console.log('No centralized provider found, setting up default provider first...');
+      await setupDefaultCentralizedProvider();
+    }
+
+    // Set Gemini 2.5 Pro Preview for all three agents
+    const defaultModelConfig = {
+      provider: providerId,
+      modelName: 'google/gemini-2.5-pro-preview',
+      parameters: {
+        temperature: 0.1,
+        topP: 0.1,
+      },
+    };
+
+    // Set up all three agents with the same model
+    const agents = [AgentNameEnum.Planner, AgentNameEnum.Navigator, AgentNameEnum.Validator];
+
+    for (const agent of agents) {
+      const hasModel = await agentModelStore.hasAgentModel(agent);
+      if (!hasModel) {
+        await agentModelStore.setAgentModel(agent, defaultModelConfig);
+        console.log(`✅ Set ${agent} to use Gemini 2.5 Pro Preview`);
+      } else {
+        console.log(`${agent} already has a model configured, skipping...`);
+      }
+    }
+
+    console.log('✅ Default agent models setup completed');
+  } catch (error) {
+    console.error('Failed to setup default agent models:', error);
+  }
+}
+
+/**
+ * Forces update of all agent models to use Gemini 2.5 Pro Preview
+ */
+export async function forceUpdateAgentModels(): Promise<void> {
+  try {
+    console.log('Force updating all agent models to Gemini 2.5 Pro Preview...');
+
+    // Ensure we have a centralized API provider
+    const providerId = ProviderTypeEnum.CentralizedAPI;
+    const hasProvider = await llmProviderStore.hasProvider(providerId);
+
+    if (!hasProvider) {
+      await setupDefaultCentralizedProvider();
+    }
+
+    const defaultModelConfig = {
+      provider: providerId,
+      modelName: 'google/gemini-2.5-pro-preview',
+      parameters: {
+        temperature: 0.1,
+        topP: 0.1,
+      },
+    };
+
+    // Force update all three agents
+    const agents = [AgentNameEnum.Planner, AgentNameEnum.Navigator, AgentNameEnum.Validator];
+
+    for (const agent of agents) {
+      await agentModelStore.setAgentModel(agent, defaultModelConfig);
+      console.log(`✅ Updated ${agent} to use Gemini 2.5 Pro Preview`);
+    }
+
+    console.log('✅ All agent models updated to Gemini 2.5 Pro Preview');
+  } catch (error) {
+    console.error('Failed to force update agent models:', error);
   }
 }

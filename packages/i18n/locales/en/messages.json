@@ -1,7 +1,7 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "AIでWebタスクを自動化！ネコノテは、データ抽出、フォーム入力などを行うオープンソースのChrome拡張機能です。"
+    "message": "AIでWebタスクを自動化！ネコノテは、データ抽出、フォーム入力などを行うChrome拡張機能です。"
   },
   "extensionName": {
     "description": "Extension name",
@@ -93,6 +93,12 @@
   "cancelEdit": {
     "message": "編集をキャンセル"
   },
+  "save": {
+    "message": "保存"
+  },
+  "cancel": {
+    "message": "キャンセル"
+  },
   "startVoiceInput": {
     "message": "音声入力を開始"
   },
@@ -104,6 +110,9 @@
   },
   "settingsTitle": {
     "message": "設定"
+  },
+  "usageGuideTab": {
+    "message": "使用ガイド"
   },
   "generalTab": {
     "message": "一般"
@@ -272,12 +281,6 @@
   },
   "general": {
     "message": "一般"
-  },
-  "cancel": {
-    "message": "キャンセル"
-  },
-  "save": {
-    "message": "保存"
   },
   "delete": {
     "message": "削除"

@@ -187,16 +187,3 @@ export const waitActionSchema: ActionSchema = {
     seconds: z.number().int().min(1).max(3).default(1).describe('amount of seconds (1-3)'),
   }),
 };
-
-// MCP Action Schemas
-export const mcpToolCallActionSchema: ActionSchema = {
-  name: 'mcp_tool_call',
-  description:
-    'Execute an MCP (Model Context Protocol) tool for specialized operations like Google Sheets manipulation',
-  schema: z.object({
-    intent: z.string().default('').describe('purpose of this action'),
-    serverName: z.string().describe('name of the MCP server (e.g., "google-sheets")'),
-    toolName: z.string().describe('name of the tool to execute'),
-    arguments: z.record(z.any()).describe('arguments for the tool'),
-  }),
-};

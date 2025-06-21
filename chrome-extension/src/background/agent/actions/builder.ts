@@ -19,14 +19,12 @@ import {
   closeTabActionSchema,
   waitActionSchema,
   navigateActionSchema,
-  mcpToolCallActionSchema,
 } from './schemas';
 import { z } from 'zod';
 import { createLogger } from '@src/background/log';
 import { ExecutionState, Actors } from '../event/types';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { wrapUntrustedContent } from '../messages/utils';
-import { mcpService } from '../../services/mcp';
 
 const logger = createLogger('Action');
 
@@ -655,44 +653,6 @@ export class ActionBuilder {
       true,
     );
     actions.push(selectDropdownOption);
-
-    // MCP Tool Call Action
-    const mcpToolCall = new Action(async (input: z.infer<typeof mcpToolCallActionSchema.schema>) => {
-      const intent = input.intent || `Execute MCP tool: ${input.serverName}.${input.toolName}`;
-      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_START, intent);
-
-      try {
-        const result = await mcpService.executeToolCall({
-          serverName: input.serverName,
-          toolName: input.toolName,
-          arguments: input.arguments,
-        });
-
-        if (result.success) {
-          const msg = `MCP tool executed successfully: ${input.toolName}`;
-          this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_OK, msg);
-          return new ActionResult({
-            extractedContent: result.content || msg,
-            includeInMemory: true,
-          });
-        } else {
-          const errorMsg = `MCP tool failed: ${result.error}`;
-          this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_FAIL, errorMsg);
-          return new ActionResult({
-            error: errorMsg,
-            includeInMemory: true,
-          });
-        }
-      } catch (error) {
-        const errorMsg = `MCP tool execution error: ${error instanceof Error ? error.message : String(error)}`;
-        this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_FAIL, errorMsg);
-        return new ActionResult({
-          error: errorMsg,
-          includeInMemory: true,
-        });
-      }
-    }, mcpToolCallActionSchema);
-    actions.push(mcpToolCall);
 
     return actions;
   }

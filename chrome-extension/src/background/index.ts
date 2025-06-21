@@ -15,7 +15,10 @@ import type { BaseChatModel } from '@langchain/core/language_models/chat_models'
 import { DEFAULT_AGENT_OPTIONS } from './agent/types';
 import { SpeechToTextService } from './services/speechToText';
 import { ProviderTypeEnum } from '@extension/storage';
-import { setupDefaultCentralizedProvider } from '@extension/storage/lib/settings/defaultProviders';
+import {
+  setupDefaultCentralizedProvider,
+  setupDefaultAgentModels,
+} from '@extension/storage/lib/settings/defaultProviders';
 const logger = createLogger('background');
 
 const browserContext = new BrowserContext({});
@@ -25,15 +28,19 @@ let currentPort: chrome.runtime.Port | null = null;
 // Setup side panel behavior
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(error => console.error(error));
 
-// Initialize default centralized API provider with better error handling
+// Initialize default centralized API provider and agent models with better error handling
 (async () => {
   try {
     await setupDefaultCentralizedProvider();
     logger.info('✅ Default centralized API provider setup complete');
+
+    // Set up default agent models for first-time users
+    await setupDefaultAgentModels();
+    logger.info('✅ Default agent models setup complete');
   } catch (error) {
-    logger.error('❌ Failed to setup default centralized provider:', error);
+    logger.error('❌ Failed to setup defaults:', error);
     // Don't let provider setup failure break the extension
-    console.error('Failed to setup default centralized provider:', error);
+    console.error('Failed to setup defaults:', error);
   }
 })();
 
@@ -412,6 +419,9 @@ async function initialize() {
 
   // Check if the centralized API provider is properly configured
   await setupDefaultCentralizedProvider();
+
+  // Ensure default agent models are set up
+  await setupDefaultAgentModels();
 
   // Temporary debug call to check OpenRouter key
   try {

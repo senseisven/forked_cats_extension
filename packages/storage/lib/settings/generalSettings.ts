@@ -16,12 +16,15 @@ export interface GeneralSettingsConfig {
   displayHighlights: boolean;
   minWaitPageLoad: number;
   themeMode: ThemeMode;
+  firstTimeUser: boolean;
 }
 
 export type GeneralSettingsStorage = BaseStorage<GeneralSettingsConfig> & {
   updateSettings: (settings: Partial<GeneralSettingsConfig>) => Promise<void>;
   getSettings: () => Promise<GeneralSettingsConfig>;
   resetToDefaults: () => Promise<void>;
+  markFirstTimeComplete: () => Promise<void>;
+  isFirstTimeUser: () => Promise<boolean>;
 };
 
 // Default settings
@@ -35,6 +38,7 @@ export const DEFAULT_GENERAL_SETTINGS: GeneralSettingsConfig = {
   displayHighlights: true,
   minWaitPageLoad: 250,
   themeMode: 'light',
+  firstTimeUser: true,
 };
 
 const storage = createStorage<GeneralSettingsConfig>('general-settings', DEFAULT_GENERAL_SETTINGS, {
@@ -67,5 +71,13 @@ export const generalSettingsStore: GeneralSettingsStorage = {
   },
   async resetToDefaults() {
     await storage.set(DEFAULT_GENERAL_SETTINGS);
+  },
+  async markFirstTimeComplete() {
+    const currentSettings = await this.getSettings();
+    await this.updateSettings({ ...currentSettings, firstTimeUser: false });
+  },
+  async isFirstTimeUser() {
+    const settings = await this.getSettings();
+    return settings.firstTimeUser;
   },
 };

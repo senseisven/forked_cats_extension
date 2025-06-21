@@ -5,19 +5,26 @@ import type { BaseStorage } from '../base/types';
 // Default template data - user-focused templates
 const defaultFavoritePrompts = [
   {
-    title: '📧 Check Daily Emails',
+    title: '📧 毎日のメールチェック',
     content:
-      'Go to my email inbox and summarize the important emails I received today. Flag any urgent ones that need immediate attention.',
+      'メールを確認して、今日受信した重要なメールを要約してください。緊急の対応が必要なものがあれば強調してください。',
   },
   {
-    title: '📰 Daily News Summary',
+    title: '📰 今日のニュース要約',
     content:
-      'Go to my preferred news website and create a summary of the top 5 most important news stories from today.',
+      'ニュースサイトにアクセスして、今日の主要なニュース5つを要約してください。重要な情報を簡潔にまとめてください。',
   },
   {
-    title: '📋 Create Meeting Notes',
-    content:
-      'Help me organize my meeting notes by creating a structured summary with action items, decisions made, and next steps.',
+    title: '📋 会議メモの整理',
+    content: '会議の内容を整理し、決定事項、アクションアイテム、次のステップを構造化してまとめてください。',
+  },
+  {
+    title: '🛒 オンラインショッピング検索',
+    content: 'Amazonや楽天で指定した商品を検索し、評価の高い商品を比較して最適な選択肢を提案してください。',
+  },
+  {
+    title: '🌤️ 天気予報の確認',
+    content: '今日と明日の天気予報を確認し、気温、降水確率、おすすめの服装について教えてください。',
   },
 ];
 

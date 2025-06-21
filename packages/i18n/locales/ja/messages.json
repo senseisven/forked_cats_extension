@@ -1,7 +1,7 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "AIでWebタスクを自動化！ネコノテは、データ抽出、フォーム入力などを行うオープンソースのChrome拡張機能です。"
+    "message": "AIでWebタスクを自動化！ネコノテは、データ抽出、フォーム入力などを行うChrome拡張機能です。"
   },
   "extensionName": {
     "description": "Extension name",
@@ -92,6 +92,12 @@
   },
   "cancelEdit": {
     "message": "編集をキャンセル"
+  },
+  "save": {
+    "message": "保存"
+  },
+  "cancel": {
+    "message": "キャンセル"
   },
   "startVoiceInput": {
     "message": "音声入力を開始"
@@ -273,12 +279,6 @@
   "general": {
     "message": "一般"
   },
-  "cancel": {
-    "message": "キャンセル"
-  },
-  "save": {
-    "message": "保存"
-  },
   "delete": {
     "message": "削除"
   },
@@ -392,5 +392,104 @@
   },
   "pageLoadWaitTimeDescription": {
     "message": "ページロード完了後に待機する最小時間 (ms)"
+  },
+  "usageGuideTab": {
+    "message": "使用ガイド"
+  },
+  "usageGuideTitle": {
+    "message": "ネコノテ使用ガイド 🐱"
+  },
+  "usageGuideSubtitle": {
+    "message": "簡単ステップでAIウェブ自動化をマスターしよう！"
+  },
+  "step": {
+    "message": "ステップ"
+  },
+  "step1Title": {
+    "message": "拡張機能を開く"
+  },
+  "step1Content": {
+    "message": "ブラウザのツールバーにあるネコノテアイコン🐱をクリックして、サイドパネルを開きます。"
+  },
+  "step2Title": {
+    "message": "タスクを入力する準備"
+  },
+  "step2Content": {
+    "message": "チャット欄は下部にあります。自然な日本語でタスクを入力できます。AIモデルは自動設定済みなので、すぐに開始できます。"
+  },
+  "step3Title": {
+    "message": "タスクを入力"
+  },
+  "step3Content": {
+    "message": "チャット欄に自然な日本語でタスクを入力します。例：「YouTubeで猫の動画を検索して」「Amazonで本を探して」「ニュースサイトで今日の主要なニュースを教えて」"
+  },
+  "step4Title": {
+    "message": "AIエージェントが作業"
+  },
+  "step4Content": {
+    "message": "3つのAIエージェントが協力してタスクを実行します：\n• 🐱プランニャー：タスクを計画\n• 🧭ニャビゲーター：ウェブページを操作\n• ✓バリデーニャー：結果を検証"
+  },
+  "step5Title": {
+    "message": "結果を確認"
+  },
+  "step5Content": {
+    "message": "タスク完了後、結果が表示されます。続けて質問したり、新しいタスクを依頼することができます。"
+  },
+  "usageExamplesTitle": {
+    "message": "使用例"
+  },
+  "example1": {
+    "message": "「ニュースサイトで今日の主要なニュースを3つ教えて」"
+  },
+  "example2": {
+    "message": "「GitHubでPythonのトレンドリポジトリを探して」"
+  },
+  "example3": {
+    "message": "「Amazonで評価の高いBluetoothイヤホンを見つけて」"
+  },
+  "example4": {
+    "message": "「特定のフォームに情報を入力して」"
+  },
+  "tipsTitle": {
+    "message": "便利なコツ"
+  },
+  "tip1": {
+    "message": "具体的な指示をすると、より正確な結果が得られます"
+  },
+  "tip2": {
+    "message": "音声入力🎤ボタンで話しかけることもできます"
+  },
+  "tip3": {
+    "message": "よく使うタスクは⭐ブックマークして保存できます"
+  },
+  "tip4": {
+    "message": "履歴📋ボタンで過去の会話を確認できます"
+  },
+  "troubleshootingTitle": {
+    "message": "トラブルシューティング"
+  },
+  "troubleshooting1": {
+    "message": "エラーが発生した場合は、ページを更新してもう一度試してください"
+  },
+  "troubleshooting2": {
+    "message": "複雑なタスクは、小さなステップに分けて依頼してください"
+  },
+  "troubleshooting3": {
+    "message": "設定でモデルを変更すると、パフォーマンスが向上する場合があります"
+  },
+  "firstTimeWelcome": {
+    "message": "ネコノテへようこそ！🐱"
+  },
+  "firstTimeMessage": {
+    "message": "初回利用ありがとうございます。使い方を学ぶため、使用ガイドをご覧になりますか？"
+  },
+  "openGuide": {
+    "message": "使用ガイドを開く"
+  },
+  "skipGuide": {
+    "message": "スキップ"
+  },
+  "getStarted": {
+    "message": "さあ、始めましょう！"
   }
 }

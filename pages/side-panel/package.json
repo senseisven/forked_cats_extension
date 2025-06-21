@@ -23,7 +23,8 @@
     "@extension/shared": "workspace:*",
     "@extension/storage": "workspace:*",
     "react-icons": "^5.0.0",
-    "webextension-polyfill": "^0.12.0"
+    "webextension-polyfill": "^0.12.0",
+    "marked": "^12.0.2"
   },
   "devDependencies": {
     "@extension/tailwindcss-config": "workspace:*",

@@ -368,36 +368,6 @@ export const jsonNavigatorOutputSchema = {
             type: 'object',
             nullable: true,
           },
-          mcp_tool_call: {
-            description:
-              'Execute an MCP (Model Context Protocol) tool for specialized operations like Google Sheets manipulation',
-            properties: {
-              intent: {
-                title: 'Intent',
-                type: 'string',
-                description: 'purpose of this action',
-              },
-              serverName: {
-                title: 'ServerName',
-                type: 'string',
-                description: 'name of the MCP server (e.g., "google-sheets")',
-              },
-              toolName: {
-                title: 'ToolName',
-                type: 'string',
-                description: 'name of the tool to execute',
-              },
-              arguments: {
-                title: 'Arguments',
-                type: 'object',
-                description: 'arguments for the tool',
-              },
-            },
-            required: ['intent', 'serverName', 'toolName', 'arguments'],
-            title: 'MCPToolCallAction',
-            type: 'object',
-            nullable: true,
-          },
         },
         title: 'ActionModel',
         type: 'object',

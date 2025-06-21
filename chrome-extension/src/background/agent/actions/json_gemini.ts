@@ -308,31 +308,6 @@ export const geminiNavigatorOutputSchema = {
             },
             required: ['intent', 'index', 'text'],
           },
-          mcp_tool_call: {
-            type: 'object',
-            description:
-              'Execute an MCP (Model Context Protocol) tool for specialized operations like Google Sheets manipulation',
-            nullable: true,
-            properties: {
-              intent: {
-                type: 'string',
-                description: 'purpose of this action',
-              },
-              serverName: {
-                type: 'string',
-                description: 'name of the MCP server (e.g., "google-sheets")',
-              },
-              toolName: {
-                type: 'string',
-                description: 'name of the tool to execute',
-              },
-              arguments: {
-                type: 'object',
-                description: 'arguments for the tool',
-              },
-            },
-            required: ['intent', 'serverName', 'toolName', 'arguments'],
-          },
         },
       },
     },

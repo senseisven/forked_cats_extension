@@ -8,22 +8,30 @@ import { GeneralSettings } from './components/GeneralSettings';
 import { ModelSettings } from './components/ModelSettings';
 import { FirewallSettings } from './components/FirewallSettings';
 import { TokenSettings } from './components/TokenSettings';
-import { MCPSettings } from './components/MCPSettings';
+import UsageGuide from './components/UsageGuide';
 
-type TabTypes = 'general' | 'models' | 'tokens' | 'firewall' | 'mcp';
+type TabTypes = 'general' | 'models' | 'tokens' | 'firewall' | 'guide';
 
 const TABS: { id: TabTypes; icon: string; label: string }[] = [
+  { id: 'guide', icon: '📖', label: t('usageGuideTab') },
   { id: 'general', icon: '⚙️', label: t('generalTab') },
   { id: 'models', icon: '📊', label: t('modelsTab') },
   { id: 'tokens', icon: '🎯', label: 'トークン' },
   { id: 'firewall', icon: '🔒', label: t('firewallTab') },
-  { id: 'mcp', icon: '🔧', label: 'MCP Integrations' },
 ];
 
 const Options = () => {
-  const [activeTab, setActiveTab] = useState<TabTypes>('models');
+  const [activeTab, setActiveTab] = useState<TabTypes>('guide');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [themeMode, setThemeMode] = useState<ThemeMode>('light');
+
+  // Check URL hash on mount to determine initial tab
+  useEffect(() => {
+    const hash = window.location.hash.substring(1);
+    if (hash === 'guide') {
+      setActiveTab('guide');
+    }
+  }, []);
 
   // Load theme settings and determine dark mode
   useEffect(() => {
@@ -63,6 +71,8 @@ const Options = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'guide':
+        return <UsageGuide isDarkMode={isDarkMode} />;
       case 'general':
         return <GeneralSettings isDarkMode={isDarkMode} />;
       case 'models':
@@ -71,8 +81,6 @@ const Options = () => {
         return <TokenSettings isDarkMode={isDarkMode} />;
       case 'firewall':
         return <FirewallSettings isDarkMode={isDarkMode} />;
-      case 'mcp':
-        return <MCPSettings isDarkMode={isDarkMode} />;
       default:
         return null;
     }

@@ -40,7 +40,8 @@ const SidePanel = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [themeMode, setThemeMode] = useState<ThemeMode>('light');
   const [favoritePrompts, setFavoritePrompts] = useState<FavoritePrompt[]>([]);
-  const [hasConfiguredModels, setHasConfiguredModels] = useState<boolean | null>(null); // null = loading, false = no models, true = has models
+  const [hasConfiguredModels, setHasConfiguredModels] = useState<boolean | null>(true); // Always true since models are now preset
+  const [showFirstTimeGuide, setShowFirstTimeGuide] = useState<boolean>(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingSpeech, setIsProcessingSpeech] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
@@ -84,18 +85,32 @@ const SidePanel = () => {
     loadThemeSettings();
   }, [themeMode]); // Re-run when themeMode changes
 
-  // Check if models are configured
+  // Check if this is the first time the user is opening the extension
+  useEffect(() => {
+    const checkFirstTimeUser = async () => {
+      try {
+        const isFirstTime = await generalSettingsStore.isFirstTimeUser();
+        if (isFirstTime) {
+          setShowFirstTimeGuide(true);
+          // Mark as no longer first time
+          await generalSettingsStore.markFirstTimeComplete();
+        }
+      } catch (error) {
+        console.error('Error checking first time user:', error);
+      }
+    };
+
+    checkFirstTimeUser();
+  }, []);
+
+  // Check if models are configured - always return true since models are preset
   const checkModelConfiguration = useCallback(async () => {
     try {
-      const configuredAgents = await agentModelStore.getConfiguredAgents();
-      console.log('Configured agents:', configuredAgents);
-
-      // Check if at least one agent (preferably Navigator) is configured
-      const hasAtLeastOneModel = configuredAgents.length > 0;
-      setHasConfiguredModels(hasAtLeastOneModel);
+      // Models are now preset by default, so always return true
+      setHasConfiguredModels(true);
     } catch (error) {
       console.error('Error checking model configuration:', error);
-      setHasConfiguredModels(false);
+      setHasConfiguredModels(true); // Even on error, assume models are preset
     }
   }, []);
 
@@ -668,6 +683,18 @@ const SidePanel = () => {
     }
   };
 
+  const handleBookmarkUpdate = async (id: number, title: string, content: string) => {
+    try {
+      await favoritesStorage.updatePrompt(id, title, content);
+
+      // Update favorites in the UI
+      const prompts = await favoritesStorage.getAllPrompts();
+      setFavoritePrompts(prompts);
+    } catch (error) {
+      console.error('Failed to update favorite prompt:', error);
+    }
+  };
+
   const handleBookmarkDelete = async (id: number) => {
     try {
       await favoritesStorage.removePrompt(id);
@@ -995,35 +1022,42 @@ const SidePanel = () => {
               </div>
             )}
 
-            {/* Show setup message when no models are configured */}
-            {hasConfiguredModels === false && (
+            {/* First-time guide popup */}
+            {showFirstTimeGuide && (
               <div
-                className={`flex flex-1 items-center justify-center p-8 ${isDarkMode ? 'text-sky-300' : 'text-[#8b7355]'}`}>
-                <div className="max-w-md text-center">
-                  <img src="/icon-128.png" alt="ネコノテロゴ" className="mx-auto mb-4 size-12" />
-                  <h3 className={`mb-2 text-lg font-semibold ${isDarkMode ? 'text-sky-200' : 'text-[#6d5a44]'}`}>
-                    ネコノテへようこそ！
-                  </h3>
-                  <p className="mb-4">
-                    使い始めるにはAIモデルを設定してください。設定パネルでAPIキーを構成するか、APIキー不要のネコノテAPIを選択してください。
-                  </p>
-                  <button
-                    onClick={() => chrome.runtime.openOptionsPage()}
-                    className={`my-4 rounded-lg px-4 py-2 font-medium transition-colors ${
-                      isDarkMode
-                        ? 'bg-sky-600 text-white hover:bg-sky-700'
-                        : 'bg-[#8b7355] text-white hover:bg-[#6d5a44]'
-                    }`}>
-                    設定パネルを開く
-                  </button>
-                  <div className="mt-4 text-sm opacity-75">
-                    <a
-                      href="https://github.com/nanobrowser/nanobrowser?tab=readme-ov-file#-quick-start"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:text-blue-700">
-                      ネコノテ使用ガイド
-                    </a>
+                className={`m-4 p-4 rounded-lg border ${
+                  isDarkMode
+                    ? 'bg-slate-800/90 border-slate-600 text-gray-100'
+                    : 'bg-white/90 border-[#d4c4a8] text-gray-800'
+                } shadow-sm`}>
+                <div className="flex items-start space-x-3">
+                  <div className="text-2xl">🐱</div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold mb-1">ネコノテへようこそ！</h3>
+                    <p className={`text-sm mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      初回利用ありがとうございます。使い方を学ぶため、使用ガイドをご覧になりますか？
+                    </p>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          chrome.runtime.openOptionsPage();
+                          setShowFirstTimeGuide(false);
+                        }}
+                        className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                          isDarkMode
+                            ? 'bg-sky-600 text-white hover:bg-sky-700'
+                            : 'bg-[#8b7355] text-white hover:bg-[#6d5a44]'
+                        }`}>
+                        使用ガイドを開く
+                      </button>
+                      <button
+                        onClick={() => setShowFirstTimeGuide(false)}
+                        className={`px-3 py-1 rounded text-sm transition-colors ${
+                          isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'
+                        }`}>
+                        スキップ
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1058,6 +1092,7 @@ const SidePanel = () => {
                         bookmarks={favoritePrompts}
                         onBookmarkSelect={handleBookmarkSelect}
                         onBookmarkUpdateTitle={handleBookmarkUpdateTitle}
+                        onBookmarkUpdate={handleBookmarkUpdate}
                         onBookmarkDelete={handleBookmarkDelete}
                         onBookmarkReorder={handleBookmarkReorder}
                         onBookmarkAdd={handleBookmarkAdd}

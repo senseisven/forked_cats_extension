@@ -73,21 +73,18 @@ The upstream repository has **simplified/removed** many features that make this 
   - Error handling and logging
 - **Deployment**: Configured for Render.com hosting
 
-### 3. **Model Context Protocol (MCP) Integration** 🔧
-**Location**: `chrome-extension/src/background/services/mcp.ts`
-- **Purpose**: Extend browser capabilities with external services
-- **Implementation**: 
-  - Google Sheets MCP server integration
-  - Credential-based authentication
-  - Fallback to browser automation when MCP unavailable
-  - Dynamic server loading from user settings
-- **Settings UI**: Complete configuration interface in options page
+### 3. **Model Context Protocol (MCP) Integration** 🔧 *(REMOVED FROM UI)*
+**Status**: Backend service files preserved, all UI components removed
+- **Backend Service**: MCP functionality still available via `backend-service/`
+- **Chrome Extension**: All MCP integration UI and settings removed
+- **Rationale**: Simplified user interface by removing MCP configuration complexity
+- **Impact**: Users can no longer configure MCP servers through extension UI
 
 ### 4. **Advanced Settings System** ⚙️
 **Location**: `packages/storage/lib/settings/`
 - **Centralized API Settings**: `centralizedApi.ts` - Backend service configuration
 - **Default Providers**: `defaultProviders.ts` - Pre-configured LLM providers  
-- **MCP Settings**: `mcpSettings.ts` - Server management and credentials
+- **MCP Settings**: *(Removed)* - UI configuration no longer available
 - **Token Management**: Integration with cursor-style token tracking
 - **Enhanced Types**: Extended type definitions for all features
 
@@ -103,7 +100,7 @@ The upstream repository has **simplified/removed** many features that make this 
 
 ### 6. **Enhanced UI Components** 🎨
 **Location**: `pages/options/src/components/`
-- **MCPSettings.tsx**: Complete MCP server management interface
+- **MCPSettings.tsx**: *(Removed)* - MCP configuration UI no longer available
 - **TokenSettings.tsx**: Token usage tracking and display
 - **Styling**: Warm cream theme (#ede2c7) with Japanese aesthetics
 - **Dark/Light Mode**: Enhanced theming system
@@ -121,7 +118,7 @@ The upstream repository has **simplified/removed** many features that make this 
 ### Core Components
 1. **Chrome Extension**: Core automation engine with Japanese agents
 2. **Backend Service**: Centralized API proxy (unique to this fork)
-3. **MCP Integration**: External service connectivity (unique to this fork)
+3. **MCP Integration**: Backend service only - UI removed
 4. **Storage System**: Enhanced settings and token management
 5. **UI System**: Japanese-localized interface with custom theming
 6. **🆕 Advanced DOM Handling**: Agent-E inspired web automation capabilities
@@ -192,4 +189,198 @@ Instead of full merge (which would remove unique features), we used **selective 
 
 ---
 
-**Last Updated**: January 2025 - Successfully integrated Agent-E inspired advanced dropdown handling while preserving fork uniqueness
+**Last Updated**: January 2025 - Removed MCP integration UI from Chrome extension while preserving backend MCP service files. Users can no longer configure MCP servers through the extension interface.
+
+## Recent Major Updates (Latest)
+
+### Template System Enhancement and Japanese Localization (Current) 🇯🇵
+**Major improvements to template system and user interface:**
+
+#### Enhanced Template Editing System
+- **Full Content Editing**: Users can now edit both template titles and content (previously title-only)
+- **Improved UI**: Redesigned edit interface with separate fields for title and content
+- **Better UX**: Added proper labels, validation, and save/cancel functionality
+- **Storage Integration**: Enhanced `favoritesStorage.updatePrompt()` integration
+
+#### Japanese Default Templates
+Updated default templates with practical Japanese content:
+- 📧 毎日のメールチェック (Daily Email Check)
+- 📰 今日のニュース要約 (Today's News Summary) 
+- 📋 会議メモの整理 (Meeting Notes Organization)
+- 🛒 オンラインショッピング検索 (Online Shopping Search)
+- 🌤️ 天気予報の確認 (Weather Forecast Check)
+
+#### Translation System Improvements
+- **Complete Japanese Support**: All interface elements properly localized
+- **Usage Guide Fixes**: Resolved missing text in usage guide tab side menu
+- **Message File Updates**: Added missing translation keys for save/cancel actions
+- **Build Optimization**: Removed duplicate translation keys causing build warnings
+
+#### Technical Implementation
+**Files Modified:**
+- `packages/storage/lib/prompt/favorites.ts` - Japanese default templates
+- `pages/side-panel/src/components/BookmarkList.tsx` - Enhanced editing UI
+- `pages/side-panel/src/SidePanel.tsx` - Template update handler
+- `packages/i18n/locales/*/messages.json` - Translation improvements
+
+**Key Features:**
+- Template content editing with real-time preview
+- Proper Japanese localization throughout
+- Enhanced user experience for template management
+- Maintained backward compatibility with existing templates
+  - 🛒 オンラインショッピング検索 (Online Shopping Search)
+  - 🌤️ 天気予報の確認 (Weather Forecast Check)
+- **Enhanced Template Editing**: Users can now edit both title AND content of templates
+  - Previously only title editing was supported
+  - Added new `onBookmarkUpdate` handler for full template editing
+  - Enhanced UI with separate fields for title and content
+  - Proper validation and error handling
+- **Translation Completeness**: Added missing translation keys for save/cancel buttons
+  - Added "save" and "cancel" keys to both Japanese and English message files
+  - Fixed potential UI text display issues
+
+### FIXES: Side Panel UI and Usage Guide (Previous)
+- **Side Panel UI Restoration**: Fixed broken UI structure that was caused by incorrect modifications
+  - Restored original chat interface layout with proper message flow
+  - Fixed BookmarkList and TokenCounter positioning
+  - Maintained responsive design and proper overflow handling
+
+### AI Model Preset System
+- **Default Models**: All three agents (Planner, Navigator, Validator) now use `google/gemini-2.5-pro-preview` by default
+- **No Setup Required**: Users no longer need to configure models or API keys on first use
+- **Background Initialization**: The extension automatically sets up models on first run via `setupDefaultAgentModels()`
+- **Centralized API**: Uses the ネコノテAPI service which requires no API keys from users
+
+### First-Time User Experience
+- **Removed Setup Screen**: Eliminated the model configuration requirement screen
+- **Direct Chat Access**: New users get immediate access to the chat interface
+- **Optional Guide Link**: Small welcome popup with option to view usage guide
+- **Background Model Setup**: Models are configured automatically without user intervention
+
+### Usage Guide Implementation
+- **Japanese Guide Page**: Created comprehensive step-by-step usage guide in Japanese
+- **Settings Integration**: Added 使用ガイド (Usage Guide) tab as the first tab in options
+- **Content Structure**: 
+  - Step-by-step instructions for using the extension
+  - Examples of natural language commands
+  - Explanation of the three AI agents
+  - Tips and troubleshooting section
+- **Responsive Design**: Left-aligned content with proper dark/light mode support
+
+## Core Architecture
+
+### Multi-Agent System
+The extension uses three specialized AI agents working together:
+
+1. **プランニャー (Planner)** 🐱
+   - Analyzes user requests and creates execution plans
+   - Breaks down complex tasks into manageable steps
+   - Determines which websites/services to use
+
+2. **ニャビゲーター (Navigator)** 🧭
+   - Executes web navigation and interaction
+   - Clicks buttons, fills forms, scrolls pages
+   - Captures screenshots and page content
+
+3. **バリデーニャー (Validator)** ✓
+   - Verifies task completion and result accuracy
+   - Checks if objectives were met
+   - Provides quality assurance for automation results
+
+### Technical Components
+
+#### Backend Service (`backend-service/`)
+- Express.js server for centralized API
+- Provides free AI model access (ネコノテAPI)
+- Handles model routing and request processing
+- Eliminates need for user API keys
+
+#### Chrome Extension (`chrome-extension/`)
+- **Background Script**: Main orchestration and agent management
+- **Side Panel**: Chat interface and user interaction
+- **Content Script**: DOM interaction and page manipulation
+- **Options Page**: Settings and configuration
+
+#### Key Packages (`packages/`)
+- **storage**: Settings, chat history, user preferences management
+- **i18n**: Internationalization with Japanese/English support
+- **ui**: Shared UI components and styling
+- **shared**: Common utilities and type definitions
+
+### User Interface
+
+#### Side Panel (`pages/side-panel/`)
+- Main chat interface for user interaction
+- Real-time message display with agent identification
+- Token usage tracking and display
+- History management and session handling
+- Bookmark system for favorite prompts
+- Voice input support (speech-to-text)
+
+#### Options Page (`pages/options/`)
+- **使用ガイド (Usage Guide)**: Step-by-step instructions in Japanese
+- **一般 (General)**: Theme, language, and basic settings
+- **モデル (Models)**: AI model configuration (now preset)
+- **トークン (Tokens)**: Usage tracking and limits
+- **ファイアウォール (Firewall)**: Security and domain restrictions
+
+### Key Features
+
+#### Natural Language Processing
+- Accepts commands in natural Japanese
+- Examples: "YouTubeで猫の動画を検索して", "Amazonで本を探して"
+- Supports complex multi-step tasks
+- Context-aware conversation flow
+
+#### Web Automation Capabilities
+- Form filling and submission
+- Search and navigation
+- Content extraction and analysis
+- Multi-page workflows
+- Screenshot capture and analysis
+
+#### User Experience Features
+- Dark/light theme support
+- Responsive design for various screen sizes
+- Accessibility features and keyboard navigation
+- Error handling and graceful failures
+- Offline capability for settings
+
+## Development Workflow
+
+### Build System
+- **Turborepo**: Monorepo orchestration
+- **Vite**: Fast development and production builds
+- **pnpm**: Package management and workspace handling
+- **TypeScript**: Type safety across all packages
+
+### Key Scripts
+- `pnpm dev`: Development mode with hot reload
+- `pnpm build`: Production build for all packages
+- `pnpm build:i18n`: Regenerate translation types
+- `pnpm zip`: Create distribution package
+
+### File Structure Notes
+- Extensions uses manifest v3
+- Side panel implementation for modern Chrome
+- Modular package architecture for maintainability
+- Shared configurations via `packages/` structure
+
+## Recent Changes Summary
+1. **Preset AI Models**: Eliminated user configuration requirement
+2. **Restored Side Panel**: Fixed broken UI structure 
+3. **Fixed Usage Guide**: Added comprehensive Japanese guide with proper content
+4. **Improved Onboarding**: Welcome popup instead of blocking setup screen
+5. **Background Setup**: Automatic model configuration on first run
+
+## Patch: June 2025 – Usage Guide Tab Label Fix
+- Added missing `usageGuideTab` key in English locale (`packages/i18n/locales/en/messages.json`).
+- This resolves blank label issue for the "Usage Guide" tab in the Options (side-panel settings) page when browser locale is set to English.
+
+## Patch: June 2025 – Markdown Rendering in Chat Panel
+- Integrated `marked` library and updated `MessageList` component to render Markdown safely.
+- Added `marked` to side panel package dependencies.
+- Allows bold text, bullet lists, and other Markdown to display correctly in chat messages.
+
+## Patch: June 2025 – Version bump for Web Store
+- Root package.json bumped to 0.1.8 for Chrome Web Store submission.

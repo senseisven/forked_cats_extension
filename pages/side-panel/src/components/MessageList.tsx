@@ -1,6 +1,9 @@
 import type { Message } from '@extension/storage';
 import { ACTOR_PROFILES } from '../types/message';
 import { memo } from 'react';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - marked has its own types, ensure installed
+import { marked } from 'marked';
 
 // Simple language detection for UI
 type DetectedLanguage = 'ja' | 'en' | 'auto';
@@ -220,11 +223,11 @@ function MessageBlock({ message, isSameActor, isDarkMode = false, detectedLangua
         )}
 
         <div className="space-y-0.5">
-          <div className={`whitespace-pre-wrap break-words text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          <div className={`break-words text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
             {isProgress ? (
               <ModernLoader actor={message.actor} isDarkMode={isDarkMode} language={detectedLanguage} />
             ) : (
-              message.content
+              <span className="markdown-content" dangerouslySetInnerHTML={{ __html: marked.parse(message.content) }} />
             )}
           </div>
           {!isProgress && (

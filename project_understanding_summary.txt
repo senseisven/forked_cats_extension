@@ -384,3 +384,34 @@ The extension uses three specialized AI agents working together:
 
 ## Patch: June 2025 – Version bump for Web Store
 - Root package.json bumped to 0.1.8 for Chrome Web Store submission.
+
+## Performance Investigation (June 2025)
+
+### Navigator Agent Latency & Occasional Hang
+After profiling `chrome-extension/src/background/agent/agents/navigator.ts` and related browser-layer helpers we observed:
+
+1. **Unconditional 1 s sleep between every action**  
+   ‑ `NavigatorAgent.doMultiAction()` calls `await new Promise(r=>setTimeout(r,1000))` irrespective of the configured `waitBetweenActions` value.  On pages that require many micro-actions (e.g. filling 3 fields + click) this alone adds several seconds.
+
+2. **Repeated Full DOM + Screenshot Capture**  
+   The Navigator grabs a fresh browser state twice per step: before the LLM call _and_ again after each index-based action to detect new elements.  Both calls default to `useVision = context.options.useVision` which can trigger Puppeteer screenshots and heavy `buildDomTree` traversal.  This can take >1 s on content-heavy pages.
+
+3. **`waitForTabEvents` / `waitForStableNetwork` Defaults**  
+   Navigations always wait the hard-coded 0.25–0.5 s idle plus `maximumWaitPageLoadTime` (5 s) before continuing—even when the target page is already cached.  For same-origin SPA navigation this is unnecessary and feels like a hang.
+
+4. **Potential dead-wait on dynamic requests**  
+   `_waitForStableNetwork` filters resource types but can still keep `pendingRequests` open for long-poll/WebRTC requests that don't complete, forcing the 5 s timeout path.
+
+5. **LLM structured-output parsing fallback**  
+   When Gemini/OpenAI occasionally returns empty `content` with only a `tool_call`, the agent falls back correctly, but if the response is malformed the agent throws and the executor silently retries, looking like a freeze.
+
+### Quick Wins Proposed
+
+* Respect `browserContext.getConfig().waitBetweenActions` instead of fixed 1 s.
+* Call `browserContext.getState(false)` for the post-action check when only hashes are needed; keep `useVision` only for the first snapshot per step.
+* Short-circuit `_waitForStableNetwork` when `document.readyState === 'complete'` _and_ no pending XHR/Fetch for 500 ms.
+* Add a safeguard in `NavigatorAgent.invoke` to bail out after N seconds and surface model timeout.
+
+These changes should shave ~40-60 % off typical step time and remove most apparent "stuck" states.
+
+---
